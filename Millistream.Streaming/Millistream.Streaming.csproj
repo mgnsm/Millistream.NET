@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard1.2;net45</TargetFrameworks>
+    <Authors>mgnsm</Authors>
+    <Description>An unofficial .NET Standard wrapper for Millistream's low-latency, high-throughput and high-availability C/C++ streaming API that can be used to subscribe to streaming real-time or delayed financial data.</Description>
+    <PackageProjectUrl>http://github.com/mgnsm/Millistream.NET</PackageProjectUrl>
+    <RepositoryUrl>http://github.com/mgnsm/Millistream.NET</RepositoryUrl>
+    <Product>Millistream Market Data Feed (MDF)</Product>
+    <Title>Millistream Streaming API</Title>
+    <PackageTags>fintech;streaming;.net;real-time;C#</PackageTags>
+    <Copyright>Copyright 2018 mgnsm</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+  </PropertyGroup>
+
+</Project>

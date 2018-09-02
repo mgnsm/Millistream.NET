@@ -1,0 +1,60 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2000
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{660A05E5-718C-45D0-8705-14C9B5DF6F98}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{A0152BDC-0D9F-4AE2-BF3E-CE24F85ECAF8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Millistream.Streaming", "Millistream.Streaming\Millistream.Streaming.csproj", "{F5CC00D3-449B-4280-8A01-B649AAE9D2C8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Millistream.Streaming.UnitTests", "Millistream.Streaming.UnitTests\Millistream.Streaming.UnitTests.csproj", "{F86497BC-8BBD-4BD2-A050-FD0882DE69FF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Millistream.Streaming.IntegrationTests", "Millistream.Streaming.IntegrationTests\Millistream.Streaming.IntegrationTests.csproj", "{DB6A274F-DB2C-4581-88F9-4A798A9D3DF7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{C04FDBC8-EB8C-4D9F-8F3A-B6A2DA42566D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp", "ConsoleApp\ConsoleApp.csproj", "{04B84E2C-DAFD-4E8B-84A8-0BF3CC7512EE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{41167C76-5F76-4049-B890-1A9D4E24BDE5}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F5CC00D3-449B-4280-8A01-B649AAE9D2C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F5CC00D3-449B-4280-8A01-B649AAE9D2C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F5CC00D3-449B-4280-8A01-B649AAE9D2C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F5CC00D3-449B-4280-8A01-B649AAE9D2C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F86497BC-8BBD-4BD2-A050-FD0882DE69FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F86497BC-8BBD-4BD2-A050-FD0882DE69FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F86497BC-8BBD-4BD2-A050-FD0882DE69FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F86497BC-8BBD-4BD2-A050-FD0882DE69FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DB6A274F-DB2C-4581-88F9-4A798A9D3DF7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DB6A274F-DB2C-4581-88F9-4A798A9D3DF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DB6A274F-DB2C-4581-88F9-4A798A9D3DF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DB6A274F-DB2C-4581-88F9-4A798A9D3DF7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{04B84E2C-DAFD-4E8B-84A8-0BF3CC7512EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04B84E2C-DAFD-4E8B-84A8-0BF3CC7512EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04B84E2C-DAFD-4E8B-84A8-0BF3CC7512EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04B84E2C-DAFD-4E8B-84A8-0BF3CC7512EE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F5CC00D3-449B-4280-8A01-B649AAE9D2C8} = {660A05E5-718C-45D0-8705-14C9B5DF6F98}
+		{F86497BC-8BBD-4BD2-A050-FD0882DE69FF} = {A0152BDC-0D9F-4AE2-BF3E-CE24F85ECAF8}
+		{DB6A274F-DB2C-4581-88F9-4A798A9D3DF7} = {A0152BDC-0D9F-4AE2-BF3E-CE24F85ECAF8}
+		{04B84E2C-DAFD-4E8B-84A8-0BF3CC7512EE} = {C04FDBC8-EB8C-4D9F-8F3A-B6A2DA42566D}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {13B18705-419F-4BCB-B456-5A1E4198605D}
+	EndGlobalSection
+EndGlobal

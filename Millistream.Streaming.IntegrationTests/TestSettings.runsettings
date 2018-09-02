@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+	<TestRunParameters>
+		<Parameter name="host" value="REPLACE_THIS_VALUE" />
+		<Parameter name="username" value="REPLACE_THIS_VALUE" />
+		<Parameter name="password" value="REPLACE_THIS_VALUE" />
+	</TestRunParameters>
+</RunSettings>

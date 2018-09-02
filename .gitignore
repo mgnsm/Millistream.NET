@@ -1,0 +1,5 @@
+﻿packages/
+.vs/
+obj/
+bin/
+Millistream.Streaming.UnitTests/FakesAssemblies

@@ -1,0 +1,50 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace Millistream.Streaming
+{
+    /// <summary>
+    /// The request message used to unsubscribe from streaming data from the server.
+    /// </summary>
+    public class UnsubscribeMessage : RequestMessage
+    {
+        #region Constructors
+        /// <summary>
+        /// Creates an instance of the <see cref="UnsubscribeMessage"/> class.
+        /// </summary>
+        /// <param name="requestClasses">An enumerable sequence of the request classes to be unsubscribed from.</param>
+        public UnsubscribeMessage(IEnumerable<RequestClass> requestClasses) : base(MessageReference.MDF_M_UNSUBSCRIBE) =>
+            RequestClasses = requestClasses ?? throw new ArgumentNullException(nameof(requestClasses));
+        #endregion
+
+        #region Properties
+        /// <summary>
+        ///  An enumerable sequence of the request classes to be requested.
+        /// </summary>
+        public IEnumerable<RequestClass> RequestClasses { get; }
+
+        /// <summary>
+        /// The optional id of the request.
+        /// </summary>
+        public string RequestId { get; set; }
+
+        /// <summary>
+        ///  An enumerable sequence of instrument references for the request. If the sequence is empty, the request will be for all instruments available. 
+        /// </summary>
+        public IEnumerable<ulong> InstrumentReferences { get; set; }
+        #endregion
+
+        #region Methods
+        internal override void AddFields(IMessage message)
+        {
+            message.Add(0, MessageReference);
+            message.AddRequestClasses(RequestClasses.ToArray());
+            if (!string.IsNullOrEmpty(RequestId))
+                message.AddString(Field.MDF_F_REQUESTID, RequestId);
+            if (InstrumentReferences != null && InstrumentReferences.Any())
+                message.AddInstrumentReferences(Field.MDF_F_INSREFLIST, InstrumentReferences.ToArray());
+        }
+        #endregion
+    }
+}
