@@ -2,4 +2,4 @@
 .vs/
 obj/
 bin/
-Millistream.Streaming.UnitTests/FakesAssemblies
+Tests/Millistream.Streaming.UnitTests/FakesAssemblies
