@@ -3,7 +3,7 @@ An unofficial .NET Standard wrapper for Millistream's low-latency, high-throughp
 ## Installation
 Millistream.NET is distributed via [NuGet](https://www.nuget.org/packages/Millistream.Streaming). The native and wrapped API can be downloaded from [Millistream's anonymous FTP server](ftp://ftp.millistream.com/). Binaries are available for Windows, Linux and OS X. They come in both 32- and 64-bit versions and should work on both little- and big-endian systems. Please refer to [the official documentation](ftp://ftp.millistream.com/documents/MDF%20C%20API.pdf) for more information about the wrapped API itself. The NuGet package does not include any native assemblies. You will have to download and install these separately.
  
-On Windows you download and run an [.exe from the FTP server](ftp://ftp.millistream.com/binaries/windows/libmdf-1.0.21.exe) that will install the native `libmdf` core library along pre-built binaries of [zlib](http://zlib.net) and [OpenSSL](http://openssl.org/) (`libmdf` links against these) to `%windir%\System32`.
+On Windows you download and run an <a href="ftp://ftp.millistream.com/binaries/windows/libmdf-1.0.21.exe">.exe from the FTP server</a> that will install the native `libmdf` core library along pre-built binaries of [zlib](http://zlib.net) and [OpenSSL](http://openssl.org/) (`libmdf` links against these) to `%windir%\System32`.
  
 On Linux, the native API and the dependent libraries are available through your distribution repository. Below is an example of how to install everything needed using the `apt-get` command line tool on Ubuntu.
 
