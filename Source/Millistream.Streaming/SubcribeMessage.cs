@@ -11,7 +11,7 @@ namespace Millistream.Streaming
     {
         #region Constructors
         /// <summary>
-        /// Creates an instance of the <see cref="Request"/> class.
+        /// Creates an instance of the <see cref="SubscribeMessage"/> class.
         /// </summary>
         /// <param name="requestType">The type of request to be sent.</param>
         /// <param name="requestClasses">An enumerable sequence of the request classes to be requested.</param>
