@@ -1,5 +1,5 @@
 # Millistream.NET
-![Build Status Badge](https://bit.ly/2ENttLt") ![NuGet Badge](https://img.shields.io/nuget/v/Millistream.Streaming.svg)
+![Build Status Badge](https://bit.ly/2ENttLt) [![NuGet Badge](https://img.shields.io/nuget/v/Millistream.Streaming.svg)](http://www.nuget.org/packages/Millistream.Streaming/)
 
 An unofficial .NET Standard wrapper for Millistream's low-latency, high-throughput and high-availability C/C++ streaming API that can be used to subscribe to streaming real-time or delayed financial data.
 ## Installation
