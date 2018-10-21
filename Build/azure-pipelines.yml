@@ -9,42 +9,43 @@ variables:
   patch: $[counter('versioncounter', 0)]
 
 steps:
-#Restore NuGet packages
 - task: NuGetCommand@2
+  displayName: 'Restore NuGet Packages'
   inputs:
     restoreSolution: Millistream.NET.sln
 
-#Build the entire solution
 - task: VSBuild@1
+  displayName: 'Build Solution'
   inputs:
     solution: Millistream.NET.sln
     vsVersion: 15.0
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
 
-#Run the unit tests
 - task: VSTest@2
+  displayName: 'Run Unit Tests'
   inputs:
     testAssemblyVer2: |
      Tests\Millistream.Streaming.UnitTests\bin\$(buildConfiguration)\Millistream.Streaming.UnitTests.dll
     vsTestVersion: 15.0
 
-#Download the installer for the native assemblies
 - powershell: '(new-object System.Net.WebClient).DownloadFile(''ftp://ftp.millistream.com/binaries/windows/libmdf-1.0.21.exe'',''libmdf-1.0.21.exe'')' 
+  displayName: 'Download Native Assemblies'
 
-#Run the installer to copy the native assemblies to %windir%\System32
 - script: 'libmdf-1.0.21.exe /S'
+  displayName: 'Install Native Assemblies'
 
-#Run the integration tests
 - task: VSTest@2
+  displayName: 'Run Integration Tests'
   inputs:
     testAssemblyVer2: |
-     Tests\Millistream.Streaming.IntegrationTests\bin\$(buildConfiguration)\Millistream.Streaming.IntegrationTests.dll
+     Tests\Millistream.Streaming.IntegrationTests\bin\$(buildConfiguration)\**\Millistream.Streaming.IntegrationTests.dll
     runSettingsFile: Tests/Millistream.Streaming.IntegrationTests/TestSettings.runsettings
     overrideTestrunParameters: '-host $(host) -username $(username) -password $(password)'
 
 #Create the NuGet package
 - task: DotNetCoreCLI@2
+  displayName: 'Create NuGet Package'
   inputs:
     command: custom
     projects: Source/Millistream.Streaming/Millistream.Streaming.csproj
@@ -53,3 +54,4 @@ steps:
 
 #Publish Artifact
 - task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact'
