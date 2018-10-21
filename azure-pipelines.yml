@@ -1,0 +1,50 @@
+pool:
+  vmImage: 'vs2017-win2016'
+
+variables:
+  buildPlatform: 'any cpu'
+  buildConfiguration: 'release'
+  major: 1
+  minor: 0
+  patch: $[counter('versioncounter', 0)]
+
+steps:
+#Build the entire solution
+- task: VSBuild@1
+  inputs:
+    solution: Millistream.NET.sln
+    vsVersion: 15.0
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+
+#Run the unit tests
+- task: VSTest@2
+  inputs:
+    testAssemblyVer2: |
+     Tests\Millistream.Streaming.UnitTests\bin\$(buildConfiguration)\Millistream.Streaming.UnitTests.dll
+    vsTestVersion: 15.0
+
+#Download the installer for the native assemblies
+- powershell: '(new-object System.Net.WebClient).DownloadFile(''ftp://ftp.millistream.com/binaries/windows/libmdf-1.0.21.exe','libmdf-1.0.21.exe')' 
+
+#Run the installer to copy the native assemblies to %windir%\System32
+- script: 'libmdf-1.0.21.exe /S'
+
+#Run the integration tests
+- task: VSTest@2
+  inputs:
+    testAssemblyVer2: |
+     Tests\Millistream.Streaming.IntegrationTests\bin\$(buildConfiguration)\Millistream.Streaming.IntegrationTests.dll
+    runSettingsFile: Tests/Millistream.Streaming.IntegrationTests/TestSettings.runsettings
+    overrideTestrunParameters: '-host $(host) -username $(username) -password $(password)'
+
+#Create the NuGet package
+- task: DotNetCoreCLI@2
+  inputs:
+    command: custom
+    projects: Source/Millistream.Streaming/Millistream.Streaming.csproj
+    custom: pack
+    arguments: '-c $(buildConfiguration) /p:PackageVersion=$(major).$(minor).$(patch) --output $(Build.ArtifactStagingDirectory) --no-build --no-restore'
+
+#Publish Artifact
+- task: PublishBuildArtifacts@1
