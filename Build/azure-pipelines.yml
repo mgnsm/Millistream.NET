@@ -9,6 +9,11 @@ variables:
   patch: $[counter('versioncounter', 0)]
 
 steps:
+#Restore NuGet packages
+- task: NuGetCommand@2
+  inputs:
+    restoreSolution: Millistream.NET.sln
+
 #Build the entire solution
 - task: VSBuild@1
   inputs:
@@ -26,8 +31,6 @@ steps:
 
 #Download the installer for the native assemblies
 - powershell: '(new-object System.Net.WebClient).DownloadFile(''ftp://ftp.millistream.com/binaries/windows/libmdf-1.0.21.exe'',''libmdf-1.0.21.exe'')' 
-
-  displayName: 'Download .EXE from FTP'
 
 #Run the installer to copy the native assemblies to %windir%\System32
 - script: 'libmdf-1.0.21.exe /S'
