@@ -25,7 +25,7 @@ steps:
     vsTestVersion: 15.0
 
 #Download the installer for the native assemblies
-- powershell: '(new-object System.Net.WebClient).DownloadFile(''ftp://ftp.millistream.com/binaries/windows/libmdf-1.0.21.exe','libmdf-1.0.21.exe')' 
+- powershell: '(new-object System.Net.WebClient).DownloadFile('ftp://ftp.millistream.com/binaries/windows/libmdf-1.0.21.exe','libmdf-1.0.21.exe')' 
 
 #Run the installer to copy the native assemblies to %windir%\System32
 - script: 'libmdf-1.0.21.exe /S'
