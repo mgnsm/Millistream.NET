@@ -1,4 +1,6 @@
 # Millistream.NET
+![Build Status Badge](https://bit.ly/2ENttLt") ![NuGet Badge](https://img.shields.io/nuget/v/Millistream.Streaming.svg)
+
 An unofficial .NET Standard wrapper for Millistream's low-latency, high-throughput and high-availability C/C++ streaming API that can be used to subscribe to streaming real-time or delayed financial data.
 ## Installation
 Millistream.NET is distributed via [NuGet](https://www.nuget.org/packages/Millistream.Streaming). The native and wrapped API can be downloaded from [Millistream's anonymous FTP server](https://bit.ly/2LOXHf5). Binaries are available for Windows, Linux and OS X. They come in both 32- and 64-bit versions and should work on both little- and big-endian systems. Please refer to [the official documentation](https://bit.ly/2LOYjkT) for more information about the wrapped API itself. The NuGet package does not include any native assemblies. You will have to download and install these separately.
