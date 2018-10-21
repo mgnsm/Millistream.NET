@@ -43,7 +43,6 @@ steps:
     runSettingsFile: Tests/Millistream.Streaming.IntegrationTests/TestSettings.runsettings
     overrideTestrunParameters: '-host $(host) -username $(username) -password $(password)'
 
-#Create the NuGet package
 - task: DotNetCoreCLI@2
   displayName: 'Create NuGet Package'
   inputs:
@@ -52,6 +51,5 @@ steps:
     custom: pack
     arguments: '-c $(buildConfiguration) /p:PackageVersion=$(major).$(minor).$(patch) --output $(Build.ArtifactStagingDirectory) --no-build --no-restore'
 
-#Publish Artifact
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact'
