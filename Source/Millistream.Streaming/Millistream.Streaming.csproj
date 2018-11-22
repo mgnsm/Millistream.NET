@@ -10,6 +10,9 @@
     <Title>Millistream Streaming API</Title>
     <PackageTags>fintech;streaming;.net;real-time;C#</PackageTags>
     <Copyright>Copyright 2018 mgnsm</Copyright>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+    <PackageReleaseNotes>XML documentation added.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">

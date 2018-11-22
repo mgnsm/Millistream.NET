@@ -6,7 +6,7 @@ variables:
   buildConfiguration: 'release'
   major: 1
   minor: 0
-  patch: $[counter('nugetpackagepatch', 0)]
+  patch: $[counter('v101', 1)]
 
 steps:
 - task: NuGetCommand@2

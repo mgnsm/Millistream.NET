@@ -43,8 +43,7 @@ namespace Millistream.Streaming
         /// <summary>
         /// Adds a list of request classes to the message. The corresponding native method is mdf_message_add_list.
         /// </summary>
-        /// <param name="tag">The field tag.</param>
-        /// <param name="instrumentReferences">The list of request classes.</param>
+        /// <param name="requestClasses">The list of request classes.</param>
         /// <returns>Returns true if the field was successfully added, or false if the value could not be added for some reason.</returns>
         bool AddRequestClasses(RequestClass[] requestClasses);
 
