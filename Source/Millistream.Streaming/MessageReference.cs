@@ -40,5 +40,8 @@
         MDF_M_L10N = 32,
         MDF_M_CI = 33,
         MDF_M_CIHISTORY = 34,
+        MDF_M_PRIIP = 35,
+        MDF_M_MIFID = 36,
+        MDF_M_MIFIDHISTORY = 37
     }
 }

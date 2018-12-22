@@ -12,7 +12,7 @@
     <Copyright>Copyright 2018 mgnsm</Copyright>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
-    <PackageReleaseNotes>XML documentation added.</PackageReleaseNotes>
+    <PackageReleaseNotes>New message references and field definitions.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
