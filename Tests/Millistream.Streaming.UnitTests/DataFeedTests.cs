@@ -316,6 +316,15 @@ namespace Millistream.Streaming.UnitTests
 
         [TestMethod]
         [ExpectedException(typeof(ObjectDisposedException))]
+        public void CannotCallRecycleAfterDisposeTest()
+        {
+            DataFeed dataFeed = new DataFeed(new StubINativeImplementation());
+            dataFeed.Dispose();
+            dataFeed.Recycle(new ResponseMessage());
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ObjectDisposedException))]
         public void CannotCallRequestAfterDisposeTest()
         {
             DataFeed dataFeed = new DataFeed(new StubINativeImplementation());
@@ -334,11 +343,11 @@ namespace Millistream.Streaming.UnitTests
 
         [TestMethod]
         [ExpectedException(typeof(ObjectDisposedException))]
-        public void CannotHookupDataReceivedEventHandlerAfterDisposeTest()
+        public void CannotSubscribeToDataAfterDisposeTest()
         {
             DataFeed dataFeed = new DataFeed(new StubINativeImplementation());
             dataFeed.Dispose();
-            dataFeed.DataReceived += (s, e) => { };
+            dataFeed.Data.Subscribe(null);
         }
 
         [TestMethod]

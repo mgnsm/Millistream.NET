@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Millistream.Streaming.Rx;
+using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -22,8 +22,13 @@ namespace Millistream.Streaming
         #endregion
 
         #region Fields
+        private static readonly HashSet<int> s_messageReferences = new HashSet<int>((int[])Enum.GetValues(typeof(MessageReference)));
+        private static readonly HashSet<uint> s_fieldReferences = new HashSet<uint>((uint[])Enum.GetValues(typeof(Field)));
+        private static readonly Func<ResponseMessage> s_responseMessageFactory = () => new ResponseMessage();
         private readonly object _lock = new object();
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        private readonly ObjectPool<ResponseMessage> _objectPool = new ObjectPool<ResponseMessage>(s_responseMessageFactory);
+        private readonly Subject<ResponseMessage> _subject = new Subject<ResponseMessage>();
         private readonly INativeImplementation _nativeImplementation;
         private readonly IntPtr _feedHandle;
         private readonly IntPtr _messageHandle;
@@ -66,6 +71,21 @@ namespace Millistream.Streaming
         /// The number of seconds to wait before if there currently is no data when consuming the feed. If set to zero (0) the consume function will return immediately. The default value is 10.
         /// </summary>
         public int ConsumeTimeout { get; set; } = 10;
+
+        /// <summary>
+        /// An observable stream of data produced by the feed. This is where all response messages are read from.
+        /// </summary>
+        public IObservable<ResponseMessage> Data
+        {
+            get
+            {
+                lock (_lock)
+                {
+                    ThrowIfDisposed();
+                    return _subject;
+                }
+            }
+        }
 
         /// <summary>
         /// The current API error code.
@@ -143,30 +163,6 @@ namespace Millistream.Streaming
                 {
                     ThrowIfDisposed();
                     _connectionStatusChangedEvent -= value;
-                }
-            }
-        }
-
-        private DataReceivedEventHandler _dataReceivedEvent;
-        /// <summary>
-        /// Occurs whenever any data is received.
-        /// </summary>
-        public event DataReceivedEventHandler DataReceived
-        {
-            add
-            {
-                lock (_lock)
-                {
-                    ThrowIfDisposed();
-                    _dataReceivedEvent += value;
-                }
-            }
-            remove
-            {
-                lock (_lock)
-                {
-                    ThrowIfDisposed();
-                    _dataReceivedEvent -= value;
                 }
             }
         }
@@ -266,6 +262,22 @@ namespace Millistream.Streaming
         }
 
         /// <summary>
+        /// Resets and recycles an instance of a <see cref="ResponseMessage" /> for reuse.
+        /// </summary>
+        /// <param name="responseMessage">The <see cref="ResponseMessage" /> instance to return to the pool of recycled objects.</param>
+        public void Recycle(ResponseMessage responseMessage)
+        {
+            if (responseMessage == null)
+                throw new ArgumentNullException(nameof(responseMessage));
+
+            lock (_lock)
+                ThrowIfDisposed();
+
+            responseMessage.ResetState();
+            _objectPool.Free(responseMessage);
+        }
+
+        /// <summary>
         /// Sends a request to the server.
         /// </summary>
         /// <param name="requestMessage">The reqest message to be sent to the server.</param>
@@ -362,43 +374,60 @@ namespace Millistream.Streaming
 
         private void OnDataReceived(IntPtr userData, IntPtr handle)
         {
-            DataReceivedEventHandler eventHandler;
-            lock (_lock)
-                eventHandler = _dataReceivedEvent;
-            if (eventHandler != null)
-                foreach (ResponseMessage responseMessage in ReadData())
-                    eventHandler.Invoke(this, new DataReceivedEventArgs(responseMessage));
-        }
-
-        private IEnumerable<ResponseMessage> ReadData()
-        {
             int messageReference = 0;
             int messageClass = 0;
             uint instrumentId = 0;
             while (_nativeImplementation.mdf_get_next_message(_feedHandle, ref messageReference, ref messageClass, ref instrumentId) == 1)
             {
-                if (Enum.IsDefined(typeof(MessageReference), messageReference))
+                if (s_messageReferences.Contains(messageReference))
                 {
-                    ResponseMessage message = new ResponseMessage(instrumentId, (MessageReference)messageReference, messageClass);
+                    ResponseMessage message = _objectPool.Allocate() ?? s_responseMessageFactory();
+                    message.InstrumentReference = instrumentId;
+                    message.MessageReference = (MessageReference)messageReference;
+                    message.MessageClass = messageClass;
+
                     uint fieldTag = 0;
+                    int messageOffset = 0;
                     IntPtr value = new IntPtr();
                     while (_nativeImplementation.mdf_get_next_field(_feedHandle, ref fieldTag, ref value) == 1)
                     {
-                        if (Enum.IsDefined(typeof(Field), fieldTag))
+                        if (s_fieldReferences.Contains(fieldTag))
                         {
-                            string utf8Encodedvalue = null;
+                            Field field = (Field)fieldTag;
                             if (value != IntPtr.Zero)
                             {
-                                int offset = 0;
-                                while (Marshal.ReadByte(value, offset++) != 0) ;
-                                byte[] bytes = new byte[offset - 1];
-                                Marshal.Copy(value, bytes, 0, bytes.Length);
-                                utf8Encodedvalue = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+                                unsafe
+                                {
+                                    try
+                                    {
+                                        byte* pointer = (byte*)value;
+                                        ReadOnlySpan<byte> span;
+                                        int fieldOffset = 0;
+                                        do
+                                        {
+                                            span = new ReadOnlySpan<byte>(pointer + fieldOffset++, 1);
+                                        } while (span[0] != 0);
+
+                                        int length = fieldOffset - 1;
+                                        span = new ReadOnlySpan<byte>(pointer, length);
+                                        for (int i = 0; i < length; i++)
+                                            message.Data.Add(span[i]);
+                                        message.SetField(field, new ReadOnlyMemory<byte>(message.Data.Items, messageOffset, length));
+                                        messageOffset += length;
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        _subject.OnError(ex);
+                                    }
+                                }
                             }
-                            message.SetField((Field)fieldTag, utf8Encodedvalue);
+                            else
+                            {
+                                message.SetField(field, ReadOnlyMemory<byte>.Empty);
+                            }
                         }
                     }
-                    yield return message;
+                    _subject.OnNext(message);
                 }
             }
         }
@@ -436,8 +465,11 @@ namespace Millistream.Streaming
             {
                 if (!_isDisposed)
                 {
-                    if (disposing && _cancellationTokenSource != null)
-                        _cancellationTokenSource.Dispose();
+                    if (disposing)
+                    {
+                        _cancellationTokenSource?.Dispose();
+                        _subject.Dispose();
+                    }
                     _nativeImplementation.mdf_message_destroy(_messageHandle);
                     _nativeImplementation.mdf_destroy(_feedHandle);
                     _isDisposed = true;

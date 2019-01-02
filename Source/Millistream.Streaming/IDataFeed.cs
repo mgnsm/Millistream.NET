@@ -1,4 +1,6 @@
-﻿namespace Millistream.Streaming
+﻿using System;
+
+namespace Millistream.Streaming
 {
     /// <summary>
     /// Represents a thread-safe request based data feed that can be used to subscribe to messages sent by the server.
@@ -9,6 +11,16 @@
         /// The number of seconds before determining that a connect attempt has timed out. Valid values are 1 to 60. The default value is 5.
         /// </summary>
         int ConnectionTimeout { get; set; }
+
+        /// <summary>
+        /// The number of seconds to wait before if there currently is no data when consuming the feed. If set to zero (0) the consume function will return immediately. The default value is 10.
+        /// </summary>
+        int ConsumeTimeout { get; set; }
+
+        /// <summary>
+        /// An observable stream of data produced by the feed. This is where all response messages are read from.
+        /// </summary>
+        IObservable<ResponseMessage> Data { get; }
 
         /// <summary>
         /// The current API error code.
@@ -51,11 +63,6 @@
         event ConnnectionStatusChangedEventHandler ConnectionStatusChanged;
 
         /// <summary>
-        /// Occurs whenever any data is received.
-        /// </summary>
-        event DataReceivedEventHandler DataReceived;
-
-        /// <summary>
         /// Connects to the first server in <paramref name="host"/>, which can be a comma separated list of 'host:port' pairs, where 'host' can be a DNS host name or an ip address (IPv6 addressed must be enclosed in brackets).
         /// The method will try each server in turn until it find one that answers.
         /// </summary>
@@ -72,6 +79,12 @@
         /// You must call the <see cref="Connect(string, string, string)"/> method before calling this method.
         /// </remarks>
         void Disconnect();
+
+        /// <summary>
+        /// Resets and recycles an instance of a <see cref="ResponseMessage" /> for reuse.
+        /// </summary>
+        /// <param name="responseMessage">The <see cref="ResponseMessage" /> instance to return to the pool of recycled objects.</param>
+        void Recycle(ResponseMessage responseMessage);
 
         /// <summary>
         /// Sends a request to the server.

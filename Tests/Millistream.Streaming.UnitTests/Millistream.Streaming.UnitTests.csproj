@@ -55,7 +55,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataFeedTests.cs" />
+    <Compile Include="ExtendableArrayTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ObjectPoolTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <Fakes Include="Fakes\Millistream.Streaming.fakes" />

@@ -5,8 +5,8 @@ variables:
   buildPlatform: 'any cpu'
   buildConfiguration: 'release'
   major: 1
-  minor: 0
-  patch: $[counter('v102', 2)]
+  minor: 1
+  patch: $[counter('v110', 0)]
 
 steps:
 - task: NuGetCommand@2

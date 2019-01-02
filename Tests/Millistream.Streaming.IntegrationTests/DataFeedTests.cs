@@ -1,6 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading;
 
 namespace Millistream.Streaming.IntegrationTests
@@ -8,7 +9,7 @@ namespace Millistream.Streaming.IntegrationTests
     [TestClass]
     public class DataFeedTests
     {
-        private static readonly TimeSpan _waitTimeout = TimeSpan.FromSeconds(10);
+        private static readonly TimeSpan s_waitTimeout = TimeSpan.FromSeconds(10);
 
         public TestContext TestContext { get; set; }
 
@@ -36,7 +37,7 @@ namespace Millistream.Streaming.IntegrationTests
                 //assert that the feed can be connected to
                 Assert.IsTrue(dataFeed.Connect(host, username, password));
                 //assert that a ConnectionStatusChanged is raised when the feed is connected 
-                manualResetEvent.WaitOne(_waitTimeout);
+                manualResetEvent.WaitOne(s_waitTimeout);
                 Assert.IsTrue(isConnected);
                 
                 //connect again
@@ -55,20 +56,20 @@ namespace Millistream.Streaming.IntegrationTests
                 dataFeed.ConnectionStatusChanged += disconnectedHandler;
                 dataFeed.Disconnect();
                 //assert that a ConnectionStatusChanged is raised when the feed is disconnected
-                manualResetEvent.WaitOne(_waitTimeout);
+                manualResetEvent.WaitOne(s_waitTimeout);
                 Assert.IsFalse(isConnected);
 
                 //connect again
                 dataFeed.ConnectionStatusChanged -= disconnectedHandler;
                 dataFeed.ConnectionStatusChanged += connectedHandler;
                 Assert.IsTrue(dataFeed.Connect(host, username, password));
-                manualResetEvent.WaitOne(_waitTimeout);
+                manualResetEvent.WaitOne(s_waitTimeout);
                 Assert.IsTrue(isConnected);
                 //disconnect again
                 dataFeed.ConnectionStatusChanged -= connectedHandler;
                 dataFeed.ConnectionStatusChanged += disconnectedHandler;
                 dataFeed.Disconnect();
-                manualResetEvent.WaitOne(_waitTimeout);
+                manualResetEvent.WaitOne(s_waitTimeout);
                 Assert.IsFalse(isConnected);
             }
         }
@@ -86,15 +87,17 @@ namespace Millistream.Streaming.IntegrationTests
             {
                 dataFeed.ConsumeTimeout = 1;
 
-                dataFeed.DataReceived += (s, e) =>
+                void onNext(ResponseMessage message)
                 {
-                    if (e.Message.MessageReference == MessageReference.MDF_M_REQUESTFINISHED
-                     && e.Message.Fields.TryGetValue(Field.MDF_F_REQUESTID, out string requestId)
-                     && requestId == RequestId)
+                    if (message.MessageReference == MessageReference.MDF_M_REQUESTFINISHED
+                        && message.Fields.TryGetValue(Field.MDF_F_REQUESTID, out ReadOnlyMemory<byte> requestId)
+                        && Encoding.UTF8.GetString(requestId.Span) == RequestId)
                         manualResetEvent.Set(); //signal when the request has been completed in full
                     else
-                        receivedResponseMessages.Add(e.Message);
-                };
+                        receivedResponseMessages.Add(message);
+                }
+
+                dataFeed.Data.Subscribe(new ResponseMessageObserver(onNext, null, null));
 
                 Assert.IsTrue(dataFeed.Connect(GetTestRunParameter("host"), GetTestRunParameter("username"), GetTestRunParameter("password")),
                     "Connect failed.");
@@ -106,7 +109,7 @@ namespace Millistream.Streaming.IntegrationTests
                     RequestId = RequestId
                 });
 
-                manualResetEvent.WaitOne(_waitTimeout);
+                manualResetEvent.WaitOne(s_waitTimeout);
                 //assert that some responses were received
                 Assert.IsTrue(receivedResponseMessages.Count > 0);
                 foreach (ResponseMessage receivedResponseMessage in receivedResponseMessages)
@@ -114,7 +117,7 @@ namespace Millistream.Streaming.IntegrationTests
 
                 //unsubscribe
                 dataFeed.Request(new UnsubscribeMessage(requestClasses) { RequestId = RequestId });
-                Assert.IsTrue(manualResetEvent.WaitOne(_waitTimeout));
+                Assert.IsTrue(manualResetEvent.WaitOne(s_waitTimeout));
             }
         }
 

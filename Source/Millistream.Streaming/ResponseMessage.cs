@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Millistream.Streaming
 {
@@ -7,39 +8,49 @@ namespace Millistream.Streaming
     /// </summary>
     public class ResponseMessage
     {
-        private readonly Dictionary<Field, string> _fields = new Dictionary<Field, string>();
+        #region Fields
+        private readonly Dictionary<Field, ReadOnlyMemory<byte>> _fields = new Dictionary<Field, ReadOnlyMemory<byte>>();
+        #endregion
 
-        internal ResponseMessage(uint instrumentReference, MessageReference messageReference, int messageClass)
-        {
-            InstrumentReference = instrumentReference;
-            MessageReference = messageReference;
-            MessageClass = messageClass;
-        }
+        #region Constructors
+        internal ResponseMessage() { }
+        #endregion
 
         #region Properties
         /// <summary>
+        /// All fields that were returned in the message.
+        /// </summary>
+        public IReadOnlyDictionary<Field, ReadOnlyMemory<byte>> Fields => _fields;
+
+        /// <summary>
         /// The unique id of the instrument. There are a limited number of messages in which this property will not be used to carry the instrument reference. Please consult the official documentation for more information.
         /// </summary>
-        public uint InstrumentReference { get; }
-        
-        /// <summary>
-        /// The message reference used to to determine the type of message.
-        /// </summary>
-        public MessageReference MessageReference { get; }
-        
+        public uint InstrumentReference { get; internal set; }
+
         /// <summary>
         /// Used internally and supplied only for completeness and transparency. The <see cref="MessageReference"/> property should be used to determine the type of the message.
         /// </summary>
-        public int MessageClass { get; }
-        
+        public int MessageClass { get; internal set; }
+
         /// <summary>
-        /// All fields that were returned in the message. The values are represented by UTF-8 strings that me be null provided that the specific field supports null values.
+        /// The message reference used to to determine the type of message.
         /// </summary>
-        public IReadOnlyDictionary<Field, string> Fields => _fields;
+        public MessageReference MessageReference { get; internal set; }
+
+        /// <summary>
+        /// The data received from the server for all fields of the response message.
+        /// </summary>
+        internal ExtendableArray<byte> Data { get; } = new ExtendableArray<byte>();
         #endregion
-        
+
         #region Methods
-        internal void SetField(Field key, string value) => _fields[key] = value;
+        internal void SetField(Field key, ReadOnlyMemory<byte> value) => _fields[key] = value;
+
+        internal void ResetState()
+        {
+            Data.Clear();
+            _fields.Clear();
+        }
         #endregion
     }
 }

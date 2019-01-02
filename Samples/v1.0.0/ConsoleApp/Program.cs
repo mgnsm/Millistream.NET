@@ -14,14 +14,13 @@ namespace ConsoleApp
             //1. Create an instance of the DataFeed class
             using (DataFeed dataFeed = new DataFeed())
             {
-                //2. Hook up an event handler to the ConnectionStatusChanged event.
+                //2. Hook up event handlers to the ConnectionStatusChanged and DataReceived events.
                 dataFeed.ConnectionStatusChanged += OnConnectionStatusChanged;
-                //3. Subscribe to the Data observable
-                dataFeed.Data.Subscribe(new Observer(dataFeed));
-                //4. Call the Connect method to connect to the feed and authenticate
-                if (dataFeed.Connect(Host, Username, Password))
+                dataFeed.DataReceived += OnDataReceived;
+                //3. Call the Connect method to connect to the feed and authenticate
+                if(dataFeed.Connect(Host, Username, Password))
                 {
-                    //5. Issue a subscription request and wait for the DataReceived event to get raised
+                    //4. Issue a subscription request and wait for the DataReceived event to get raised
                     dataFeed.Request(new SubscribeMessage(
                         RequestType.MDF_RT_FULL, // <- The type of request. Full (image+streaming) in this case.
                         new RequestClass[1] { RequestClass.MDF_RC_QUOTE }) //<- What kind of data to request. Quotes in this case.
@@ -37,6 +36,14 @@ namespace ConsoleApp
                 //prevent the app from terminating until you press a key
                 Console.ReadLine();
             }
+        }
+
+        static void OnDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            Console.WriteLine($"{DateTime.Now.ToShortTimeString()} - " +
+                $"Received a {e.Message.MessageReference} message with the following fields:");
+            foreach (var field in e.Message.Fields)
+                Console.WriteLine($"{field.Key}: {field.Value}");
         }
 
         static void OnConnectionStatusChanged(object sender,
