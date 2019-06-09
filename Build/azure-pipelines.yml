@@ -1,33 +1,25 @@
 pool:
-  vmImage: 'vs2017-win2016'
+  vmImage: 'windows-2019'
 
 variables:
-  buildPlatform: 'any cpu'
   buildConfiguration: 'release'
   major: 1
   minor: 1
   patch: $[counter('v110', 0)]
 
 steps:
-- task: NuGetCommand@2
-  displayName: 'Restore NuGet Packages'
+- task: DotNetCoreCLI@2
+  displayName: 'Restore NuGet Packages and Build Solution'
   inputs:
-    restoreSolution: Millistream.NET.sln
-
-- task: VSBuild@1
-  displayName: 'Build Solution'
-  inputs:
-    solution: Millistream.NET.sln
-    vsVersion: 15.0
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+    command: build
+    projects: 'Millistream.NET.sln'
+    arguments: '-c $(buildConfiguration)'
 
 - task: VSTest@2
   displayName: 'Run Unit Tests'
   inputs:
     testAssemblyVer2: |
-     Tests\Millistream.Streaming.UnitTests\bin\$(buildConfiguration)\Millistream.Streaming.UnitTests.dll
-    vsTestVersion: 15.0
+     Tests\Millistream.Streaming.UnitTests\bin\$(buildConfiguration)\**\Millistream.Streaming.UnitTests.dll
 
 - powershell: '(new-object System.Net.WebClient).DownloadFile(''ftp://ftp.millistream.com/binaries/windows/libmdf-1.0.21.exe'',''libmdf-1.0.21.exe'')' 
   displayName: 'Download Native Assemblies'
