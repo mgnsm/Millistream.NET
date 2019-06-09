@@ -32,22 +32,26 @@ namespace ConsoleApp
             const string Username = "YOUR_USERNAME";
             const string Password = "YOUR_PASSWORD";
 
-            //1. Create an instance of the DataFeed class
+            //1. Create an instance of the DataFeed class.
             using (DataFeed dataFeed = new DataFeed())
             {
                 //2. Hook up an event handler to the ConnectionStatusChanged event.
                 dataFeed.ConnectionStatusChanged += OnConnectionStatusChanged;
-                //3. Subscribe to the Data observable
+                //3. Subscribe to the Data observable.
                 dataFeed.Data.Subscribe(new Observer(dataFeed));
-                //4. Call the Connect method to connect to the feed and authenticate
+                //4. Call the Connect method to connect to the feed and authenticate.
                 if (dataFeed.Connect(Host, Username, Password))
                 {
-                    //5. Issue a subscription request and wait for the DataReceived event to get raised
+                    //5. Issue a subscription request and wait for data.
                     dataFeed.Request(new SubscribeMessage(
                         RequestType.MDF_RT_FULL, // <- The type of request. Full (image+streaming) in this case.
-                        new RequestClass[1] { RequestClass.MDF_RC_QUOTE }) //<- What kind of data to request. Quotes in this case.
+                        new RequestClass[1] { RequestClass.MDF_RC_QUOTE }) //<- What kind of data to request. 
+                                                                           //   Quotes in this case.
                     {
-                        InstrumentReferences = new ulong[1] { 772 }, //<- What instrument identifier(s) the request is for. 772 is the unique identifier for Ericsson B on Nasdaq OMX Stockholm
+                        InstrumentReferences = new ulong[1] { 772 }, //<- What instrument identifier(s) the 
+                                                                     //   request is for. 772 is the unique 
+                                                                     //   identifier for Ericsson B on Nasdaq OMX 
+                                                                     //   Stockholm.
                     });
                 }
                 else
