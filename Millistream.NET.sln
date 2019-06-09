@@ -20,7 +20,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{41167C76-5F76-4049-B890-1A9D4E24BDE5}"
 	ProjectSection(SolutionItems) = preProject
 		Build\azure-pipelines.yml = Build\azure-pipelines.yml
+		Build\integration-tests.yml = Build\integration-tests.yml
 		README.md = README.md
+		Build\unit-tests.yml = Build\unit-tests.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp", "Samples\ConsoleApp\ConsoleApp.csproj", "{78D0CB1A-31D5-44AD-8D93-76DA8136604B}"

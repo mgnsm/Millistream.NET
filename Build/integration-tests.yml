@@ -1,0 +1,19 @@
+steps:
+- powershell: |
+   [xml]$doc = Get-Content Tests/Millistream.Streaming.IntegrationTests/TestSettings.runsettings
+   $doc.RunSettings.TestRunParameters.ChildNodes.Item(0).value = '$(hostname)'
+   $doc.RunSettings.TestRunParameters.ChildNodes.Item(1).value = '$(username)'
+   $doc.RunSettings.TestRunParameters.ChildNodes.Item(2).value = '$(password)'
+   $doc.Save("$(Build.SourcesDirectory)/Tests/Millistream.Streaming.IntegrationTests/UpdatedTestSettings.runsettings")
+  displayName: 'Override TestRunParameters'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Run Integration Tests'
+  inputs:
+    command: test
+    projects: 'Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj'
+    arguments: '-c $(buildConfiguration) --no-build --no-restore -s $(Build.SourcesDirectory)/Tests/Millistream.Streaming.IntegrationTests/UpdatedTestSettings.runsettings'
+
+- powershell: |
+   Remove-Item $(Build.SourcesDirectory)/Tests/Millistream.Streaming.IntegrationTests/UpdatedTestSettings.runsettings
+  displayName: Remove temporary .runsettings file

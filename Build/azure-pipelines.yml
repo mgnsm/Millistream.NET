@@ -1,47 +1,83 @@
-pool:
-  vmImage: 'windows-2019'
-
 variables:
   buildConfiguration: 'release'
-  major: 1
-  minor: 1
-  patch: $[counter('v110', 0)]
 
-steps:
-- task: DotNetCoreCLI@2
-  displayName: 'Restore NuGet Packages and Build Solution'
-  inputs:
-    command: build
-    projects: 'Millistream.NET.sln'
-    arguments: '-c $(buildConfiguration)'
+jobs:
+- job: Unix
+  strategy:
+    matrix:
+      Ubuntu:
+        imageName: 'ubuntu-16.04'
+      macOS:
+        imageName: 'macOS-10.14'
+    maxParallel: 2
+  pool:
+    vmImage: $(imageName)
+  steps:
+  - task: DotNetCoreCLI@2
+    displayName: 'Restore NuGet Packages and Build Millistream.Streaming For .NET Standard Only'
+    inputs:
+     command: build
+     projects: Source/Millistream.Streaming/Millistream.Streaming.csproj
+     arguments: '-c $(buildConfiguration) -f netstandard1.2'
 
-- task: VSTest@2
-  displayName: 'Run Unit Tests'
-  inputs:
-    testAssemblyVer2: |
-     Tests\Millistream.Streaming.UnitTests\bin\$(buildConfiguration)\**\Millistream.Streaming.UnitTests.dll
+  - task: DotNetCoreCLI@2
+    displayName: 'Restore NuGet Packages and Build The Other Projects for .NET Core'
+    inputs:
+     command: build
+     projects: |
+      **/*.csproj
+      !**/Millistream.Streaming.csproj
+     arguments: '-c $(buildConfiguration) -f netcoreapp2.1'
 
-- powershell: '(new-object System.Net.WebClient).DownloadFile(''ftp://ftp.millistream.com/binaries/windows/libmdf-1.0.21.exe'',''libmdf-1.0.21.exe'')' 
-  displayName: 'Download Native Assemblies'
+  - template: unit-tests.yml
 
-- script: 'libmdf-1.0.21.exe /S'
-  displayName: 'Install Native Assemblies'
+  - bash: |
+     sudo wget "https://packages.millistream.com/apt/sources.list.d/`lsb_release -cs`.list" -O /etc/apt/sources.list.d/millistream.list 
+     wget -q "https://packages.millistream.com/D2FCCE35.gpg" -O- | sudo apt-key add - 
+     sudo apt update
+     sudo apt-get install libmdf
+    displayName: Download and Install libmdf on Ubuntu
+    condition: eq( variables['Agent.OS'], 'Linux' )
 
-- task: VSTest@2
-  displayName: 'Run Integration Tests'
-  inputs:
-    testAssemblyVer2: |
-     Tests\Millistream.Streaming.IntegrationTests\bin\$(buildConfiguration)\**\Millistream.Streaming.IntegrationTests.dll
-    runSettingsFile: Tests/Millistream.Streaming.IntegrationTests/TestSettings.runsettings
-    overrideTestrunParameters: '-host $(host) -username $(username) -password $(password)'
+  - bash: |
+     curl -O https://packages.millistream.com/macOS/libmdf-1.0.21.pkg 
+     sudo installer -pkg libmdf-1.0.21.pkg -target /
+    displayName: Download and Install libmdf on macOS
+    condition: eq( variables['Agent.OS'], 'Darwin' )
 
-- task: DotNetCoreCLI@2
-  displayName: 'Create NuGet Package'
-  inputs:
-    command: custom
-    projects: Source/Millistream.Streaming/Millistream.Streaming.csproj
-    custom: pack
-    arguments: '-c $(buildConfiguration) /p:PackageVersion=$(major).$(minor).$(patch) --output $(Build.ArtifactStagingDirectory) --no-build --no-restore'
+  - template: integration-tests.yml
 
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact'
+- job: Windows
+  pool:
+    vmImage: 'windows-2019'
+  steps:
+  - task: DotNetCoreCLI@2
+    displayName: 'Restore NuGet Packages and Build Solution For All TargetFrameworks'
+    inputs:
+     command: build
+     projects: 'Millistream.NET.sln'
+     arguments: '-c $(buildConfiguration)'
+
+  - template: unit-tests.yml
+
+  - powershell: |
+     (new-object System.Net.WebClient).DownloadFile('ftp://ftp.millistream.com/binaries/windows/libmdf-1.0.21.exe','libmdf-1.0.21.exe')
+     .\libmdf-1.0.21.exe /S
+    displayName: 'Download and Install Native Assemblies'
+
+  - template: integration-tests.yml
+
+  - task: CopyFiles@2
+    displayName: 'Copy the .csproj file and the compiled binaries to the staging directory'
+    inputs:
+     SourceFolder: 'Source/Millistream.Streaming/'
+     Contents: |
+      Millistream.Streaming.csproj
+      bin/$(buildConfiguration)/**
+     TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifacts'
+    inputs:
+     pathtoPublish: '$(Build.ArtifactStagingDirectory)' 
+     artifactName: 'drop'
