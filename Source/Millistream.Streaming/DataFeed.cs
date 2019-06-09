@@ -442,9 +442,10 @@ namespace Millistream.Streaming
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 return new NativeWindowsImplementation();
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                return new NativeUnixImplementation();
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                return new NativeLinuxImplementation();
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                return new NativeMacOsImplementation();
 
             throw new PlatformNotSupportedException();
         }

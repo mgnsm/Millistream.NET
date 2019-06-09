@@ -3,11 +3,11 @@ using System.Runtime.InteropServices;
 
 namespace Millistream.Streaming
 {
-    internal class NativeLinuxImplementation : INativeImplementation
+    internal class NativeMacOsImplementation : INativeImplementation
     {
         private static class NativeUnixMethods
         {
-            private const string DllName = "libmdf.so.0";
+            private const string DllName = "libmdf.0.dylib";
 
             [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
             public static extern IntPtr mdf_create();
