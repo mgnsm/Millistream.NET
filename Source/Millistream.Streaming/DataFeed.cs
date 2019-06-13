@@ -234,7 +234,7 @@ namespace Millistream.Streaming
                                 }
                             }
                             break;
-                        default:
+                        case -1:
                             return false;
                     }
                 } while (DateTime.UtcNow.Subtract(startTime).TotalSeconds < connectionTimeout);
