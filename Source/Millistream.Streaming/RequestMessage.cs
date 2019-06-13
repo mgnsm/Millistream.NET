@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Millistream.Streaming
+﻿namespace Millistream.Streaming
 {
     /// <summary>
     /// Represents a request message to be sent to the server.
