@@ -50,13 +50,17 @@ jobs:
 - job: Windows
   pool:
     vmImage: 'windows-2019'
+  variables:
+    major: 1
+    minor: 1
+    patch: $[counter('v111', 1)]
   steps:
   - task: DotNetCoreCLI@2
     displayName: 'Restore NuGet Packages and Build Solution For All TargetFrameworks'
     inputs:
      command: build
      projects: 'Millistream.NET.sln'
-     arguments: '-c $(buildConfiguration)'
+     arguments: '-c $(buildConfiguration) -p:Version=$(major).$(minor).$(patch)'
 
   - template: unit-tests.yml
 
