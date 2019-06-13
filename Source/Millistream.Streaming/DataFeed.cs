@@ -68,7 +68,7 @@ namespace Millistream.Streaming
         }
 
         /// <summary>
-        /// The number of seconds to wait before if there currently is no data when consuming the feed. If set to zero (0) the consume function will return immediately. The default value is 10.
+        /// The number of seconds to wait for if there currently is no data when consuming the feed. If set to zero (0) the consume function will return immediately. The default value is 10.
         /// </summary>
         public int ConsumeTimeout { get; set; } = 10;
 

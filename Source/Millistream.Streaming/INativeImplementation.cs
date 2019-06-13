@@ -12,7 +12,7 @@ namespace Millistream.Streaming
         int mdf_set_property(IntPtr handle, MDF_OPTION option, IntPtr value);
         int mdf_connect(IntPtr handle, string server);
         void mdf_disconnect(IntPtr handle);
-        int mdf_consume(IntPtr handle, int timout);
+        int mdf_consume(IntPtr handle, int timeout);
         IntPtr mdf_message_create();
         int mdf_message_add(IntPtr message, ulong instrument_reference, int message_reference);
         int mdf_message_del(IntPtr message);

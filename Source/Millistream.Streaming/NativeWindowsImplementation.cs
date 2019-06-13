@@ -34,7 +34,7 @@ namespace Millistream.Streaming
             public static extern void mdf_disconnect(IntPtr handle);
 
             [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-            public static extern int mdf_consume(IntPtr handle, int timout);
+            public static extern int mdf_consume(IntPtr handle, int timeout);
 
             [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
             public static extern IntPtr mdf_message_create();
@@ -86,7 +86,7 @@ namespace Millistream.Streaming
         }
 
         public int mdf_connect(IntPtr handle, string server) => NativeWindowsMethods.mdf_connect(handle, server);
-        public int mdf_consume(IntPtr handle, int timout) => NativeWindowsMethods.mdf_consume(handle, timout);
+        public int mdf_consume(IntPtr handle, int timeout) => NativeWindowsMethods.mdf_consume(handle, timeout);
         public IntPtr mdf_create() => NativeWindowsMethods.mdf_create();
         public void mdf_destroy(IntPtr handle) => NativeWindowsMethods.mdf_destroy(handle);
         public void mdf_disconnect(IntPtr handle) => NativeWindowsMethods.mdf_disconnect(handle);
