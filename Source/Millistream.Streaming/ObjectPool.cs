@@ -26,13 +26,13 @@ namespace Millistream.Streaming
         /// <summary>
         /// Initializes a new instance of the <see cref="ObjectPool{T}"/> class.
         /// </summary>
-        /// <param name="objectFactory">A factory method that creates a new instance of typeparamref name="T"/> when needed.</param>
+        /// <param name="objectFactory">A factory method that creates a new instance of <typeparamref name="T"/> when needed.</param>
         internal ObjectPool(Func<T> objectFactory) : this(objectFactory, Environment.ProcessorCount * 2) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ObjectPool{T}"/> class.
         /// </summary>
-        /// <param name="objectFactory">A factory method that creates a new instance of typeparamref name="T"/> when needed.</param>
+        /// <param name="objectFactory">A factory method that creates a new instance of <typeparamref name="T"/> when needed.</param>
         /// <param name="size">The predefined size limit of the object pool.</param>
         internal ObjectPool(Func<T> objectFactory, int size)
         {
