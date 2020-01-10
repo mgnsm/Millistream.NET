@@ -74,7 +74,8 @@ namespace ConsoleApp
     {
         private readonly IDataFeed _dataFeed;
 
-        public Observer(IDataFeed dataFeed) => _dataFeed = dataFeed;
+        public Observer(IDataFeed dataFeed) => _dataFeed = dataFeed ?? 
+            throw new ArgumentNullException(nameof(dataFeed));
 
         public void OnNext(ResponseMessage message)
         {
@@ -86,7 +87,7 @@ namespace ConsoleApp
 #else
                 Console.WriteLine($"{field.Key}: {Encoding.UTF8.GetString(field.Value.ToArray())}");
 #endif
-            _dataFeed?.Recycle(message);
+            _dataFeed.Recycle(message);
         }
 
         public void OnCompleted() { }
