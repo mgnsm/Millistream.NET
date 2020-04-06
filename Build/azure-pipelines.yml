@@ -13,6 +13,12 @@ jobs:
   pool:
     vmImage: $(imageName)
   steps:
+  - task: UseDotNet@2
+    displayName: 'Install the .NET Core SDK'
+    inputs:
+      packageType: sdk
+      version: 3.x
+
   - task: DotNetCoreCLI@2
     displayName: 'Restore NuGet Packages and Build Millistream.Streaming For .NET Standard Only'
     inputs:
