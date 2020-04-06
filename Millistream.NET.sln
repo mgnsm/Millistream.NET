@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.2000
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29409.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{660A05E5-718C-45D0-8705-14C9B5DF6F98}"
 EndProject
@@ -9,7 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{A0152BDC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Millistream.Streaming", "Source\Millistream.Streaming\Millistream.Streaming.csproj", "{F5CC00D3-449B-4280-8A01-B649AAE9D2C8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Millistream.Streaming.UnitTests", "Tests\Millistream.Streaming.UnitTests\Millistream.Streaming.UnitTests.csproj", "{F86497BC-8BBD-4BD2-A050-FD0882DE69FF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Millistream.Streaming.UnitTests", "Tests\Millistream.Streaming.UnitTests\Millistream.Streaming.UnitTests.csproj", "{F86497BC-8BBD-4BD2-A050-FD0882DE69FF}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Millistream.Streaming.IntegrationTests", "Tests\Millistream.Streaming.IntegrationTests\Millistream.Streaming.IntegrationTests.csproj", "{DB6A274F-DB2C-4581-88F9-4A798A9D3DF7}"
 EndProject
@@ -28,6 +28,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp", "Samples\ConsoleApp\ConsoleApp.csproj", "{78D0CB1A-31D5-44AD-8D93-76DA8136604B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "v1.0.0", "v1.0.0", "{250E61F3-D935-4729-8F60-9E7C2E6A6F40}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Millistream.Streaming.DataTypes", "Source\Millistream.Streaming.DataTypes\Millistream.Streaming.DataTypes.csproj", "{F4B36982-5C27-4988-8D96-99858868071C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Millistream.Streaming.DataTypes.UnitTests", "Tests\Millistream.Streaming.DataTypes.UnitTests\Millistream.Streaming.DataTypes.UnitTests.csproj", "{ACD99697-5CB5-41A8-8014-98C963002547}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -55,6 +59,14 @@ Global
 		{78D0CB1A-31D5-44AD-8D93-76DA8136604B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{78D0CB1A-31D5-44AD-8D93-76DA8136604B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{78D0CB1A-31D5-44AD-8D93-76DA8136604B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4B36982-5C27-4988-8D96-99858868071C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4B36982-5C27-4988-8D96-99858868071C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4B36982-5C27-4988-8D96-99858868071C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4B36982-5C27-4988-8D96-99858868071C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ACD99697-5CB5-41A8-8014-98C963002547}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACD99697-5CB5-41A8-8014-98C963002547}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACD99697-5CB5-41A8-8014-98C963002547}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACD99697-5CB5-41A8-8014-98C963002547}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -66,6 +78,8 @@ Global
 		{04B84E2C-DAFD-4E8B-84A8-0BF3CC7512EE} = {250E61F3-D935-4729-8F60-9E7C2E6A6F40}
 		{78D0CB1A-31D5-44AD-8D93-76DA8136604B} = {C04FDBC8-EB8C-4D9F-8F3A-B6A2DA42566D}
 		{250E61F3-D935-4729-8F60-9E7C2E6A6F40} = {C04FDBC8-EB8C-4D9F-8F3A-B6A2DA42566D}
+		{F4B36982-5C27-4988-8D96-99858868071C} = {660A05E5-718C-45D0-8705-14C9B5DF6F98}
+		{ACD99697-5CB5-41A8-8014-98C963002547} = {A0152BDC-0D9F-4AE2-BF3E-CE24F85ECAF8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {13B18705-419F-4BCB-B456-5A1E4198605D}
