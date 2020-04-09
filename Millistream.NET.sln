@@ -20,6 +20,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{41167C76-5F76-4049-B890-1A9D4E24BDE5}"
 	ProjectSection(SolutionItems) = preProject
 		Build\azure-pipelines.yml = Build\azure-pipelines.yml
+		Build\build.yml = Build\build.yml
 		Build\integration-tests.yml = Build\integration-tests.yml
 		README.md = README.md
 		Build\unit-tests.yml = Build\unit-tests.yml
@@ -31,7 +32,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "v1.0.0", "v1.0.0", "{250E61
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Millistream.Streaming.DataTypes", "Source\Millistream.Streaming.DataTypes\Millistream.Streaming.DataTypes.csproj", "{F4B36982-5C27-4988-8D96-99858868071C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Millistream.Streaming.DataTypes.UnitTests", "Tests\Millistream.Streaming.DataTypes.UnitTests\Millistream.Streaming.DataTypes.UnitTests.csproj", "{ACD99697-5CB5-41A8-8014-98C963002547}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Millistream.Streaming.DataTypes.UnitTests", "Tests\Millistream.Streaming.DataTypes.UnitTests\Millistream.Streaming.DataTypes.UnitTests.csproj", "{ACD99697-5CB5-41A8-8014-98C963002547}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

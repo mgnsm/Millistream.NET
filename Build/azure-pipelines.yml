@@ -1,39 +1,12 @@
 variables:
-  buildConfiguration: 'release'
+  buildConfiguration: 'Release'
 
 jobs:
-- job: Unix
-  strategy:
-    matrix:
-      Ubuntu:
-        imageName: 'ubuntu-16.04'
-      macOS:
-        imageName: 'macOS-10.14'
-    maxParallel: 2
+- job: Linux
   pool:
-    vmImage: $(imageName)
+    vmImage: 'ubuntu-18.04'
   steps:
-  - task: UseDotNet@2
-    displayName: 'Install the .NET Core SDK'
-    inputs:
-      packageType: sdk
-      version: 3.x
-
-  - task: DotNetCoreCLI@2
-    displayName: 'Restore NuGet Packages and Build Millistream.Streaming For .NET Standard Only'
-    inputs:
-     command: build
-     projects: Source/Millistream.Streaming/Millistream.Streaming.csproj
-     arguments: '-c $(buildConfiguration) -f netstandard1.2'
-
-  - task: DotNetCoreCLI@2
-    displayName: 'Restore NuGet Packages and Build The Other Projects for .NET Core'
-    inputs:
-     command: build
-     projects: |
-      **/*.csproj
-      !**/Millistream.Streaming.csproj
-     arguments: '-c $(buildConfiguration) -f netcoreapp2.1'
+  - template: build.yml
 
   - template: unit-tests.yml
 
@@ -42,14 +15,28 @@ jobs:
      wget -q "https://packages.millistream.com/D2FCCE35.gpg" -O- | sudo apt-key add - 
      sudo apt update
      sudo apt-get install libmdf
-    displayName: Download and Install libmdf on Ubuntu
-    condition: eq( variables['Agent.OS'], 'Linux' )
+    displayName: Download and Install libmdf
+
+  - template: integration-tests.yml
+
+- job: macOS
+  pool:
+    vmImage: 'macOS-10.14'
+  steps:
+  - task: UseDotNet@2
+    displayName: 'Install the .NET Core SDK'
+    inputs:
+      packageType: sdk
+      version: 3.x
+ 
+  - template: build.yml
+
+  - template: unit-tests.yml
 
   - bash: |
      curl -O https://packages.millistream.com/macOS/libmdf-1.0.21.pkg 
      sudo installer -pkg libmdf-1.0.21.pkg -target /
-    displayName: Download and Install libmdf on macOS
-    condition: eq( variables['Agent.OS'], 'Darwin' )
+    displayName: Download and Install libmdf
 
   - template: integration-tests.yml
 

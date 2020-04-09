@@ -1,0 +1,16 @@
+steps:
+- task: DotNetCoreCLI@2
+  displayName: 'Restore NuGet Packages and Build Millistream.Streaming For .NET Standard'
+  inputs:
+    command: build
+    projects: Source/Millistream.Streaming/Millistream.Streaming.csproj
+    arguments: '-c $(buildConfiguration) -f netstandard1.2'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Restore NuGet Packages and Build The Test Projects for .NET Core'
+  inputs:
+    command: build
+    projects: |
+     **/Millistream.Streaming.UnitTests.csproj
+     **/Millistream.Streaming.IntegrationTests.csproj
+    arguments: '-c $(buildConfiguration) -f netcoreapp3.0'
