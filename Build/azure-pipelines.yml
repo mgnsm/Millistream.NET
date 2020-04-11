@@ -1,6 +1,17 @@
 variables:
   buildConfiguration: 'Release'
 
+trigger:
+  branches:
+    include:
+    - master
+  paths:
+    include:
+    - Source/Millistream.Streaming/
+    - Tests/Millistream.Streaming.IntegrationTests
+    - Tests/Millistream.Streaming.UnitTests
+    - Build/*
+
 jobs:
 - job: Linux
   pool:
