@@ -25,7 +25,7 @@ namespace Millistream.Streaming.IntegrationTests
                 dataFeed.ConsumeTimeout = 1;
    
                 bool isConnected = false;
-                void connectedHandler(object s, ConnectionStatusChangedEventArgs e)
+                void ConnectedHandler(object s, ConnectionStatusChangedEventArgs e)
                 {
                     if (e.ConnectionStatus == ConnectionStatus.MDF_STATUS_CONNECTED)
                     {
@@ -33,7 +33,7 @@ namespace Millistream.Streaming.IntegrationTests
                         manualResetEvent.Set();
                     }
                 }
-                dataFeed.ConnectionStatusChanged += connectedHandler;
+                dataFeed.ConnectionStatusChanged += ConnectedHandler;
                 //assert that the feed can be connected to
                 Assert.IsTrue(dataFeed.Connect(host, username, password));
                 //assert that a ConnectionStatusChanged is raised when the feed is connected 
@@ -41,11 +41,11 @@ namespace Millistream.Streaming.IntegrationTests
                 Assert.IsTrue(isConnected);
                 
                 //connect again
-                dataFeed.ConnectionStatusChanged -= connectedHandler;
+                dataFeed.ConnectionStatusChanged -= ConnectedHandler;
                 Assert.IsTrue(dataFeed.Connect(host, username, password));
 
                 //disconnnect
-                void disconnectedHandler(object s, ConnectionStatusChangedEventArgs e)
+                void DisconnectedHandler(object s, ConnectionStatusChangedEventArgs e)
                 {
                     if (e.ConnectionStatus == ConnectionStatus.MDF_STATUS_DISCONNECTED)
                     {
@@ -53,21 +53,21 @@ namespace Millistream.Streaming.IntegrationTests
                         manualResetEvent.Set();
                     }
                 }
-                dataFeed.ConnectionStatusChanged += disconnectedHandler;
+                dataFeed.ConnectionStatusChanged += DisconnectedHandler;
                 dataFeed.Disconnect();
                 //assert that a ConnectionStatusChanged is raised when the feed is disconnected
                 manualResetEvent.WaitOne(s_waitTimeout);
                 Assert.IsFalse(isConnected);
 
                 //connect again
-                dataFeed.ConnectionStatusChanged -= disconnectedHandler;
-                dataFeed.ConnectionStatusChanged += connectedHandler;
+                dataFeed.ConnectionStatusChanged -= DisconnectedHandler;
+                dataFeed.ConnectionStatusChanged += ConnectedHandler;
                 Assert.IsTrue(dataFeed.Connect(host, username, password));
                 manualResetEvent.WaitOne(s_waitTimeout);
                 Assert.IsTrue(isConnected);
                 //disconnect again
-                dataFeed.ConnectionStatusChanged -= connectedHandler;
-                dataFeed.ConnectionStatusChanged += disconnectedHandler;
+                dataFeed.ConnectionStatusChanged -= ConnectedHandler;
+                dataFeed.ConnectionStatusChanged += DisconnectedHandler;
                 dataFeed.Disconnect();
                 manualResetEvent.WaitOne(s_waitTimeout);
                 Assert.IsFalse(isConnected);
@@ -87,7 +87,7 @@ namespace Millistream.Streaming.IntegrationTests
             {
                 dataFeed.ConsumeTimeout = 1;
 
-                void onNext(ResponseMessage message)
+                void OnNext(ResponseMessage message)
                 {
                     if (message.MessageReference == MessageReference.MDF_M_REQUESTFINISHED
                         && message.Fields.TryGetValue(Field.MDF_F_REQUESTID, out ReadOnlyMemory<byte> requestId)
@@ -97,7 +97,7 @@ namespace Millistream.Streaming.IntegrationTests
                         receivedResponseMessages.Add(message);
                 }
 
-                dataFeed.Data.Subscribe(new ResponseMessageObserver(onNext, null, null));
+                dataFeed.Data.Subscribe(new ResponseMessageObserver(OnNext, null, null));
 
                 Assert.IsTrue(dataFeed.Connect(GetTestRunParameter("host"), GetTestRunParameter("username"), GetTestRunParameter("password")),
                     "Connect failed.");
@@ -123,7 +123,7 @@ namespace Millistream.Streaming.IntegrationTests
 
         private string GetTestRunParameter(string parameterName)
         {
-            string parameterValue = TestContext.Properties.TryGetValue(parameterName, out object value) ? value as string : default(string);
+            string parameterValue = TestContext.Properties[parameterName] as string;
             if (string.IsNullOrEmpty(parameterValue))
                 Assert.Fail($"No {parameterName} was specified in the .runsettings file.");
             return parameterValue;
