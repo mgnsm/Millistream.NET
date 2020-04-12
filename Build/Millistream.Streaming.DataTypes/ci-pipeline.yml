@@ -1,0 +1,61 @@
+variables:
+  buildConfiguration: 'Release'
+  major: 1
+  minor: 0
+  patch: $[counter('v100', 0)]
+
+trigger:
+  branches:
+    include:
+    - master
+  paths:
+    include:
+    - Source/Millistream.Streaming.DataTypes/
+    - Tests/Millistream.Streaming.DataTypes.UnitTests
+    - Build/Millistream.Streaming.DataTypes/*
+
+jobs:
+- job: Linux
+  pool:
+    vmImage: 'ubuntu-18.04'
+  steps:
+  - template: build.yml
+
+  - template: unit-tests.yml
+
+- job: macOS
+  pool:
+    vmImage: 'macOS-10.14'
+  steps:
+  - task: UseDotNet@2
+    displayName: 'Install the .NET Core SDK'
+    inputs:
+      packageType: sdk
+      version: 3.x
+ 
+  - template: build.yml
+
+  - template: unit-tests.yml
+
+- job: Windows
+  pool:
+    vmImage: 'windows-2019'
+  steps:
+  - template: build.yml
+
+  - template: unit-tests.yml
+
+  - task: CopyFiles@2
+    displayName: 'Copy the .csproj file and the compiled binaries to the staging directory'
+    inputs:
+     SourceFolder: 'Source/Millistream.Streaming.DataTypes/'
+     Contents: |
+      Millistream.Streaming.DataTypes.csproj
+      bin/$(buildConfiguration)/**
+     TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifacts'
+    inputs:
+     pathtoPublish: '$(Build.ArtifactStagingDirectory)' 
+     artifactName: 'drop'

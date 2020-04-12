@@ -10,7 +10,7 @@ trigger:
     - Source/Millistream.Streaming/
     - Tests/Millistream.Streaming.IntegrationTests
     - Tests/Millistream.Streaming.UnitTests
-    - Build/*
+    - Build/Millistream.Streaming/*
 
 jobs:
 - job: Linux
@@ -63,7 +63,10 @@ jobs:
     displayName: 'Restore NuGet Packages and Build Solution For All TargetFrameworks'
     inputs:
      command: build
-     projects: 'Millistream.NET.sln'
+     projects: |
+       Source/Millistream.Streaming/Millistream.Streaming.csproj
+       Tests/Millistream.Streaming.UnitTests/Millistream.Streaming.UnitTests.csproj
+       Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj
      arguments: '-c $(buildConfiguration) -p:Version=$(major).$(minor).$(patch)'
 
   - template: unit-tests.yml
