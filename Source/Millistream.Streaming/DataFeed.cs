@@ -217,7 +217,7 @@ namespace Millistream.Streaming
                         case 1:
                             int mref = 0;
                             int mclass = 0;
-                            uint insref = 0;
+                            ulong insref = 0;
                             while (_nativeImplementation.mdf_get_next_message(_feedHandle, ref mref, ref mclass, ref insref) == 1)
                             {
                                 switch (mref)
@@ -352,7 +352,7 @@ namespace Millistream.Streaming
                         case 1:
                             int mref = 0;
                             int mclass = 0;
-                            uint insref = 0;
+                            ulong insref = 0;
                             while (_nativeImplementation.mdf_get_next_message(_feedHandle, ref mref, ref mclass, ref insref) == 1)
                                 if (mref == (int)MessageReference.MDF_M_LOGOFF)
                                     return;
@@ -376,7 +376,7 @@ namespace Millistream.Streaming
         {
             int messageReference = 0;
             int messageClass = 0;
-            uint instrumentId = 0;
+            ulong instrumentId = 0;
             while (_nativeImplementation.mdf_get_next_message(_feedHandle, ref messageReference, ref messageClass, ref instrumentId) == 1)
             {
                 if (s_messageReferences.Contains(messageReference))

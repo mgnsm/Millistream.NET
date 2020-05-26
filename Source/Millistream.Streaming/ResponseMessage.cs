@@ -25,7 +25,7 @@ namespace Millistream.Streaming
         /// <summary>
         /// The unique id of the instrument. There are a limited number of messages in which this property will not be used to carry the instrument reference. Please consult the official documentation for more information.
         /// </summary>
-        public uint InstrumentReference { get; internal set; }
+        public ulong InstrumentReference { get; internal set; }
 
         /// <summary>
         /// Used internally and supplied only for completeness and transparency. The <see cref="MessageReference"/> property should be used to determine the type of the message.

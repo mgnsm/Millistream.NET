@@ -13,7 +13,7 @@ namespace Millistream.Streaming.UnitTests
         private const string Username = "username";
         private const string Password = "password";
 
-        private delegate void mdf_get_next_message_callback(IntPtr handle, ref int message, ref int message_class, ref uint instrument);
+        private delegate void mdf_get_next_message_callback(IntPtr handle, ref int message, ref int message_class, ref ulong instrument);
         private delegate void mdf_get_property_callback(IntPtr handle, MDF_OPTION option, ref IntPtr value);
 
         [TestMethod]
@@ -25,8 +25,8 @@ namespace Millistream.Streaming.UnitTests
             nativeImplementationMock.Setup(x => x.mdf_consume(It.IsAny<IntPtr>(), It.IsAny<int>())).Returns(1);
             int returnedMessage = (int)MessageReference.MDF_M_LOGONGREETING;
             nativeImplementationMock
-                .Setup(x => x.mdf_get_next_message(It.IsAny<IntPtr>(), ref It.Ref<int>.IsAny, ref It.Ref<int>.IsAny, ref It.Ref<uint>.IsAny))
-                .Callback(new mdf_get_next_message_callback((IntPtr handle, ref int message, ref int message_class, ref uint instrument)
+                .Setup(x => x.mdf_get_next_message(It.IsAny<IntPtr>(), ref It.Ref<int>.IsAny, ref It.Ref<int>.IsAny, ref It.Ref<ulong>.IsAny))
+                .Callback(new mdf_get_next_message_callback((IntPtr handle, ref int message, ref int message_class, ref ulong instrument)
                     => message = returnedMessage))
                 .Returns(1);
 
@@ -61,8 +61,8 @@ namespace Millistream.Streaming.UnitTests
             nativeImplementationMock.Setup(x => x.mdf_consume(It.IsAny<IntPtr>(), It.IsAny<int>())).Returns(1);
             int returnedMessage = (int)MessageReference.MDF_M_LOGONGREETING;
             nativeImplementationMock.Setup(x => x.mdf_get_next_message(It.IsAny<IntPtr>(),
-                ref It.Ref<int>.IsAny, ref It.Ref<int>.IsAny, ref It.Ref<uint>.IsAny))
-                .Callback(new mdf_get_next_message_callback((IntPtr handle, ref int message, ref int message_class, ref uint instrument)
+                ref It.Ref<int>.IsAny, ref It.Ref<int>.IsAny, ref It.Ref<ulong>.IsAny))
+                .Callback(new mdf_get_next_message_callback((IntPtr handle, ref int message, ref int message_class, ref ulong instrument)
                     => message = returnedMessage))
                 .Returns(1);
 

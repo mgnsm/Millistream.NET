@@ -6,7 +6,7 @@ namespace Millistream.Streaming
     {
         IntPtr mdf_create();
         void mdf_destroy(IntPtr handle);
-        int mdf_get_next_message(IntPtr handle, ref int message, ref int message_class, ref uint instrument);
+        int mdf_get_next_message(IntPtr handle, ref int message, ref int message_class, ref ulong instrument);
         int mdf_get_next_field(IntPtr handle, ref uint tag, ref IntPtr value);
         int mdf_get_property(IntPtr handle, MDF_OPTION option, ref IntPtr value);
         int mdf_set_property(IntPtr handle, MDF_OPTION option, IntPtr value);
