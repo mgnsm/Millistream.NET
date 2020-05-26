@@ -119,7 +119,7 @@ namespace Millistream.Streaming.Rx
             if (observer == null)
                 throw new ArgumentNullException(nameof(observer));
 
-            SubjectDisposable disposable = default(SubjectDisposable);
+            SubjectDisposable disposable = default;
             for (; ; )
             {
                 SubjectDisposable[] observers = Volatile.Read(ref _observers);
@@ -164,7 +164,7 @@ namespace Millistream.Streaming.Rx
                 if (j < 0)
                     break;
 
-                SubjectDisposable[] b = default(SubjectDisposable[]);
+                SubjectDisposable[] b;
                 if (n == 1)
                 {
                     b = s_empty;

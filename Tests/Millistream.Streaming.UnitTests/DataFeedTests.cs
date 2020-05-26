@@ -82,7 +82,7 @@ namespace Millistream.Streaming.UnitTests
                         break;
                 }
                 methodCallCounter++;
-                return default(int);
+                return default;
             }
             nativeImplementationMock
                 .Setup(x => x.mdf_message_add_list(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<string>()))
@@ -94,7 +94,7 @@ namespace Millistream.Streaming.UnitTests
                 Assert.AreEqual((uint)Field.MDF_F_REQUESTTYPE, tag);
                 Assert.AreEqual(((int)requestType).ToString(), value);
                 methodCallCounter++;
-                return default(int);
+                return default;
             }
             nativeImplementationMock
                 .Setup(x => x.mdf_message_add_numeric(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<string>()))
@@ -110,7 +110,7 @@ namespace Millistream.Streaming.UnitTests
                     Assert.AreEqual(0UL, instrument_reference);
                     Assert.AreEqual((int)MessageReference.MDF_M_REQUEST, message_reference);
                     methodCallCounter++;
-                    return default(int);
+                    return default;
                 }
                 nativeImplementationMock
                     .Setup(x => x.mdf_message_add(It.IsAny<IntPtr>(), It.IsAny<ulong>(), It.IsAny<int>()))
@@ -131,7 +131,7 @@ namespace Millistream.Streaming.UnitTests
                     Assert.AreEqual(0UL, instrument_reference);
                     Assert.AreEqual((int)MessageReference.MDF_M_UNSUBSCRIBE, message_reference);
                     methodCallCounter++;
-                    return default(int);
+                    return default;
                 }
                 nativeImplementationMock
                     .Setup(x => x.mdf_message_add(It.IsAny<IntPtr>(), It.IsAny<ulong>(), It.IsAny<int>()))

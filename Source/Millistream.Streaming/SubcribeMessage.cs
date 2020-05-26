@@ -66,7 +66,7 @@ namespace Millistream.Streaming
             if (UtcStartTime.HasValue)
             {
                 message.AddDate(Field.MDF_F_DATE, UtcStartTime.Value.Date);
-                if (UtcStartTime.Value.TimeOfDay != default(TimeSpan))
+                if (UtcStartTime.Value.TimeOfDay != default)
                     message.AddTime(Field.MDF_F_TIME, UtcStartTime.Value.TimeOfDay);
             }
         }
