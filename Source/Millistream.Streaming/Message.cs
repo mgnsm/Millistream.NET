@@ -6,7 +6,6 @@ namespace Millistream.Streaming
 {
     internal sealed class Message : IMessage
     {
-        private const string DateFormat = "yyyy-MM-dd";
         private const string ListSeparator = " ";
         private readonly INativeImplementation _nativeImplementation;
         private readonly IntPtr _messageHandle;
