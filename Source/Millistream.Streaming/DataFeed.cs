@@ -1,6 +1,6 @@
 ﻿using Millistream.Streaming.Rx;
 using System;
-using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,8 +22,8 @@ namespace Millistream.Streaming
         #endregion
 
         #region Fields
-        private static readonly HashSet<int> s_messageReferences = new HashSet<int>((int[])Enum.GetValues(typeof(MessageReference)));
-        private static readonly HashSet<uint> s_fieldReferences = new HashSet<uint>((uint[])Enum.GetValues(typeof(Field)));
+        private static readonly ImmutableHashSet<int> s_messageReferences = ImmutableHashSet.Create((int[])Enum.GetValues(typeof(MessageReference)));
+        private static readonly ImmutableHashSet<uint> s_fieldReferences = ImmutableHashSet.Create((uint[])Enum.GetValues(typeof(Field)));
         private static readonly Func<ResponseMessage> s_responseMessageFactory = () => new ResponseMessage();
         private readonly object _lock = new object();
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
