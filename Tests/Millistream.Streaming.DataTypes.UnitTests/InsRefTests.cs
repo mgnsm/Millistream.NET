@@ -10,8 +10,7 @@ namespace Millistream.Streaming.DataTypes.UnitTests
         [TestMethod]
         public void TryParseInsRefTest()
         {
-            InsRef insRef;
-            Assert.IsTrue(InsRef.TryParse("1", out insRef));
+            Assert.IsTrue(InsRef.TryParse("1", out InsRef insRef));
             Assert.AreEqual(1ul, insRef);
             Assert.IsTrue(InsRef.TryParse("1".GetBytes(), out insRef));
             Assert.AreEqual(1ul, insRef);

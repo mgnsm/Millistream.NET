@@ -15,8 +15,7 @@ namespace Millistream.Streaming.DataTypes.UnitTests
             ParseMonthTest(2020, 12);
             ParseMonthTest(9999, 12);
 
-            Month month;
-            Assert.IsFalse(Month.TryParse("0000-12", out month));
+            Assert.IsFalse(Month.TryParse("0000-12", out Month month));
             Assert.AreEqual(default, month);
             Assert.IsFalse(Month.TryParse("2001-13".GetBytes(), out _));
             Assert.IsFalse(Month.TryParse("29", out _));
@@ -99,8 +98,7 @@ namespace Millistream.Streaming.DataTypes.UnitTests
             const char PaddingChar = '0';
             string s = $"{year.ToString().PadLeft(4, PaddingChar)}-{monthNumber.ToString().PadLeft(2, PaddingChar)}";
 
-            Month month;
-            Assert.IsTrue(Month.TryParse(s.GetBytes(), out month));
+            Assert.IsTrue(Month.TryParse(s.GetBytes(), out Month month));
             Assert.AreEqual(year, month.Year);
             Assert.AreEqual(monthNumber, month.Number);
             Assert.AreEqual(s, month.ToString());

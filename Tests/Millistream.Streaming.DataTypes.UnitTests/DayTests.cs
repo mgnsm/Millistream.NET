@@ -13,8 +13,7 @@ namespace Millistream.Streaming.DataTypes.UnitTests
             ParseDayTest(0001, 1, 1);
             ParseDayTest(2000, 2, 29);
 
-            Day day;
-            Assert.IsFalse(Day.TryParse("0000-12-12", out day));
+            Assert.IsFalse(Day.TryParse("0000-12-12", out Day day));
             Assert.AreEqual(default, day);
             Assert.IsFalse(Day.TryParse("2001-02-29".GetBytes(), out _));
             Assert.IsFalse(Day.TryParse("29", out _));
@@ -96,8 +95,7 @@ namespace Millistream.Streaming.DataTypes.UnitTests
             const char PaddingChar = '0';
             string s = $"{year.ToString().PadLeft(4, PaddingChar)}-{month.ToString().PadLeft(2, PaddingChar)}-{dayNumber.ToString().PadLeft(2, PaddingChar)}";
             
-            Day day;
-            Assert.IsTrue(Day.TryParse(s.GetBytes(), out day));
+            Assert.IsTrue(Day.TryParse(s.GetBytes(), out Day day));
             Assert.AreEqual(year, day.Year);
             Assert.AreEqual(month, day.Month.Number);
             Assert.AreEqual(dayNumber, day.Number);

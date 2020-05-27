@@ -16,8 +16,7 @@ namespace Millistream.Streaming.DataTypes.UnitTests
             ParseWeekTest(2020, 45);
             ParseWeekTest(9999, 53);
 
-            Week week;
-            Assert.IsTrue(Week.TryParse("2020-W3".GetBytes(), out week));
+            Assert.IsTrue(Week.TryParse("2020-W3".GetBytes(), out Week week));
             Assert.AreEqual(2020, week.Year);
             Assert.AreEqual(3, week.Number);
             Assert.AreEqual("2020-W03", week.ToString());
@@ -108,8 +107,7 @@ namespace Millistream.Streaming.DataTypes.UnitTests
             const char PaddingChar = '0';
             string s = $"{year.ToString().PadLeft(4, PaddingChar)}-W{number.ToString().PadLeft(2, PaddingChar)}";
 
-            Week week;
-            Assert.IsTrue(Week.TryParse(s.GetBytes(), out week));
+            Assert.IsTrue(Week.TryParse(s.GetBytes(), out Week week));
             Assert.AreEqual(year, week.Year);
             Assert.AreEqual(number, week.Number);
             Assert.AreEqual(s, week.ToString());

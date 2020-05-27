@@ -14,10 +14,9 @@ namespace Millistream.Streaming.DataTypes.UnitTests
             TryParseTimeTest(12, 12, 13, null, 1);
             TryParseTimeTest(9, 9, 13, 1, null);
 
-            Time time;
             string timeValueToParse = "12:12:13.000000001";
             Assert.IsTrue(Time.TryParse(timeValueToParse, out _));
-            Assert.IsTrue(Time.TryParse(timeValueToParse.GetBytes(), out time));
+            Assert.IsTrue(Time.TryParse(timeValueToParse.GetBytes(), out Time time));
             Assert.AreEqual(12, time.Hours);
             Assert.AreEqual(12, time.Minutes);
             Assert.AreEqual(13, time.Seconds);
@@ -201,8 +200,7 @@ namespace Millistream.Streaming.DataTypes.UnitTests
             else if (nanoseconds.HasValue)
                 s += AddNanoSeconds(nanoseconds.Value);
 
-            Time time;
-            Assert.IsTrue(Time.TryParse(s, out time));
+            Assert.IsTrue(Time.TryParse(s, out Time time));
             AssertPropertyValues(time);
             Assert.IsTrue(Time.TryParse(s.GetBytes(), out time));
             AssertPropertyValues(time);

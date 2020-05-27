@@ -10,8 +10,7 @@ namespace Millistream.Streaming.DataTypes.UnitTests
         [TestMethod]
         public void TryParseUIntTest()
         {
-            UInt @uint;
-            Assert.IsTrue(UInt.TryParse("1", out @uint));
+            Assert.IsTrue(UInt.TryParse("1", out UInt @uint));
             Assert.AreEqual(1ul, @uint);
             Assert.IsTrue(UInt.TryParse("1".GetBytes(), out @uint));
             Assert.AreEqual(1ul, @uint);

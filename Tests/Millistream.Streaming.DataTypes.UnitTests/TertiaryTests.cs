@@ -16,8 +16,7 @@ namespace Millistream.Streaming.DataTypes.UnitTests
             ParseTertiaryTest(2020, 1);
             ParseTertiaryTest(9999, 3);
 
-            Tertiary tertiary;
-            Assert.IsFalse(Tertiary.TryParse("0000-T1", out tertiary));
+            Assert.IsFalse(Tertiary.TryParse("0000-T1", out Tertiary tertiary));
             Assert.AreEqual(default, tertiary);
             Assert.IsFalse(Tertiary.TryParse("2001-T4".GetBytes(), out _));
             Assert.IsFalse(Tertiary.TryParse("2001-T0".GetBytes(), out _));
@@ -93,10 +92,9 @@ namespace Millistream.Streaming.DataTypes.UnitTests
 
         private static void ParseTertiaryTest(int year, int number)
         {
-            string s = $"{year.ToString().PadLeft(4, '0')}-T{number.ToString()}";
+            string s = $"{year.ToString().PadLeft(4, '0')}-T{number}";
 
-            Tertiary tertiary;
-            Assert.IsTrue(Tertiary.TryParse(s.GetBytes(), out tertiary));
+            Assert.IsTrue(Tertiary.TryParse(s.GetBytes(), out Tertiary tertiary));
             Assert.AreEqual(year, tertiary.Year);
             Assert.AreEqual(number, tertiary.Number);
             Assert.AreEqual(s, tertiary.ToString());

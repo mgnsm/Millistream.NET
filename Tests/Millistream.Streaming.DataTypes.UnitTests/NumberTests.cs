@@ -212,8 +212,7 @@ namespace Millistream.Streaming.DataTypes.UnitTests
 
         private static void ParseNumberTest(string s)
         {
-            Number number;
-            Assert.IsTrue(Number.TryParse(s, out number));
+            Assert.IsTrue(Number.TryParse(s, out Number number));
             Assert.AreEqual(s, number.ToString());
             Assert.IsTrue(Number.TryParse(s.GetBytes(), out number));
             Assert.AreEqual(s, number.ToString());

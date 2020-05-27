@@ -9,8 +9,7 @@ namespace Millistream.Streaming.DataTypes.UnitTests
         [TestMethod]
         public void TryParseBoolTest()
         {
-            Bool @bool;
-            Assert.IsTrue(Bool.TryParse("1", out @bool));
+            Assert.IsTrue(Bool.TryParse("1", out Bool @bool));
             Assert.IsTrue(@bool);
             Assert.IsTrue(Bool.TryParse("1".GetBytes(), out @bool));
             Assert.IsTrue(@bool);

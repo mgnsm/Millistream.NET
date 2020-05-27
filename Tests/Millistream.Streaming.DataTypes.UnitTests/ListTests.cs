@@ -20,8 +20,7 @@ namespace Millistream.Streaming.DataTypes.UnitTests
             ParseListTest("+111 222 ", ListPrefix.Add, new InsRef(111), new InsRef(222));
             ParseListTest("=999", ListPrefix.Replace, new InsRef(999));
 
-            List list;
-            Assert.IsFalse(List.TryParse("45 5b6", out list));
+            Assert.IsFalse(List.TryParse("45 5b6", out List list));
             Assert.AreEqual(0, list.Count);
             Assert.AreEqual(ListPrefix.Undefined, list.Prefix);
             Assert.IsFalse(list.PrefixCharacter.HasValue);
@@ -123,8 +122,7 @@ namespace Millistream.Streaming.DataTypes.UnitTests
                 Assert.AreEqual(s.Trim(), list.ToString());
             }
 
-            List list;
-            Assert.IsTrue(List.TryParse(s, out list));
+            Assert.IsTrue(List.TryParse(s, out List list));
             Verify(list);
             Assert.IsTrue(List.TryParse(s.GetBytes(), out list));
             Verify(list);

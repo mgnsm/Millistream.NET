@@ -16,8 +16,7 @@ namespace Millistream.Streaming.DataTypes.UnitTests
             ParseSemiAnnualTest(2020, 1);
             ParseSemiAnnualTest(9999, 2);
 
-            SemiAnnual semiAnnual;
-            Assert.IsFalse(SemiAnnual.TryParse("0000-H1", out semiAnnual));
+            Assert.IsFalse(SemiAnnual.TryParse("0000-H1", out SemiAnnual semiAnnual));
             Assert.AreEqual(default, semiAnnual);
             Assert.IsFalse(SemiAnnual.TryParse("2001-H3".GetBytes(), out _));
             Assert.IsFalse(SemiAnnual.TryParse("2001-H0".GetBytes(), out _));
@@ -94,10 +93,9 @@ namespace Millistream.Streaming.DataTypes.UnitTests
 
         private static void ParseSemiAnnualTest(int year, int half)
         {
-            string s = $"{year.ToString().PadLeft(4, '0')}-H{half.ToString()}";
+            string s = $"{year.ToString().PadLeft(4, '0')}-H{half}";
 
-            SemiAnnual semiAnnual;
-            Assert.IsTrue(SemiAnnual.TryParse(s.GetBytes(), out semiAnnual));
+            Assert.IsTrue(SemiAnnual.TryParse(s.GetBytes(), out SemiAnnual semiAnnual));
             Assert.AreEqual(year, semiAnnual.Year);
             Assert.AreEqual(half, semiAnnual.Number);
             Assert.AreEqual(s, semiAnnual.ToString());

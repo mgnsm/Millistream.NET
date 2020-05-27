@@ -16,8 +16,7 @@ namespace Millistream.Streaming.DataTypes.UnitTests
             ParseDateTest(2025, 1, 31);
             ParseDateTest(2000, 2, 29);
 
-            Date date;
-            Assert.IsFalse(Date.TryParse("2019-02-29", out date));
+            Assert.IsFalse(Date.TryParse("2019-02-29", out Date date));
             Assert.AreEqual(default, date);
             Assert.IsFalse(Date.TryParse("2019-2-28", out date));
             Assert.AreEqual(default, date);
@@ -36,8 +35,7 @@ namespace Millistream.Streaming.DataTypes.UnitTests
             ParseDateTest(2025, 1, null);
             ParseDateTest(2000, 2, null);
 
-            Date date;
-            Assert.IsFalse(Date.TryParse("2019-14", out date));
+            Assert.IsFalse(Date.TryParse("2019-14", out Date date));
             Assert.AreEqual(default, date);
             Assert.IsTrue(Date.TryParse("2025-12", out date));
             Assert.AreEqual(DateFormat.Month, date.Format);
@@ -55,8 +53,7 @@ namespace Millistream.Streaming.DataTypes.UnitTests
 
             Assert.IsFalse(Date.TryParse("10000", out _));
             Assert.IsFalse(Date.TryParse("0", out _));
-            Date date;
-            Assert.IsTrue(Date.TryParse("2020", out date));
+            Assert.IsTrue(Date.TryParse("2020", out Date date));
             Assert.AreEqual(DateFormat.Year, date.Format);
             Assert.AreEqual(2020, date.Year);
         }
@@ -64,8 +61,7 @@ namespace Millistream.Streaming.DataTypes.UnitTests
         [TestMethod]
         public void ParseQuarterTest()
         {
-            Date date;
-            Assert.IsTrue(Date.TryParse("2019-Q2", out date));
+            Assert.IsTrue(Date.TryParse("2019-Q2", out Date date));
             Assert.IsFalse(date.Day.HasValue);
             Assert.IsFalse(date.Month.HasValue);
             Assert.IsTrue(date.Quarter.HasValue);
@@ -88,8 +84,7 @@ namespace Millistream.Streaming.DataTypes.UnitTests
         [TestMethod]
         public void ParseTertiaryTest()
         {
-            Date date;
-            Assert.IsTrue(Date.TryParse("2020-T3", out date));
+            Assert.IsTrue(Date.TryParse("2020-T3", out Date date));
             Assert.IsFalse(date.Day.HasValue);
             Assert.IsFalse(date.Month.HasValue);
             Assert.IsFalse(date.Quarter.HasValue);
@@ -112,8 +107,7 @@ namespace Millistream.Streaming.DataTypes.UnitTests
         [TestMethod]
         public void ParseSemiAnnualTest()
         {
-            Date date;
-            Assert.IsTrue(Date.TryParse("2021-H2", out date));
+            Assert.IsTrue(Date.TryParse("2021-H2", out Date date));
             Assert.IsFalse(date.Day.HasValue);
             Assert.IsFalse(date.Month.HasValue);
             Assert.IsFalse(date.Quarter.HasValue);
@@ -137,8 +131,7 @@ namespace Millistream.Streaming.DataTypes.UnitTests
         [TestMethod]
         public void ParseWeekTest()
         {
-            Date date;
-            Assert.IsTrue(Date.TryParse("2020-W40", out date));
+            Assert.IsTrue(Date.TryParse("2020-W40", out Date date));
             Assert.IsFalse(date.Day.HasValue);
             Assert.IsFalse(date.Month.HasValue);
             Assert.IsFalse(date.Quarter.HasValue);
@@ -243,8 +236,7 @@ namespace Millistream.Streaming.DataTypes.UnitTests
                 Assert.AreEqual(s, date.ToString());
             }
 
-            Date date;
-            Assert.IsTrue(Date.TryParse(s, out date));
+            Assert.IsTrue(Date.TryParse(s, out Date date));
             Verify(date);
             Assert.IsTrue(Date.TryParse(s.GetBytes(), out date));
             Verify(date);

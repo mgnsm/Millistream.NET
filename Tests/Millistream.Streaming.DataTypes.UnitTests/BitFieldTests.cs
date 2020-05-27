@@ -36,8 +36,7 @@ namespace Millistream.Streaming.DataTypes.UnitTests
         [TestMethod]
         public void TryParseBitFieldTest()
         {
-            BitField bitField;
-            Assert.IsTrue(BitField.TryParse("1", out bitField));
+            Assert.IsTrue(BitField.TryParse("1", out BitField bitField));
             Assert.AreEqual(1ul, bitField);
             Assert.IsTrue(BitField.TryParse("1".GetBytes(), out bitField));
             Assert.AreEqual(1ul, bitField);

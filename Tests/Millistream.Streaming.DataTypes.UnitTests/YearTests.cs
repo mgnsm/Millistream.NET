@@ -9,8 +9,7 @@ namespace Millistream.Streaming.DataTypes.UnitTests
         [TestMethod]
         public void ParseYearTest()
         {
-            Year year;
-            Assert.IsTrue(Year.TryParse("2020", out year) && year == 2020 && year.ToString() == "2020");
+            Assert.IsTrue(Year.TryParse("2020", out Year year) && year == 2020 && year.ToString() == "2020");
             Assert.IsTrue(Year.TryParse("0001", out year) && year == 1 && year.ToString() == "0001");
             Assert.IsTrue(Year.TryParse("9999", out year) && year == 9999 && year.ToString() == "9999");
             Assert.IsFalse(Year.TryParse("0000", out year) && year == default);

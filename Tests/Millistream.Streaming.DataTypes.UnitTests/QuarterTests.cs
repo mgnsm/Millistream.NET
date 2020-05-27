@@ -16,8 +16,7 @@ namespace Millistream.Streaming.DataTypes.UnitTests
             ParseQuarterTest(2020, 4);
             ParseQuarterTest(9999, 4);
 
-            Quarter quarter;
-            Assert.IsFalse(Quarter.TryParse("0000-Q1", out quarter));
+            Assert.IsFalse(Quarter.TryParse("0000-Q1", out Quarter quarter));
             Assert.AreEqual(default, quarter);
             Assert.IsFalse(Quarter.TryParse("2001-Q5".GetBytes(), out _));
             Assert.IsFalse(Quarter.TryParse("Q4", out _));
@@ -96,10 +95,9 @@ namespace Millistream.Streaming.DataTypes.UnitTests
 
         private static void ParseQuarterTest(int year, int quarterNumber)
         {
-            string s = $"{year.ToString().PadLeft(4, '0')}-Q{quarterNumber.ToString()}";
+            string s = $"{year.ToString().PadLeft(4, '0')}-Q{quarterNumber}";
 
-            Quarter quarter;
-            Assert.IsTrue(Quarter.TryParse(s.GetBytes(), out quarter));
+            Assert.IsTrue(Quarter.TryParse(s.GetBytes(), out Quarter quarter));
             Assert.AreEqual(year, quarter.Year);
             Assert.AreEqual(quarterNumber, quarter.Number);
             Assert.AreEqual(s, quarter.ToString());
