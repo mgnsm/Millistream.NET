@@ -30,27 +30,25 @@ namespace Millistream.Streaming.UnitTests
                     => message = returnedMessage))
                 .Returns(1);
 
-            using (DataFeed dataFeed = new DataFeed(nativeImplementationMock.Object))
-            {
-                //The Connect method should return true whenever mdf_get_next_message returns 1 and sets message to MDF_M_LOGONGREETING.
-                Assert.IsTrue(dataFeed.Connect(Host, Username, Password));
+            using DataFeed dataFeed = new DataFeed(nativeImplementationMock.Object);
+            //The Connect method should return true whenever mdf_get_next_message returns 1 and sets message to MDF_M_LOGONGREETING.
+            Assert.IsTrue(dataFeed.Connect(Host, Username, Password));
 
-                //The Disconnect() method should be called if the Connect method is called again
-                Assert.IsTrue(dataFeed.Connect(Host, Username, Password));
-                nativeImplementationMock.Verify(x => x.mdf_disconnect(It.IsAny<IntPtr>()));
+            //The Disconnect() method should be called if the Connect method is called again
+            Assert.IsTrue(dataFeed.Connect(Host, Username, Password));
+            nativeImplementationMock.Verify(x => x.mdf_disconnect(It.IsAny<IntPtr>()));
 
-                returnedMessage = (int)MessageReference.MDF_M_LOGOFF;
-                //The Connect method should return false when the message is set to MDF_M_LOGOFF
-                Assert.IsFalse(dataFeed.Connect(Host, Username, Password));
+            returnedMessage = (int)MessageReference.MDF_M_LOGOFF;
+            //The Connect method should return false when the message is set to MDF_M_LOGOFF
+            Assert.IsFalse(dataFeed.Connect(Host, Username, Password));
 
-                //...and when mdf_connect returns anything else than 1
-                nativeImplementationMock.Setup(x => x.mdf_connect(It.IsAny<IntPtr>(), It.IsAny<string>())).Returns(-1);
-                Assert.IsFalse(dataFeed.Connect(Host, Username, Password));
-                //...and when mdf_consume returns -1
-                nativeImplementationMock.Setup(x => x.mdf_connect(It.IsAny<IntPtr>(), It.IsAny<string>())).Returns(1);
-                nativeImplementationMock.Setup(x => x.mdf_consume(It.IsAny<IntPtr>(), It.IsAny<int>())).Returns(-1);
-                Assert.IsFalse(dataFeed.Connect(Host, Username, Password));
-            }
+            //...and when mdf_connect returns anything else than 1
+            nativeImplementationMock.Setup(x => x.mdf_connect(It.IsAny<IntPtr>(), It.IsAny<string>())).Returns(-1);
+            Assert.IsFalse(dataFeed.Connect(Host, Username, Password));
+            //...and when mdf_consume returns -1
+            nativeImplementationMock.Setup(x => x.mdf_connect(It.IsAny<IntPtr>(), It.IsAny<string>())).Returns(1);
+            nativeImplementationMock.Setup(x => x.mdf_consume(It.IsAny<IntPtr>(), It.IsAny<int>())).Returns(-1);
+            Assert.IsFalse(dataFeed.Connect(Host, Username, Password));
         }
 
         [TestMethod]
@@ -100,46 +98,44 @@ namespace Millistream.Streaming.UnitTests
                 .Setup(x => x.mdf_message_add_numeric(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<string>()))
                 .Returns<IntPtr, uint, string>(mdf_message_add_numeric);
 
-            using (DataFeed dataFeed = new DataFeed(nativeImplementationMock.Object))
+            using DataFeed dataFeed = new DataFeed(nativeImplementationMock.Object);
+            if (!dataFeed.Connect(Host, Username, Password))
+                Assert.Inconclusive($"The {nameof(DataFeed.Connect)} method returned false.");
+
+            int mdf_message_add(IntPtr message, ulong instrument_reference, int message_reference)
             {
-                if (!dataFeed.Connect(Host, Username, Password))
-                    Assert.Inconclusive($"The {nameof(DataFeed.Connect)} method returned false.");
-
-                int mdf_message_add(IntPtr message, ulong instrument_reference, int message_reference)
-                {
-                    Assert.AreEqual(0UL, instrument_reference);
-                    Assert.AreEqual((int)MessageReference.MDF_M_REQUEST, message_reference);
-                    methodCallCounter++;
-                    return default;
-                }
-                nativeImplementationMock
-                    .Setup(x => x.mdf_message_add(It.IsAny<IntPtr>(), It.IsAny<ulong>(), It.IsAny<int>()))
-                    .Returns<IntPtr, ulong, int>(mdf_message_add);
-
-                SubscribeMessage subscribeMessage = new SubscribeMessage(requestType, requestClasses);
-                dataFeed.Request(subscribeMessage);
-                //assert that the expected methods of the INativeImplementation were actually called
-                Assert.AreEqual(3, methodCallCounter);
-                //subscribe to some instruments
-                subscribeMessage.InstrumentReferences = instrumentReferences;
-                dataFeed.Request(subscribeMessage);
-                Assert.AreEqual(7, methodCallCounter);
-
-                //unsubcribe and assert that the MDF_M_UNSUBSCRIBE message reference was passed to the mdf_message_add method
-                int mdf_message_add2(IntPtr message, ulong instrument_reference, int message_reference)
-                {
-                    Assert.AreEqual(0UL, instrument_reference);
-                    Assert.AreEqual((int)MessageReference.MDF_M_UNSUBSCRIBE, message_reference);
-                    methodCallCounter++;
-                    return default;
-                }
-                nativeImplementationMock
-                    .Setup(x => x.mdf_message_add(It.IsAny<IntPtr>(), It.IsAny<ulong>(), It.IsAny<int>()))
-                    .Returns<IntPtr, ulong, int>(mdf_message_add2);
-
-                dataFeed.Request(new UnsubscribeMessage(requestClasses));
-                Assert.AreEqual(9, methodCallCounter);
+                Assert.AreEqual(0UL, instrument_reference);
+                Assert.AreEqual((int)MessageReference.MDF_M_REQUEST, message_reference);
+                methodCallCounter++;
+                return default;
             }
+            nativeImplementationMock
+                .Setup(x => x.mdf_message_add(It.IsAny<IntPtr>(), It.IsAny<ulong>(), It.IsAny<int>()))
+                .Returns<IntPtr, ulong, int>(mdf_message_add);
+
+            SubscribeMessage subscribeMessage = new SubscribeMessage(requestType, requestClasses);
+            dataFeed.Request(subscribeMessage);
+            //assert that the expected methods of the INativeImplementation were actually called
+            Assert.AreEqual(3, methodCallCounter);
+            //subscribe to some instruments
+            subscribeMessage.InstrumentReferences = instrumentReferences;
+            dataFeed.Request(subscribeMessage);
+            Assert.AreEqual(7, methodCallCounter);
+
+            //unsubcribe and assert that the MDF_M_UNSUBSCRIBE message reference was passed to the mdf_message_add method
+            int mdf_message_add2(IntPtr message, ulong instrument_reference, int message_reference)
+            {
+                Assert.AreEqual(0UL, instrument_reference);
+                Assert.AreEqual((int)MessageReference.MDF_M_UNSUBSCRIBE, message_reference);
+                methodCallCounter++;
+                return default;
+            }
+            nativeImplementationMock
+                .Setup(x => x.mdf_message_add(It.IsAny<IntPtr>(), It.IsAny<ulong>(), It.IsAny<int>()))
+                .Returns<IntPtr, ulong, int>(mdf_message_add2);
+
+            dataFeed.Request(new UnsubscribeMessage(requestClasses));
+            Assert.AreEqual(9, methodCallCounter);
         }
 
         [TestMethod]
@@ -149,16 +145,16 @@ namespace Millistream.Streaming.UnitTests
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ToSmallConnectionTimeoutTest()
         {
-            using (DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object))
-                dataFeed.ConnectionTimeout = DataFeed.MinConnectionTimeout - 1;
+            using DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object);
+            dataFeed.ConnectionTimeout = DataFeed.MinConnectionTimeout - 1;
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ToLargeConnectionTimeoutTest()
         {
-            using (DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object))
-                dataFeed.ConnectionTimeout = DataFeed.MaxConnectionTimeout + 1;
+            using DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object);
+            dataFeed.ConnectionTimeout = DataFeed.MaxConnectionTimeout + 1;
         }
 
         [TestMethod]
@@ -170,8 +166,8 @@ namespace Millistream.Streaming.UnitTests
                 .Setup(x => x.mdf_get_property(It.IsAny<IntPtr>(), MDF_OPTION.MDF_OPT_ERROR, ref It.Ref<IntPtr>.IsAny))
                 .Callback(new mdf_get_property_callback((IntPtr handler, MDF_OPTION option_, ref IntPtr value) => value = (IntPtr)ErrorCode));
 
-            using (DataFeed dataFeed = new DataFeed(nativeImplementationMock.Object))
-                Assert.AreEqual(ErrorCode, dataFeed.ErrorCode);
+            using DataFeed dataFeed = new DataFeed(nativeImplementationMock.Object);
+            Assert.AreEqual(ErrorCode, dataFeed.ErrorCode);
         }
 
         [TestMethod]
@@ -181,16 +177,16 @@ namespace Millistream.Streaming.UnitTests
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ToSmallHeartbeatIntervalTest()
         {
-            using (DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object))
-                dataFeed.HeartbeatInterval = DataFeed.MinHeartbeatInterval - 1;
+            using DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object);
+            dataFeed.HeartbeatInterval = DataFeed.MinHeartbeatInterval - 1;
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ToLargeHeartbeatIntervalTest()
         {
-            using (DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object))
-                dataFeed.HeartbeatInterval = DataFeed.MaxHeartbeatInterval + 1;
+            using DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object);
+            dataFeed.HeartbeatInterval = DataFeed.MaxHeartbeatInterval + 1;
         }
 
         [TestMethod]
@@ -200,16 +196,16 @@ namespace Millistream.Streaming.UnitTests
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ToSmallMaximumMissedHeartbeatsTest()
         {
-            using (DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object))
-                dataFeed.MaximumMissedHeartbeats = DataFeed.MinMissedHeartbeats - 1;
+            using DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object);
+            dataFeed.MaximumMissedHeartbeats = DataFeed.MinMissedHeartbeats - 1;
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ToLargeMaximumMissedHeartbeatsTest()
         {
-            using (DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object))
-                dataFeed.MaximumMissedHeartbeats = DataFeed.MaxMissedHeartbeats + 1;
+            using DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object);
+            dataFeed.MaximumMissedHeartbeats = DataFeed.MaxMissedHeartbeats + 1;
         }
 
         [TestMethod]
@@ -225,17 +221,15 @@ namespace Millistream.Streaming.UnitTests
                 .Setup(x => x.mdf_set_property(It.IsAny<IntPtr>(), MDF_OPTION.MDF_OPT_TCP_NODELAY, It.IsAny<IntPtr>()))
                 .Verifiable();
 
-            using (DataFeed dataFeed = new DataFeed(nativeImplementationMock.Object))
-            {
-                //assert that the expected values are returned from the getter
-                Assert.AreEqual(true, dataFeed.NoDelay);
-                returnValue = new IntPtr(0);
-                Assert.AreEqual(false, dataFeed.NoDelay);
-                //set the property
-                dataFeed.NoDelay = true;
-                //verify that the setter was invoked
-                nativeImplementationMock.Verify();
-            }
+            using DataFeed dataFeed = new DataFeed(nativeImplementationMock.Object);
+            //assert that the expected values are returned from the getter
+            Assert.AreEqual(true, dataFeed.NoDelay);
+            returnValue = new IntPtr(0);
+            Assert.AreEqual(false, dataFeed.NoDelay);
+            //set the property
+            dataFeed.NoDelay = true;
+            //verify that the setter was invoked
+            nativeImplementationMock.Verify();
         }
 
         [TestMethod]
@@ -253,16 +247,16 @@ namespace Millistream.Streaming.UnitTests
                 .Setup(x => x.mdf_get_property(It.IsAny<IntPtr>(), MDF_OPTION.MDF_OPT_TIME_DIFFERENCE, ref It.Ref<IntPtr>.IsAny))
                 .Callback(new mdf_get_property_callback((IntPtr handler, MDF_OPTION option, ref IntPtr value) => value = (IntPtr)Difference));
 
-            using (DataFeed dataFeed = new DataFeed(nativeImplementationMock.Object))
-                Assert.AreEqual(Difference, dataFeed.TimeDifference);
+            using DataFeed dataFeed = new DataFeed(nativeImplementationMock.Object);
+            Assert.AreEqual(Difference, dataFeed.TimeDifference);
         }
 
         [TestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
         public void RequestBeforeConnectTest()
         {
-            using (DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object))
-                dataFeed.Request(new SubscribeMessage(RequestType.MDF_RT_FULL, new RequestClass[1] { RequestClass.MDF_RC_BASICDATA }));
+            using DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object);
+            dataFeed.Request(new SubscribeMessage(RequestType.MDF_RT_FULL, new RequestClass[1] { RequestClass.MDF_RC_BASICDATA }));
         }
 
         [TestMethod]
@@ -453,15 +447,13 @@ namespace Millistream.Streaming.UnitTests
                 .Setup(x => x.mdf_set_property(It.IsAny<IntPtr>(), option, It.IsAny<IntPtr>()))
                 .Verifiable();
 
-            using (DataFeed dataFeed = new DataFeed(nativeImplementationMock.Object))
-            {
-                //assert that the expected value is returned from the getter
-                Assert.AreEqual(Value, getter(dataFeed));
-                //set the property
-                setter(dataFeed);
-                //assert that the setter was invoked
-                nativeImplementationMock.Verify();
-            }
+            using DataFeed dataFeed = new DataFeed(nativeImplementationMock.Object);
+            //assert that the expected value is returned from the getter
+            Assert.AreEqual(Value, getter(dataFeed));
+            //set the property
+            setter(dataFeed);
+            //assert that the setter was invoked
+            nativeImplementationMock.Verify();
         }
 
         private void GetUInt64PropertyTest(MDF_OPTION option, Func<DataFeed, ulong> getter)
@@ -473,8 +465,8 @@ namespace Millistream.Streaming.UnitTests
                 .Callback(new mdf_get_property_callback((IntPtr handler, MDF_OPTION option_, ref IntPtr value) => value = (IntPtr)Bytes));
 
             //assert that the property returns the correct value
-            using (DataFeed dataFeed = new DataFeed(nativeImplementationMock.Object))
-                Assert.AreEqual(Bytes, getter(dataFeed));
+            using DataFeed dataFeed = new DataFeed(nativeImplementationMock.Object);
+            Assert.AreEqual(Bytes, getter(dataFeed));
         }
     }
 }
