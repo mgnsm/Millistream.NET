@@ -145,16 +145,20 @@ namespace Millistream.Streaming.UnitTests
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ToSmallConnectionTimeoutTest()
         {
-            using DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object);
-            dataFeed.ConnectionTimeout = DataFeed.MinConnectionTimeout - 1;
+            using DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object)
+            {
+                ConnectionTimeout = DataFeed.MinConnectionTimeout - 1
+            };
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ToLargeConnectionTimeoutTest()
         {
-            using DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object);
-            dataFeed.ConnectionTimeout = DataFeed.MaxConnectionTimeout + 1;
+            using DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object)
+            {
+                ConnectionTimeout = DataFeed.MaxConnectionTimeout + 1
+            };
         }
 
         [TestMethod]
@@ -177,16 +181,20 @@ namespace Millistream.Streaming.UnitTests
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ToSmallHeartbeatIntervalTest()
         {
-            using DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object);
-            dataFeed.HeartbeatInterval = DataFeed.MinHeartbeatInterval - 1;
+            using DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object)
+            {
+                HeartbeatInterval = DataFeed.MinHeartbeatInterval - 1
+            };
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ToLargeHeartbeatIntervalTest()
         {
-            using DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object);
-            dataFeed.HeartbeatInterval = DataFeed.MaxHeartbeatInterval + 1;
+            using DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object)
+            {
+                HeartbeatInterval = DataFeed.MaxHeartbeatInterval + 1
+            };
         }
 
         [TestMethod]
@@ -196,16 +204,20 @@ namespace Millistream.Streaming.UnitTests
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ToSmallMaximumMissedHeartbeatsTest()
         {
-            using DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object);
-            dataFeed.MaximumMissedHeartbeats = DataFeed.MinMissedHeartbeats - 1;
+            using DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object)
+            {
+                MaximumMissedHeartbeats = DataFeed.MinMissedHeartbeats - 1
+            };
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ToLargeMaximumMissedHeartbeatsTest()
         {
-            using DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object);
-            dataFeed.MaximumMissedHeartbeats = DataFeed.MaxMissedHeartbeats + 1;
+            using DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object)
+            {
+                MaximumMissedHeartbeats = DataFeed.MaxMissedHeartbeats + 1
+            };
         }
 
         [TestMethod]
