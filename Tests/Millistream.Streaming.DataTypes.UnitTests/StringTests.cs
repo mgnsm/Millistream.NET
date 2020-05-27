@@ -87,7 +87,7 @@ namespace Millistream.Streaming.DataTypes.UnitTests
         {
             String @string = new String("value");
             Assert.AreEqual('a', @string[1]);
-            Assert.AreEqual('e', @string[@string.Length - 1]);
+            Assert.AreEqual('e', @string[^1]);
         }
 
         [TestMethod]
