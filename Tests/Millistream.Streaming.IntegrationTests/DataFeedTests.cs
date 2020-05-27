@@ -96,8 +96,7 @@ namespace Millistream.Streaming.IntegrationTests
 
             dataFeed.Data.Subscribe(new ResponseMessageObserver(OnNext, null, null));
 
-            Assert.IsTrue(dataFeed.Connect(GetTestRunParameter("host"), GetTestRunParameter("username"), GetTestRunParameter("password")),
-                "Connect failed.");
+            Connect(dataFeed);
 
             //subscribe to basic data and quotes for instrument 772 (ERIC B)
             dataFeed.Request(new SubscribeMessage(RequestType.MDF_RT_FULL, requestClasses)
@@ -116,6 +115,84 @@ namespace Millistream.Streaming.IntegrationTests
             dataFeed.Request(new UnsubscribeMessage(requestClasses) { RequestId = RequestId });
             Assert.IsTrue(manualResetEvent.WaitOne(s_waitTimeout));
         }
+
+        [TestMethod]
+        public void WildcardSubscriptionsTest()
+        {
+            const string RequestId = "rid2";
+            using DataFeed dataFeed = new DataFeed();
+            using AutoResetEvent autoResetEvent = new AutoResetEvent(false);
+            dataFeed.ConsumeTimeout = 120;
+
+            Dictionary<MessageReference, int> receivedMessageTypes = new Dictionary<MessageReference, int>();
+            Dictionary<ulong, int> receivedInstrumentReferences = new Dictionary<ulong, int>();
+            void OnNext(ResponseMessage message)
+            {
+                Assert.IsNotNull(message);
+                switch (message.MessageReference)
+                {
+                    case MessageReference.MDF_M_REQUESTFINISHED:
+                        if (message.Fields.TryGetValue(Field.MDF_F_REQUESTID, out ReadOnlyMemory<byte> requestId)
+                            && Encoding.UTF8.GetString(requestId.Span) == RequestId)
+                            autoResetEvent.Set(); //signal when the request has been completed in full
+                        break;
+                    default:
+                        static void IncreaseCount<T>(Dictionary<T, int> dictionary, T key)
+                        {
+                            dictionary.TryGetValue(key, out int currentCount);
+                            dictionary[key] = currentCount++;
+                        }
+                        IncreaseCount(receivedMessageTypes, message.MessageReference);
+                        IncreaseCount(receivedInstrumentReferences, message.InstrumentReference);
+                        break;
+                }
+                dataFeed.Recycle(message);
+            }
+
+            void UnsubscribeAndClear(RequestClass[] requestClasses)
+            {
+                dataFeed.Request(new UnsubscribeMessage(requestClasses) { RequestId = RequestId });
+                Assert.IsTrue(autoResetEvent.WaitOne(s_waitTimeout));
+                receivedMessageTypes.Clear();
+                receivedInstrumentReferences.Clear();
+                Assert.AreEqual(0, receivedMessageTypes.Count);
+                Assert.AreEqual(0, receivedInstrumentReferences.Count);
+            }
+
+            dataFeed.Data.Subscribe(new ResponseMessageObserver(OnNext, null, null));
+
+            Connect(dataFeed);
+
+            //subscribe to a specific request class (MDF_RC_BASICDATA) for all instruments
+            RequestClass[] requestClasses = new RequestClass[1] { RequestClass.MDF_RC_BASICDATA };
+            dataFeed.Request(new SubscribeMessage(RequestType.MDF_RT_IMAGE, requestClasses) { RequestId = RequestId });
+            autoResetEvent.WaitOne(s_waitTimeout);
+            Assert.IsTrue(receivedMessageTypes.Count == 1);
+            Assert.IsTrue(receivedInstrumentReferences.Count > 1);
+            UnsubscribeAndClear(requestClasses);
+
+            //subscribe to all messages for a particular instrument
+            dataFeed.Request(new SubscribeMessage(RequestType.MDF_RT_IMAGE)
+            { 
+                RequestId = RequestId,
+                InstrumentReferences = new ulong[1] { 772 }
+            });
+            autoResetEvent.WaitOne(s_waitTimeout);
+            Assert.IsTrue(receivedMessageTypes.Count > 1);
+            Assert.IsTrue(receivedInstrumentReferences.Count == 1);
+            UnsubscribeAndClear(null);
+
+            //subscribe to all request classes and all instruments that the account is entitled for
+            dataFeed.Request(new SubscribeMessage(RequestType.MDF_RT_IMAGE) { RequestId = RequestId });
+            autoResetEvent.WaitOne(s_waitTimeout);
+            Assert.IsTrue(receivedMessageTypes.Count > 1);
+            Assert.IsTrue(receivedInstrumentReferences.Count > 1);
+            UnsubscribeAndClear(null);
+        }
+
+        private void Connect(IDataFeed dataFeed) =>
+            Assert.IsTrue(dataFeed.Connect(GetTestRunParameter("host"), GetTestRunParameter("username"), GetTestRunParameter("password")),
+                "Connect failed.");
 
         private string GetTestRunParameter(string parameterName)
         {

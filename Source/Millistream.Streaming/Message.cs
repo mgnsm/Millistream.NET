@@ -32,8 +32,9 @@ namespace Millistream.Streaming
             return _nativeImplementation.mdf_message_add_list(_messageHandle, (uint)tag, string.Join(ListSeparator, instrumentReferences)) == 1;
         }
 
-        public bool AddRequestClasses(RequestClass[] requestClasses) =>
-            (requestClasses == null || requestClasses.Length == 0) ? false : _nativeImplementation.mdf_message_add_list(_messageHandle, (uint)Field.MDF_F_REQUESTCLASS, string.Join(ListSeparator, requestClasses.Select(x => ((uint)x).ToString()))) == 1;
+        public bool AddRequestClasses(RequestClass[] requestClasses) => (requestClasses == null || requestClasses.Length == 0) ?
+            AddString(Field.MDF_F_REQUESTCLASS, "*") :
+                _nativeImplementation.mdf_message_add_list(_messageHandle, (uint)Field.MDF_F_REQUESTCLASS, string.Join(ListSeparator, requestClasses.Select(x => ((uint)x).ToString()))) == 1;
 
         public bool AddInt64(Field tag, long value, sbyte decimals)
         {

@@ -13,16 +13,23 @@ namespace Millistream.Streaming
         /// <summary>
         /// Creates an instance of the <see cref="UnsubscribeMessage"/> class.
         /// </summary>
-        /// <param name="requestClasses">An enumerable sequence of the request classes to be unsubscribed from.</param>
+        public UnsubscribeMessage() 
+            : base(MessageReference.MDF_M_UNSUBSCRIBE) 
+        { }
+
+        /// <summary>
+        /// Creates an instance of the <see cref="UnsubscribeMessage"/> class.
+        /// </summary>
+        /// <param name="requestClasses">An optional enumerable sequence of the request classes to be unsubscribed from.</param>
         public UnsubscribeMessage(IEnumerable<RequestClass> requestClasses) : base(MessageReference.MDF_M_UNSUBSCRIBE) =>
-            RequestClasses = requestClasses ?? throw new ArgumentNullException(nameof(requestClasses));
+            RequestClasses = requestClasses;
         #endregion
 
         #region Properties
         /// <summary>
-        ///  An enumerable sequence of the request classes to be requested.
+        ///  An enumerable sequence of the request classes to be requested. If the sequence is empty, the request will be for all request classes available.
         /// </summary>
-        public IEnumerable<RequestClass> RequestClasses { get; }
+        public IEnumerable<RequestClass> RequestClasses { get; set; }
 
         /// <summary>
         /// The optional id of the request.
@@ -39,7 +46,7 @@ namespace Millistream.Streaming
         internal override void AddFields(IMessage message)
         {
             message.Add(0, MessageReference);
-            message.AddRequestClasses(RequestClasses.ToArray());
+            message.AddRequestClasses(RequestClasses?.ToArray());
             if (!string.IsNullOrEmpty(RequestId))
                 message.AddString(Field.MDF_F_REQUESTID, RequestId);
             if (InstrumentReferences != null && InstrumentReferences.Any())

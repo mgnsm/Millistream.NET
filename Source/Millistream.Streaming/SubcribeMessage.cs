@@ -14,20 +14,27 @@ namespace Millistream.Streaming
         /// Creates an instance of the <see cref="SubscribeMessage"/> class.
         /// </summary>
         /// <param name="requestType">The type of request to be sent.</param>
-        /// <param name="requestClasses">An enumerable sequence of the request classes to be requested.</param>
+        public SubscribeMessage(RequestType requestType)
+            : this(requestType, default) { }
+        
+        /// <summary>
+        /// Creates an instance of the <see cref="SubscribeMessage"/> class.
+        /// </summary>
+        /// <param name="requestType">The type of request to be sent.</param>
+        /// <param name="requestClasses">An optional enumerable sequence of the request classes to be requested.</param>
         public SubscribeMessage(RequestType requestType, IEnumerable<RequestClass> requestClasses)
             : base(MessageReference.MDF_M_REQUEST)
         {
-            RequestClasses = requestClasses ?? throw new ArgumentNullException(nameof(requestClasses));
             RequestType = requestType;
+            RequestClasses = requestClasses;
         }
         #endregion
 
         #region Properties
         /// <summary>
-        ///  An enumerable sequence of the request classes to be requested.
+        ///  An enumerable sequence of the request classes to be requested. If the sequence is empty, the request will be for all request classes available. 
         /// </summary>
-        public IEnumerable<RequestClass> RequestClasses { get; }
+        public IEnumerable<RequestClass> RequestClasses { get; set; }
 
         /// <summary>
         /// The type of request to be sent.
@@ -57,7 +64,7 @@ namespace Millistream.Streaming
         internal override void AddFields(IMessage message)
         {
             message.Add(0, MessageReference);
-            message.AddRequestClasses(RequestClasses.ToArray());
+            message.AddRequestClasses(RequestClasses?.ToArray());
             message.AddUInt32(Field.MDF_F_REQUESTTYPE, (uint)RequestType);
             if (!string.IsNullOrEmpty(RequestId))
                 message.AddString(Field.MDF_F_REQUESTID, RequestId);
