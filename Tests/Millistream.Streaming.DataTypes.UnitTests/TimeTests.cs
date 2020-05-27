@@ -16,7 +16,7 @@ namespace Millistream.Streaming.DataTypes.UnitTests
 
             Time time;
             string timeValueToParse = "12:12:13.000000001";
-            Assert.IsTrue(Time.TryParse(timeValueToParse, out time));
+            Assert.IsTrue(Time.TryParse(timeValueToParse, out _));
             Assert.IsTrue(Time.TryParse(timeValueToParse.GetBytes(), out time));
             Assert.AreEqual(12, time.Hours);
             Assert.AreEqual(12, time.Minutes);
@@ -26,7 +26,7 @@ namespace Millistream.Streaming.DataTypes.UnitTests
             Assert.AreEqual(timeValueToParse, time.ToString());
 
             timeValueToParse = "12:12:13.123456789";
-            Assert.IsTrue(Time.TryParse(timeValueToParse, out time));
+            Assert.IsTrue(Time.TryParse(timeValueToParse, out _));
             Assert.IsTrue(Time.TryParse(timeValueToParse.GetBytes(), out time));
             Assert.AreEqual(12, time.Hours);
             Assert.AreEqual(12, time.Minutes);

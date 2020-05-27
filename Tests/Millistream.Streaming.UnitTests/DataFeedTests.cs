@@ -340,7 +340,7 @@ namespace Millistream.Streaming.UnitTests
         {
             DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object);
             dataFeed.Dispose();
-            int connectionTimeout = dataFeed.ConnectionTimeout;
+            _ = dataFeed.ConnectionTimeout;
         }
 
         [TestMethod]
@@ -358,7 +358,7 @@ namespace Millistream.Streaming.UnitTests
         {
             DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object);
             dataFeed.Dispose();
-            Error errorCode = dataFeed.ErrorCode;
+            _ = dataFeed.ErrorCode;
         }
 
         [TestMethod]
@@ -367,7 +367,7 @@ namespace Millistream.Streaming.UnitTests
         {
             DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object);
             dataFeed.Dispose();
-            int heartbeatInterval = dataFeed.HeartbeatInterval;
+            _ = dataFeed.HeartbeatInterval;
         }
 
         [TestMethod]
@@ -385,7 +385,7 @@ namespace Millistream.Streaming.UnitTests
         {
             DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object);
             dataFeed.Dispose();
-            int maximumMissedHeartbeats = dataFeed.MaximumMissedHeartbeats;
+            _ = dataFeed.MaximumMissedHeartbeats;
         }
 
         [TestMethod]
@@ -403,7 +403,7 @@ namespace Millistream.Streaming.UnitTests
         {
             DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object);
             dataFeed.Dispose();
-            bool noDelay = dataFeed.NoDelay;
+            _ = dataFeed.NoDelay;
         }
 
         [TestMethod]
@@ -421,7 +421,7 @@ namespace Millistream.Streaming.UnitTests
         {
             DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object);
             dataFeed.Dispose();
-            ulong receivedBytes = dataFeed.ReceivedBytes;
+            _ = dataFeed.ReceivedBytes;
         }
 
         [TestMethod]
@@ -430,7 +430,7 @@ namespace Millistream.Streaming.UnitTests
         {
             DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object);
             dataFeed.Dispose();
-            ulong sentBytes = dataFeed.SentBytes;
+            _ = dataFeed.SentBytes;
         }
 
         [TestMethod]
@@ -439,7 +439,7 @@ namespace Millistream.Streaming.UnitTests
         {
             DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object);
             dataFeed.Dispose();
-            int timeDifference = dataFeed.TimeDifference;
+            _ = dataFeed.TimeDifference;
         }
 
         private void GetAndSetPropertyTest(MDF_OPTION option, Func<DataFeed, int> getter, Action<DataFeed> setter)
