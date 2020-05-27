@@ -131,7 +131,7 @@ namespace Millistream.Streaming.DataTypes
                             time = new Time(hours, minutes, seconds);
                             return true;
                         default:
-                            if (value[8] == Dot && int.TryParse(value.Slice(9, value.Length - 9), out int fractionalSeconds))
+                            if (value[8] == Dot && int.TryParse(value[9..], out int fractionalSeconds))
                             {
                                 switch (value.Length)
                                 {

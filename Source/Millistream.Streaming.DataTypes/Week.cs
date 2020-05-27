@@ -69,7 +69,7 @@ namespace Millistream.Streaming.DataTypes
                 && value[4] == '-'
                 && value[5] == 'W'
                 && int.TryParse(value.Slice(0, 4), out int year)
-                && int.TryParse(value.Slice(6, value.Length - 6), out int weekNumber))
+                && int.TryParse(value[6..], out int weekNumber))
             {
                 try
                 {
