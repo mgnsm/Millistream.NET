@@ -124,6 +124,15 @@ namespace Millistream.Streaming.UnitTests
             nativeImplementationMock.Verify(x => x.mdf_message_add(It.IsAny<IntPtr>(), It.IsAny<ulong>(), It.IsAny<int>()));
             nativeImplementationMock.Invocations.Clear();
 
+            const int MaxInstrumentReferencesCount = 1_000_000;
+            subscribeMessage.InstrumentReferences = Enumerable.Range(1, MaxInstrumentReferencesCount + 1).Select(x => (ulong)x);
+            try
+            {
+                dataFeed.Request(subscribeMessage);
+                Assert.Fail($"More than {MaxInstrumentReferencesCount} instrument references unexpectedly accepted.");
+            }
+            catch (ArgumentException) { }
+
             //unsubcribe and assert that the MDF_M_UNSUBSCRIBE message reference was passed to the mdf_message_add method
             static int mdf_message_add2(IntPtr message, ulong instrument_reference, int message_reference)
             {
