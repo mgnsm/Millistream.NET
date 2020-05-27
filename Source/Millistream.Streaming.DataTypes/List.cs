@@ -33,21 +33,13 @@ namespace Millistream.Streaming.DataTypes
             _instrumentReferences = instrumentReferences ?? throw new ArgumentNullException(nameof(instrumentReferences));
             Prefix = prefix;
 
-            switch (prefix)
+            PrefixCharacter = prefix switch
             {
-                case ListPrefix.Add:
-                    PrefixCharacter = AddPrefix;
-                    break;
-                case ListPrefix.Remove:
-                    PrefixCharacter = RemovePrefix;
-                    break;
-                case ListPrefix.Replace:
-                    PrefixCharacter = ReplacePrefix;
-                    break;
-                default:
-                    PrefixCharacter = default;
-                    break;
-            }
+                ListPrefix.Add => AddPrefix,
+                ListPrefix.Remove => RemovePrefix,
+                ListPrefix.Replace => ReplacePrefix,
+                _ => default(char?),
+            };
 
             if (instrumentReferences is ICollection<InsRef> collection)
             {
