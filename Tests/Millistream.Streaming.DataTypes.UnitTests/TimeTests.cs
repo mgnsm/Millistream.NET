@@ -190,9 +190,9 @@ namespace Millistream.Streaming.DataTypes.UnitTests
             }
 
             const char PaddingChar = '0';
-            string AddHoursMinutesOrSeconds(int i) => i.ToString().PadLeft(2, PaddingChar);
-            string AddMilliseconds(int milliseconds) => $".{milliseconds.ToString().PadLeft(3, PaddingChar)}";
-            string AddNanoSeconds(int nanoseconds) => $".{nanoseconds.ToString().PadLeft(9, PaddingChar)}";
+            static string AddHoursMinutesOrSeconds(int i) => i.ToString().PadLeft(2, PaddingChar);
+            static string AddMilliseconds(int milliseconds) => $".{milliseconds.ToString().PadLeft(3, PaddingChar)}";
+            static string AddNanoSeconds(int nanoseconds) => $".{nanoseconds.ToString().PadLeft(9, PaddingChar)}";
 
             string s = $"{AddHoursMinutesOrSeconds(hours)}:{AddHoursMinutesOrSeconds(minutes)}:{AddHoursMinutesOrSeconds(seconds)}";
             if (milliseconds.HasValue)
