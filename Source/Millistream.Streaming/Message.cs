@@ -26,8 +26,8 @@ namespace Millistream.Streaming
         {
             if (instrumentReferences == null || instrumentReferences.Length == 0)
                 return false;
-            if (instrumentReferences.Length > 100_000_00)
-                throw new ArgumentException("There is a current soft limit of 100.000.000 instrument references per list.", nameof(instrumentReferences));
+            if (instrumentReferences.Length > 1_000_000)
+                throw new ArgumentException("There is a current soft limit of 1,000,000 instrument references per list.", nameof(instrumentReferences));
 
             return _nativeImplementation.mdf_message_add_list(_messageHandle, (uint)tag, string.Join(ListSeparator, instrumentReferences)) == 1;
         }
