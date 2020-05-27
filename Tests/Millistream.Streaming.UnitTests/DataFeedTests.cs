@@ -64,7 +64,6 @@ namespace Millistream.Streaming.UnitTests
                     => message = returnedMessage))
                 .Returns(1);
 
-            int methodCallCounter = 0;
             RequestClass[] requestClasses = new RequestClass[1] { RequestClass.MDF_RC_BASICDATA };
             ulong[] instrumentReferences = new ulong[3] { 1L, 2L, 3L };
             int mdf_message_add_list(IntPtr message, uint tag, string value)
@@ -79,7 +78,6 @@ namespace Millistream.Streaming.UnitTests
                         Assert.AreEqual(string.Join(Separator, instrumentReferences), value);
                         break;
                 }
-                methodCallCounter++;
                 return default;
             }
             nativeImplementationMock
@@ -91,7 +89,6 @@ namespace Millistream.Streaming.UnitTests
             {
                 Assert.AreEqual((uint)Field.MDF_F_REQUESTTYPE, tag);
                 Assert.AreEqual(((int)requestType).ToString(), value);
-                methodCallCounter++;
                 return default;
             }
             nativeImplementationMock
@@ -102,11 +99,10 @@ namespace Millistream.Streaming.UnitTests
             if (!dataFeed.Connect(Host, Username, Password))
                 Assert.Inconclusive($"The {nameof(DataFeed.Connect)} method returned false.");
 
-            int mdf_message_add(IntPtr message, ulong instrument_reference, int message_reference)
+            static int mdf_message_add(IntPtr message, ulong instrument_reference, int message_reference)
             {
                 Assert.AreEqual(0UL, instrument_reference);
                 Assert.AreEqual((int)MessageReference.MDF_M_REQUEST, message_reference);
-                methodCallCounter++;
                 return default;
             }
             nativeImplementationMock
@@ -116,18 +112,23 @@ namespace Millistream.Streaming.UnitTests
             SubscribeMessage subscribeMessage = new SubscribeMessage(requestType, requestClasses);
             dataFeed.Request(subscribeMessage);
             //assert that the expected methods of the INativeImplementation were actually called
-            Assert.AreEqual(3, methodCallCounter);
+            nativeImplementationMock.Verify(x => x.mdf_message_add_list(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<string>()));
+            nativeImplementationMock.Verify(x => x.mdf_message_add_numeric(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<string>()));
+            nativeImplementationMock.Verify(x => x.mdf_message_add(It.IsAny<IntPtr>(), It.IsAny<ulong>(), It.IsAny<int>()));
+            nativeImplementationMock.Invocations.Clear();
             //subscribe to some instruments
             subscribeMessage.InstrumentReferences = instrumentReferences;
             dataFeed.Request(subscribeMessage);
-            Assert.AreEqual(7, methodCallCounter);
+            nativeImplementationMock.Verify(x => x.mdf_message_add_list(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<string>()), Times.Exactly(2));
+            nativeImplementationMock.Verify(x => x.mdf_message_add_numeric(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<string>()));
+            nativeImplementationMock.Verify(x => x.mdf_message_add(It.IsAny<IntPtr>(), It.IsAny<ulong>(), It.IsAny<int>()));
+            nativeImplementationMock.Invocations.Clear();
 
             //unsubcribe and assert that the MDF_M_UNSUBSCRIBE message reference was passed to the mdf_message_add method
-            int mdf_message_add2(IntPtr message, ulong instrument_reference, int message_reference)
+            static int mdf_message_add2(IntPtr message, ulong instrument_reference, int message_reference)
             {
                 Assert.AreEqual(0UL, instrument_reference);
                 Assert.AreEqual((int)MessageReference.MDF_M_UNSUBSCRIBE, message_reference);
-                methodCallCounter++;
                 return default;
             }
             nativeImplementationMock
@@ -135,7 +136,8 @@ namespace Millistream.Streaming.UnitTests
                 .Returns<IntPtr, ulong, int>(mdf_message_add2);
 
             dataFeed.Request(new UnsubscribeMessage(requestClasses));
-            Assert.AreEqual(9, methodCallCounter);
+            nativeImplementationMock.Verify(x => x.mdf_message_add_list(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<string>()));
+            nativeImplementationMock.Verify(x => x.mdf_message_add(It.IsAny<IntPtr>(), It.IsAny<ulong>(), It.IsAny<int>()));
         }
 
         [TestMethod]
