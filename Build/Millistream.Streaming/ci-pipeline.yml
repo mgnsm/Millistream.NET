@@ -57,7 +57,7 @@ jobs:
   variables:
     major: 1
     minor: 1
-    patch: $[counter('v111', 1)]
+    patch: $[counter('v112', 3)]
   steps:
   - task: DotNetCoreCLI@2
     displayName: 'Restore NuGet Packages and Build Solution For All TargetFrameworks'
