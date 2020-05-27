@@ -13,4 +13,4 @@ steps:
     projects: |
      **/Millistream.Streaming.UnitTests.csproj
      **/Millistream.Streaming.IntegrationTests.csproj
-    arguments: '-c $(buildConfiguration) -f netcoreapp3.0'
+    arguments: '-c $(buildConfiguration) -f netcoreapp3.1'
