@@ -5,7 +5,7 @@ namespace ConsoleApp
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             const string Host = "HOST";
             const string Username = "YOUR_USERNAME";
