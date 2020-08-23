@@ -10,9 +10,17 @@ An unofficial .NET wrapper for Millistream's low-latency, high-throughput and hi
 ## Installation
 Millistream.NET is distributed via [NuGet](https://www.nuget.org/packages/Millistream.Streaming). The native and wrapped API can be downloaded from [Millistream's official website](https://packages.millistream.com/). Binaries are available for Linux, macOS and Windows. They come in both 32- and 64-bit versions and should work on both little- and big-endian systems. Please refer to [the official documentation](https://bit.ly/2LOYjkT) for more information about the wrapped API itself. The NuGet package does not include any native assemblies. You will have to download and install these separately.
  
-On Windows you download and run an [.exe from the FTP server](https://bit.ly/2N96qh2) that will install the native `libmdf` core library along pre-built binaries of [zlib](http://zlib.net) and [OpenSSL](http://openssl.org/) (`libmdf` links against these) to `%windir%\System32`.
- 
-On Linux, the native API and the dependent libraries are available through your distribution repository. Below is an example of how to install everything needed using the `apt-get` command line tool on Ubuntu.
+On **Windows** you download and run an [.exe](https://packages.millistream.com/Windows/libmdf-1.0.23.exe) that will install the native `libmdf` core library along pre-built binaries of [zlib](http://zlib.net) and [OpenSSL](http://openssl.org/) (`libmdf` links against these) to `%windir%\System32`. You can do this silently from a command prompt using Powershell:
+
+    powershell (new-object System.Net.WebClient).DownloadFile('https://packages.millistream.com/Windows/libmdf-1.0.23.exe', 'libmdf-1.0.23.exe')
+    .\libmdf-1.0.23.exe /S
+
+On **macOS** you download and install a `.pkg` file, for example in a Bash shell:
+
+    curl -O https://packages.millistream.com/macOS/libmdf-1.0.21.pkg 
+    sudo installer -pkg libmdf-1.0.21.pkg -target /
+
+On **Linux**, the native API and the dependent libraries are available through your distribution repository. Below is an example of how to install everything needed using the `apt-get` command-line tool on Ubuntu:
 
     sudo wget "https://packages.millistream.com/apt/sources.list.d/`lsb_release -cs`.list" -O /etc/apt/sources.list.d/millistream.list 
     wget -q "https://packages.millistream.com/D2FCCE35.gpg" -O- | sudo apt-key add - 
