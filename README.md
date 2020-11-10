@@ -4,12 +4,12 @@ An unofficial .NET wrapper for Millistream's low-latency, high-throughput and hi
 
 | Package | Build Status | NuGet  |
 | :------------ |-------------| -------------|
-| Millistream.Streaming | ![Build Status Badge](https://bit.ly/3eeOGKP) | [![NuGet Badge](https://img.shields.io/nuget/v/Millistream.Streaming.svg)](http://www.nuget.org/packages/Millistream.Streaming/) |
-| Millistream.Streaming.DataTypes | ![Build Status Badge](https://bit.ly/2yyIxds) | [![NuGet Badge](https://img.shields.io/nuget/v/Millistream.Streaming.DataTypes.svg)](http://www.nuget.org/packages/Millistream.Streaming.DataTypes/) |
+| Millistream.Streaming | [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/mgnsm/Millistream.NET/Millistream.Streaming?label=GitHub%20Actions&logo=GitHub)](https://github.com/mgnsm/Millistream.NET/actions?query=workflow%3AMillistream.Streaming) | [![NuGet Badge](https://img.shields.io/nuget/v/Millistream.Streaming.svg)](http://www.nuget.org/packages/Millistream.Streaming/) |
+| Millistream.Streaming.DataTypes | [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/mgnsm/Millistream.NET/Millistream.Streaming.DataTypes?label=GitHub%20Actions&logo=GitHub)](https://github.com/mgnsm/Millistream.NET/actions?query=workflow%3AMillistream.Streaming.DataTypes) | [![NuGet Badge](https://img.shields.io/nuget/v/Millistream.Streaming.DataTypes.svg)](http://www.nuget.org/packages/Millistream.Streaming.DataTypes/) |
 
 ## Installation
 Millistream.NET is distributed via [NuGet](https://www.nuget.org/packages/Millistream.Streaming). The native and wrapped API can be downloaded from [Millistream's official website](https://packages.millistream.com/). Binaries are available for Linux, macOS and Windows. They come in both 32- and 64-bit versions and should work on both little- and big-endian systems. Please refer to [the official documentation](https://bit.ly/2LOYjkT) for more information about the wrapped API itself. The NuGet package does not include any native assemblies. You will have to download and install these separately.
- 
+### Native Dependency
 On **Windows** you download and run an [.exe](https://packages.millistream.com/Windows/libmdf-1.0.23.exe) that will install the native `libmdf` core library along pre-built binaries of [zlib](http://zlib.net) and [OpenSSL](http://openssl.org/) (`libmdf` links against these) to `%windir%\System32`. You can do this silently from a command prompt using Powershell:
 
     powershell (new-object System.Net.WebClient).DownloadFile('https://packages.millistream.com/Windows/libmdf-1.0.23.exe', 'libmdf-1.0.23.exe')
@@ -29,7 +29,11 @@ On **Linux**, the native API and the dependent libraries are available through y
 
 Instructions on how to install the API on other supported distributions can be found on the [FTP server](https://bit.ly/2wD2omK). You may also want to take a look at the [YAML build pipeline](.github/workflows/millistream.streaming.yml) in this repository. It installs the native binaries and runs integration tests against them on macOS, Ubuntu and Windows using the cloud-hosted runners in GitHub Actions.
 ## Basic example
-Once you have installed the native `libmdf` library on your computer, you can then [install](https://docs.microsoft.com/en-us/nuget/consume-packages/ways-to-install-a-package) Millistream.NET into your project using NuGet and use it in your application. Below is a basic example of how to use the .NET API to connect to a server and subscribe to some streaming data:
+Once you have installed the native `libmdf` library on your computer, you can then [install](https://docs.microsoft.com/en-us/nuget/consume-packages/ways-to-install-a-package) Millistream.NET into your project using NuGet:
+
+    PM> Install-Package Millistream.Streaming
+
+Below is a basic example of how to use the .NET API to connect to a server and subscribe to some streaming data:
 
 ```cs
 using System;
