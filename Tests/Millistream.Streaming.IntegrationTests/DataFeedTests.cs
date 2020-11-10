@@ -9,8 +9,6 @@ namespace Millistream.Streaming.IntegrationTests
     [TestClass]
     public class DataFeedTests
     {
-        private static readonly TimeSpan s_waitTimeout = TimeSpan.FromSeconds(10);
-
         public TestContext TestContext { get; set; }
 
         [TestMethod]
@@ -36,7 +34,7 @@ namespace Millistream.Streaming.IntegrationTests
             //assert that the feed can be connected to
             Assert.IsTrue(dataFeed.Connect(host, username, password));
             //assert that a ConnectionStatusChanged is raised when the feed is connected 
-            manualResetEvent.WaitOne(s_waitTimeout);
+            manualResetEvent.WaitOne();
             Assert.IsTrue(isConnected);
 
             //connect again
@@ -55,20 +53,20 @@ namespace Millistream.Streaming.IntegrationTests
             dataFeed.ConnectionStatusChanged += DisconnectedHandler;
             dataFeed.Disconnect();
             //assert that a ConnectionStatusChanged is raised when the feed is disconnected
-            manualResetEvent.WaitOne(s_waitTimeout);
+            manualResetEvent.WaitOne();
             Assert.IsFalse(isConnected);
 
             //connect again
             dataFeed.ConnectionStatusChanged -= DisconnectedHandler;
             dataFeed.ConnectionStatusChanged += ConnectedHandler;
             Assert.IsTrue(dataFeed.Connect(host, username, password));
-            manualResetEvent.WaitOne(s_waitTimeout);
+            manualResetEvent.WaitOne();
             Assert.IsTrue(isConnected);
             //disconnect again
             dataFeed.ConnectionStatusChanged -= ConnectedHandler;
             dataFeed.ConnectionStatusChanged += DisconnectedHandler;
             dataFeed.Disconnect();
-            manualResetEvent.WaitOne(s_waitTimeout);
+            manualResetEvent.WaitOne();
             Assert.IsFalse(isConnected);
         }
 
@@ -105,7 +103,7 @@ namespace Millistream.Streaming.IntegrationTests
                 RequestId = RequestId
             });
 
-            manualResetEvent.WaitOne(s_waitTimeout);
+            manualResetEvent.WaitOne();
             //assert that some responses were received
             Assert.IsTrue(receivedResponseMessages.Count > 0);
             foreach (ResponseMessage receivedResponseMessage in receivedResponseMessages)
@@ -113,7 +111,7 @@ namespace Millistream.Streaming.IntegrationTests
 
             //unsubscribe
             dataFeed.Request(new UnsubscribeMessage(requestClasses) { RequestId = RequestId });
-            Assert.IsTrue(manualResetEvent.WaitOne(s_waitTimeout));
+            Assert.IsTrue(manualResetEvent.WaitOne());
         }
 
         [TestMethod]
@@ -152,7 +150,7 @@ namespace Millistream.Streaming.IntegrationTests
             void UnsubscribeAndClear(RequestClass[] requestClasses)
             {
                 dataFeed.Request(new UnsubscribeMessage(requestClasses) { RequestId = RequestId });
-                Assert.IsTrue(autoResetEvent.WaitOne(s_waitTimeout));
+                Assert.IsTrue(autoResetEvent.WaitOne());
                 receivedMessageTypes.Clear();
                 receivedInstrumentReferences.Clear();
                 Assert.AreEqual(0, receivedMessageTypes.Count);
@@ -166,7 +164,7 @@ namespace Millistream.Streaming.IntegrationTests
             //subscribe to a specific request class (MDF_RC_BASICDATA) for all instruments
             RequestClass[] requestClasses = new RequestClass[1] { RequestClass.MDF_RC_BASICDATA };
             dataFeed.Request(new SubscribeMessage(RequestType.MDF_RT_IMAGE, requestClasses) { RequestId = RequestId });
-            autoResetEvent.WaitOne(s_waitTimeout);
+            autoResetEvent.WaitOne();
             Assert.IsTrue(receivedMessageTypes.Count == 1);
             Assert.IsTrue(receivedInstrumentReferences.Count > 1);
             UnsubscribeAndClear(requestClasses);
@@ -177,14 +175,14 @@ namespace Millistream.Streaming.IntegrationTests
                 RequestId = RequestId,
                 InstrumentReferences = new ulong[1] { 772 }
             });
-            autoResetEvent.WaitOne(s_waitTimeout);
+            autoResetEvent.WaitOne();
             Assert.IsTrue(receivedMessageTypes.Count > 1);
             Assert.IsTrue(receivedInstrumentReferences.Count == 1);
             UnsubscribeAndClear(null);
 
             //subscribe to all request classes and all instruments that the account is entitled for
             dataFeed.Request(new SubscribeMessage(RequestType.MDF_RT_IMAGE) { RequestId = RequestId });
-            autoResetEvent.WaitOne(s_waitTimeout);
+            autoResetEvent.WaitOne();
             Assert.IsTrue(receivedMessageTypes.Count > 1);
             Assert.IsTrue(receivedInstrumentReferences.Count > 1);
             UnsubscribeAndClear(null);
