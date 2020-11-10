@@ -1,0 +1,56 @@
+name: Millistream.Streaming.DataTypes
+
+env:
+  major: 1
+  minor: 0
+  patch: 0
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+     - 'Source/Millistream.Streaming.DataTypes/**'
+  workflow_dispatch:
+
+jobs:
+  Build:
+    strategy:
+      matrix:
+        os: [macOS-latest, ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Setup dotnet
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.x
+
+    - name: Build
+      shell: bash
+      run: |
+        runNumber=$GITHUB_RUN_NUMBER
+        revision=$((runNumber-1))
+        version=$major.$minor.$revision
+        dotnet build Source/Millistream.Streaming.DataTypes/Millistream.Streaming.DataTypes.csproj -c Release -p:Version=$version
+        dotnet build Tests/Millistream.Streaming.DataTypes.UnitTests/Millistream.Streaming.DataTypes.UnitTests.csproj -c Release -p:Version=$version
+
+    - name: Test
+      run: |
+        dotnet test Tests/Millistream.Streaming.DataTypes.UnitTests/Millistream.Streaming.DataTypes.UnitTests.csproj -c Release --no-build --no-restore
+
+    - name: Pack
+      if: ${{ matrix.os == 'windows-latest' }}
+      shell: bash
+      run: |
+        dotnet pack Source/Millistream.Streaming.DataTypes/Millistream.Streaming.DataTypes.csproj -c Release /property:PackageVersion=$major.$minor.$patch --no-build --no-restore
+
+    - name: Upload Artifact
+      if: ${{ matrix.os == 'windows-latest' }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: Millistream.Streaming.Datatypes
+        path: 'Source/Millistream.Streaming.Datatypes/bin/Release/**/*.nupkg'
+        if-no-files-found: error

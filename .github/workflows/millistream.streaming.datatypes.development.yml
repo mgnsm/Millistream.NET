@@ -1,0 +1,45 @@
+name: Millistream.Streaming.DataTypes (development)
+
+on:
+  push:
+    branches:
+      - development
+    paths:
+     - 'Source/Millistream.Streaming.DataTypes/**'
+     - 'Tests/Millistream.Streaming.DataTypes.UnitTests/**'
+     - '.github/workflows/millistream.streaming.datatypes.yml'
+     - '.github/workflows/millistream.streaming.datatypes.development.yml'
+  pull_request:
+    branches:
+      - main
+      - development
+    paths:
+     - 'Source/Millistream.Streaming.DataTypes/**'
+     - 'Tests/Millistream.Streaming.DataTypes.UnitTests/**'
+     - '.github/workflows/millistream.streaming.datatypes.yml'
+     - '.github/workflows/millistream.streaming.datatypes.development.yml'
+  workflow_dispatch:
+
+jobs:
+  Build:
+    strategy:
+      matrix:
+        os: [macOS-latest, ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Setup dotnet
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.x
+
+    - name: Build
+      run: |
+        dotnet build Source/Millistream.Streaming.DataTypes/Millistream.Streaming.DataTypes.csproj -c Release
+        dotnet build Tests/Millistream.Streaming.DataTypes.UnitTests/Millistream.Streaming.DataTypes.UnitTests.csproj -c Release
+
+    - name: Test
+      run: |
+        dotnet test Tests/Millistream.Streaming.DataTypes.UnitTests/Millistream.Streaming.DataTypes.UnitTests.csproj -c Release --no-build --no-restore

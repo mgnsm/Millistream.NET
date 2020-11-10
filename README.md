@@ -27,7 +27,7 @@ On **Linux**, the native API and the dependent libraries are available through y
     sudo apt update
     sudo apt-get install libmdf
 
-Instructions on how to install the API on other supported distributions can be found on the [FTP server](https://bit.ly/2wD2omK). You may also want to take a look at the [YAML build pipeline](https://github.com/mgnsm/Millistream.NET/blob/master/Build/Millistream.Streaming/ci-pipeline.yml) in this repository. It installs the native binaries and runs integration tests against them on macOS, Ubuntu and Windows using the Microsoft-hosted agents in Azure Pipelines.
+Instructions on how to install the API on other supported distributions can be found on the [FTP server](https://bit.ly/2wD2omK). You may also want to take a look at the [YAML build pipeline](.github/workflows/millistream.streaming.yml) in this repository. It installs the native binaries and runs integration tests against them on macOS, Ubuntu and Windows using the cloud-hosted runners in GitHub Actions.
 ## Basic example
 Once you have installed the native `libmdf` library on your computer, you can then [install](https://docs.microsoft.com/en-us/nuget/consume-packages/ways-to-install-a-package) Millistream.NET into your project using NuGet and use it in your application. Below is a basic example of how to use the .NET API to connect to a server and subscribe to some streaming data:
 

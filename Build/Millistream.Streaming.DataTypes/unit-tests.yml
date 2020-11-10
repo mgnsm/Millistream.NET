@@ -1,7 +1,0 @@
-steps:
-- task: DotNetCoreCLI@2
-  displayName: 'Run Unit Tests'
-  inputs:
-    command: test
-    projects: 'Tests/Millistream.Streaming.DataTypes.UnitTests/Millistream.Streaming.DataTypes.UnitTests.csproj'
-    arguments: '-c $(buildConfiguration) --no-build --no-restore'

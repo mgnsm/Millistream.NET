@@ -1,0 +1,98 @@
+name: Millistream.Streaming (development)
+
+on:
+  push:
+    branches:
+      - development
+    paths:
+     - 'Source/Millistream.Streaming/**'
+     - 'Tests/Millistream.Streaming.UnitTests/**'
+     - 'Tests/Millistream.Streaming.IntegrationTests/**'
+     - '.github/workflows/millistream.streaming.yml'
+     - '.github/workflows/millistream.streaming.development.yml'
+  pull_request:
+    branches:
+      - main
+      - development
+    paths:
+     - 'Source/Millistream.Streaming/**'
+     - 'Tests/Millistream.Streaming.UnitTests/**'
+     - 'Tests/Millistream.Streaming.IntegrationTests/**'
+     - '.github/workflows/millistream.streaming.yml'
+     - '.github/workflows/millistream.streaming.development.yml'
+  workflow_dispatch:
+
+jobs:
+  Build:
+    strategy:
+      matrix:
+        os: [macOS-latest, ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Setup dotnet
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.x
+
+    - name: Build using .NET Standard
+      run: |
+        dotnet build Source/Millistream.Streaming/Millistream.Streaming.csproj -c Release -f netstandard1.2
+        dotnet build Tests/Millistream.Streaming.UnitTests/Millistream.Streaming.UnitTests.csproj -c Release -f netcoreapp3.1
+        dotnet build Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release -f netcoreapp3.1
+
+    - name: Build on Windows using .NET Framework
+      if: ${{ matrix.os == 'windows-latest' }}
+      shell: bash
+      run: |
+        dotnet build Source/Millistream.Streaming/Millistream.Streaming.csproj -c Release
+        dotnet build Tests/Millistream.Streaming.UnitTests/Millistream.Streaming.UnitTests.csproj -c Release
+        dotnet build Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release
+
+    - name: Run Unit Tests
+      run: |
+        dotnet test Tests/Millistream.Streaming.UnitTests/Millistream.Streaming.UnitTests.csproj -c Release --no-build --no-restore
+
+    - name: Download and Install libmdf on macOS
+      if: ${{ matrix.os == 'macOS-latest' }}
+      run: |
+        curl -O https://packages.millistream.com/macOS/libmdf-1.0.21.pkg 
+        sudo installer -pkg libmdf-1.0.21.pkg -target /
+
+    - name: Download and Install libmdf on Linux
+      if: ${{ matrix.os == 'ubuntu-latest' }}
+      run: |
+        sudo wget "https://packages.millistream.com/apt/sources.list.d/`lsb_release -cs`.list" -O /etc/apt/sources.list.d/millistream.list 
+        wget -q "https://packages.millistream.com/D2FCCE35.gpg" -O- | sudo apt-key add - 
+        sudo apt update
+        sudo apt-get install libmdf
+
+    - name: Download and Install libmdf on Windows
+      if: ${{ matrix.os == 'windows-latest' }}
+      shell: powershell
+      run: |
+        (new-object System.Net.WebClient).DownloadFile('https://packages.millistream.com/Windows/libmdf-1.0.23.exe','libmdf-1.0.23.exe')
+        .\libmdf-1.0.23.exe /S
+
+    - name: Set Credentials
+      shell: pwsh
+      env:
+        HOSTNAME: ${{ secrets.HOSTNAME }}
+        USERNAME: ${{ secrets.USERNAME }}
+        PASSWORD: ${{ secrets.PASSWORD }}
+      run: |
+        [xml]$doc = Get-Content Tests/Millistream.Streaming.IntegrationTests/TestSettings.runsettings
+        $doc.RunSettings.TestRunParameters.ChildNodes.Item(0).value = "$env:HOSTNAME"
+        $doc.RunSettings.TestRunParameters.ChildNodes.Item(1).value = "$env:USERNAME"
+        $doc.RunSettings.TestRunParameters.ChildNodes.Item(2).value = "$env:PASSWORD"
+        $doc.Save("UpdatedTestSettings.runsettings")
+
+    - name: Run Integration Tests
+      run: |
+        dotnet test Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release --no-build --no-restore -s UpdatedTestSettings.runsettings
+
+    - name: Remove the .runsettings file
+      shell: pwsh
+      run: Remove-Item UpdatedTestSettings.runsettings
