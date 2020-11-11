@@ -30,23 +30,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Millistream.Streaming.DataT
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Millistream.Streaming.DataTypes.UnitTests", "Tests\Millistream.Streaming.DataTypes.UnitTests\Millistream.Streaming.DataTypes.UnitTests.csproj", "{ACD99697-5CB5-41A8-8014-98C963002547}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{DECA8D94-9246-4426-BCC2-66D3DFDC088C}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Millistream.Streaming", "Millistream.Streaming", "{F26C442E-F164-4DDD-B849-0C075E7AE11A}"
-	ProjectSection(SolutionItems) = preProject
-		Build\Millistream.Streaming\build.yml = Build\Millistream.Streaming\build.yml
-		Build\Millistream.Streaming\ci-pipeline.yml = Build\Millistream.Streaming\ci-pipeline.yml
-		Build\Millistream.Streaming\integration-tests.yml = Build\Millistream.Streaming\integration-tests.yml
-		Build\Millistream.Streaming\unit-tests.yml = Build\Millistream.Streaming\unit-tests.yml
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Millistream.Streaming.DataTypes", "Millistream.Streaming.DataTypes", "{25FB326E-420C-4C86-8A6C-D673A9FAED41}"
-	ProjectSection(SolutionItems) = preProject
-		Build\Millistream.Streaming.DataTypes\build.yml = Build\Millistream.Streaming.DataTypes\build.yml
-		Build\Millistream.Streaming.DataTypes\ci-pipeline.yml = Build\Millistream.Streaming.DataTypes\ci-pipeline.yml
-		Build\Millistream.Streaming.DataTypes\unit-tests.yml = Build\Millistream.Streaming.DataTypes\unit-tests.yml
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -94,8 +77,6 @@ Global
 		{250E61F3-D935-4729-8F60-9E7C2E6A6F40} = {C04FDBC8-EB8C-4D9F-8F3A-B6A2DA42566D}
 		{F4B36982-5C27-4988-8D96-99858868071C} = {660A05E5-718C-45D0-8705-14C9B5DF6F98}
 		{ACD99697-5CB5-41A8-8014-98C963002547} = {A0152BDC-0D9F-4AE2-BF3E-CE24F85ECAF8}
-		{F26C442E-F164-4DDD-B849-0C075E7AE11A} = {DECA8D94-9246-4426-BCC2-66D3DFDC088C}
-		{25FB326E-420C-4C86-8A6C-D673A9FAED41} = {DECA8D94-9246-4426-BCC2-66D3DFDC088C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {13B18705-419F-4BCB-B456-5A1E4198605D}
