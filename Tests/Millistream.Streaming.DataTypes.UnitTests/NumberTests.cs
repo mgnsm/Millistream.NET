@@ -9,68 +9,149 @@ namespace Millistream.Streaming.DataTypes.UnitTests
     public class NumberTests
     {
         [TestMethod]
-        public void ParseNumberTest()
+        public void CreateNumberTest()
         {
-            ParseNumberTest("123.45");
-            ParseNumberTest("-123.45");
-            ParseNumberTest("10");
-            ParseNumberTest("-20");
-            ParseNumberTest("0.00000001");
-            ParseNumberTest("0.001");
-            ParseNumberTest("001");
-            ParseNumberTest("005.012");
-            ParseNumberTest("010101");
-            ParseNumberTest("-10000.4");
-            ParseNumberTest("9999999999999999999999999999999999999999.9999999999");
-            ParseNumberTest("-9999999999999999999999999999999999999999.9999999999");
-            ParseNumberTest("NULL");
+            static void Test(Number number, int expectedPrecision, int expectedScale, bool shouldBeNegative = false)
+            {
+                Assert.AreEqual(expectedPrecision, number.GetPrecision());
+                Assert.AreEqual(expectedScale, number.Scale);
+                Assert.AreEqual(shouldBeNegative, number.IsNegative);
+            }
 
-            const string Utf8EncodedNumber = "190.09";
-            Assert.IsTrue(Number.TryParse(Utf8EncodedNumber.GetBytes(), out Number number));
-            Assert.AreEqual("190,09", number.ToString(new CultureInfo("sv")));
+            Test(new Number(0, 0), 1, 0);
+            //10^1..10^18
+            long value = 1;
+            int expectedPrecision = 1;
+            for (int i = 0; i < 18; i++)
+            {
+                value *= 10;
+
+                Test(new Number(value, 0), ++expectedPrecision, 0); //10..100..1000...1000000000000000000
+                Test(new Number(value - 1, 0), expectedPrecision - 1, 0);//9..999..999...999999999999999999
+                Test(new Number(value + 1, 0), expectedPrecision, 0); //11..101..1001...1000000000000000001
+
+                //negative values
+                Test(new Number(-value, 0), expectedPrecision, 0, true);
+                Test(new Number(-value + 1, 0), expectedPrecision - 1, 0, true);
+                Test(new Number(-value - 1, 0), expectedPrecision, 0, true);
+            }
+            Test(new Number(9999999999999999999 + 1, 0), 20, 0);
+            Test(new Number(ulong.MaxValue, 0), 20, 0);
+            Test(new Number(long.MinValue, 0), 19, 0, true);
+
+            //number(20,x)...number(38,x)
+            for (int i = 20; i < 39; i++)
+            {
+                BigInteger bigInteger = BigInteger.Parse(new string('9', i));
+                Test(new Number(bigInteger, 0), i, 0);
+                Test(new Number(bigInteger - 1, 0), i, 0);
+                Test(new Number(bigInteger + 1, 0), i + 1, 0);
+
+                Test(new Number(-bigInteger, 0), i, 0, true);
+                Test(new Number(-bigInteger - 1, 0), i + 1, 0, true);
+                Test(new Number(-bigInteger + 1, 0), i, 0, true);
+            }
+
+            Test(new Number(1, 10), 11, 10, false);
         }
 
         [TestMethod]
-        public void NumberPrecisionAndScaleTest()
+        public void GetNullNumberTest()
         {
-            Number number1 = CreateNumber("123.456");
-            Assert.IsFalse(number1.IsNegative);
-            Assert.AreEqual(6, number1.GetPrecision());
-            Assert.AreEqual(3, number1.Scale);
+            Number number = Number.Null;
+            Assert.AreEqual(0, number.GetPrecision());
+            Assert.AreEqual(0, number.Scale);
+            Assert.IsFalse(number.IsNegative);
+            Assert.AreEqual("NULL", number.ToString());
+        }
 
-            Number number2 = CreateNumber("-1000");
-            Assert.IsTrue(number2.IsNegative);
-            Assert.AreEqual(4, number2.GetPrecision());
-            Assert.AreEqual(0, number2.Scale);
+        [TestMethod]
+        public void GetAbsOfNumberTest()
+        {
+            Assert.AreEqual(Number.Abs(new Number(-123456, 3)), new Number(123456, 3));
+            Assert.AreEqual(Number.Abs(new Number(123, 0)), new Number(123, 0));
+            Assert.AreEqual(Number.Abs(new Number(-1, 0)), new Number(1, 0));
+            Assert.AreEqual(Number.Abs(new Number(1234, 1)), new Number(1234, 1));
+            Assert.AreEqual(Number.Abs(Number.Null), Number.Null);
+        }
 
-            Number number3 = CreateNumber("0.001");
-            Assert.IsFalse(number3.IsNegative);
-            Assert.AreEqual(4, number3.GetPrecision());
-            Assert.AreEqual(3, number3.Scale);
+        [TestMethod]
+        public void ParseNumberTest()
+        {
+            static void ParseNumberTest(string s, int expectedPrecision, int expectedScale, bool shouldBeNegative)
+            {
+                void Test(Number number)
+                {
+                    Assert.AreEqual(expectedPrecision, number.GetPrecision());
+                    Assert.AreEqual(expectedScale, number.Scale);
+                    Assert.AreEqual(shouldBeNegative, number.IsNegative);
+                }
 
-            Number number4 = new Number(new BigInteger(4005), 2);
-            Assert.IsFalse(number4.IsNegative);
-            Assert.AreEqual(4, number4.GetPrecision());
-            Assert.AreEqual(2, number4.Scale);
-            Assert.AreEqual("40.05", number4.ToString(CultureInfo.InvariantCulture));
+                Assert.IsTrue(Number.TryParse(s, out Number number));
+                Test(number);
+                Test(Number.Parse(s));
 
-            Number number5 = new Number(new BigInteger(1010000007), 7);
-            Assert.IsFalse(number5.IsNegative);
-            Assert.AreEqual(10, number5.GetPrecision());
-            Assert.AreEqual(7, number5.Scale);
-            Assert.AreEqual("101.0000007", number5.ToString(CultureInfo.InvariantCulture));
+                ReadOnlySpan<byte> bytes = s.GetBytes();
+                Assert.IsTrue(Number.TryParse(bytes, out number));
+                Test(number);
+                Test(Number.Parse(bytes));
+            }
 
-            Number number6 = new Number(new BigInteger(0), 0);
-            Assert.IsFalse(number6.IsNegative);
-            Assert.AreEqual(1, number6.GetPrecision());
-            Assert.AreEqual(0, number6.Scale);
-            Assert.AreEqual("0", number6.ToString());
+            ParseNumberTest("123.45", 5, 2, false);
+            ParseNumberTest("-123.45", 5, 2, true);
+            ParseNumberTest("123.4500", 5, 2, false);
+            ParseNumberTest("10", 2, 0, false);
+            ParseNumberTest("-20", 2, 0, true);
+            ParseNumberTest("00", 1, 0, false);
+            ParseNumberTest("0", 1, 0, false);
+            ParseNumberTest("-0", 1, 0, false);
+            ParseNumberTest("-000", 1, 0, false);
+            ParseNumberTest("0.00000001", 9, 8, false);
+            ParseNumberTest("0.001", 4, 3, false);
+            ParseNumberTest("001", 1, 0, false);
+            ParseNumberTest("005.012", 4, 3, false);
+            ParseNumberTest("010101", 5, 0, false);
+            ParseNumberTest("-10000.4", 6, 1, true);
+            ParseNumberTest("NULL", 0, 0, false);
+            ParseNumberTest("153.10000", 4, 1, false);
+            ParseNumberTest("-153.10000", 4, 1, true);
+            ParseNumberTest("10.00", 2, 0, false);
+            ParseNumberTest("9999999999999999999", 19, 0, false);
+            ParseNumberTest("999.9999999999999999", 19, 16, false);
+            ParseNumberTest("9.999999999999999999", 19, 18, false);
+            ParseNumberTest("999999999999999999.9", 19, 1, false);
+            ParseNumberTest("-9999999999999999999", 19, 0, true);
+            ParseNumberTest("-999.9999999999999999", 19, 16, true);
+            ParseNumberTest("-9.999999999999999999", 19, 18, true);
+            ParseNumberTest("-999999999999999999.9", 19, 1, true);
+            ParseNumberTest("18446744073709551615", 20, 0, false);
+            ParseNumberTest("1844674407370955161.5", 20, 1, false);
+            ParseNumberTest("1.8446744073709551615", 20, 19, false);
+            ParseNumberTest("1844674407.3709551615", 20, 10, false);
+            ParseNumberTest("-18446744073709551615", 20, 0, true);
+            ParseNumberTest("-1844674407370955161.5", 20, 1, true);
+            ParseNumberTest("-1.8446744073709551615", 20, 19, true);
+            ParseNumberTest("-1844674407.3709551615", 20, 10, true);
+            ParseNumberTest("18446744073709551614", 20, 0, false);
+            ParseNumberTest("-18446744073709551614", 20, 0, true);
+            ParseNumberTest("-18446744073709551616", 20, 0, true);
+            ParseNumberTest("184467440737095516.16", 20, 2, false);
+            ParseNumberTest("9999999999999999999999999999999999999999.9999999999", 50, 10, false);
+            ParseNumberTest("-9999999999999999999999999999999999999999.9999999999", 50, 10, true);
+            ParseNumberTest("0010.4400", 4, 2, false);
+            ParseNumberTest("-0010.9900", 4, 2, true);
 
-            Number number7 = Number.Null;
-            Assert.IsFalse(number7.IsNegative);
-            Assert.AreEqual(0, number7.GetPrecision());
-            Assert.AreEqual(0, number7.Scale);
-            Assert.AreEqual("NULL", number7.ToString());
+            Assert.IsFalse(Number.TryParse("0.".GetBytes(), out _));
+            Assert.IsFalse(Number.TryParse("10.".GetBytes(), out _));
+            Assert.IsFalse(Number.TryParse(".".GetBytes(), out _));
+            Assert.IsFalse(Number.TryParse(".123".GetBytes(), out _));
+            Assert.IsFalse(Number.TryParse(".0".GetBytes(), out _));
+            Assert.IsFalse(Number.TryParse(".1".GetBytes(), out _));
+            Assert.IsFalse(Number.TryParse("-99999999999999999999999999999999999999999999999999.".GetBytes(), out _));
+            Assert.IsFalse(Number.TryParse("99999999999999999999999999999999999999999999999999.".GetBytes(), out _));
+            Assert.IsFalse(Number.TryParse(".99999999999999999999999999999999999999999999999999.".GetBytes(), out _));
+            Assert.IsFalse(Number.TryParse("-.".GetBytes(), out _));
+            Assert.IsFalse(Number.TryParse("-.1".GetBytes(), out _));
         }
 
         [TestMethod]
@@ -88,126 +169,135 @@ namespace Millistream.Streaming.DataTypes.UnitTests
         [TestMethod]
         public void CompareNumbersTest()
         {
-            Assert.AreEqual(CreateNumber("123.456"), CreateNumber("123.456"));
+            Assert.AreEqual(new Number(123456, 3), new Number(123456, 3));
 
-            Number number = CreateNumber("-1000");
-            object @object = CreateNumber("-1000");
+            Number number = new Number(-1000, 0);
+            object @object = new Number(-1000, 0);
             Assert.AreEqual(number, @object);
 
-            Number number2 = CreateNumber("-1000");
+            Number number2 = new Number(-1000, 0);
             Assert.IsTrue(number.Equals(number2));
             Assert.AreEqual(number.GetHashCode(), number2.GetHashCode());
 
-            Number number3 = CreateNumber("1000");
+            Number number3 = new Number(1000, 0);
             Assert.IsFalse(number.Equals(number3));
             Assert.AreNotEqual(number.GetHashCode(), number3.GetHashCode());
 
-            Assert.AreEqual(Number.Null, Number.Parse("null"));
-            Assert.AreNotEqual(Number.Null, Number.Parse("0"));
+            Assert.AreEqual(Number.Null, Number.Parse("null".GetBytes()));
+            Assert.AreNotEqual(Number.Null, new Number(0, 0));
 
-            number = CreateNumber("1000");
-            number2 = CreateNumber("2.5");
+            number = new Number(1000, 0);
+            number2 = new Number(25, 1);
             Assert.AreEqual(1, number.CompareTo(null));
             Assert.AreEqual(1, number.CompareTo(Number.Null));
             Assert.AreEqual(-1, Number.Null.CompareTo(number));
             Assert.AreEqual(1, number.CompareTo(number2));
             Assert.AreEqual(-1, number2.CompareTo(number));
-            number = CreateNumber("-1000");
+            number = new Number(-1000, 0);
             Assert.AreEqual(-1, number.CompareTo(number2));
             Assert.AreEqual(1, number2.CompareTo(number));
 
-            Assert.IsTrue(CreateNumber("0.1") > CreateNumber("0.002"));
-            Assert.IsTrue(CreateNumber("11.1") > CreateNumber("10"));
-            Assert.IsTrue(CreateNumber("100") > CreateNumber("99"));
-            Assert.IsTrue(CreateNumber("1.9999999999999") < CreateNumber("2"));
-            Assert.IsTrue(CreateNumber("5.25000") == CreateNumber("5.25"));
-            Assert.IsFalse(CreateNumber("5.25000") != CreateNumber("5.25"));
-            Assert.IsTrue(CreateNumber("0") > Number.Null);
-            Assert.IsTrue(CreateNumber("0") >= Number.Null);
-            Assert.IsTrue(Number.Null < CreateNumber("-100"));
+            Assert.IsTrue(new Number(1, 1) > new Number(2, 3));
+            Assert.IsTrue(new Number(111, 1) > new Number(10, 0));
+            Assert.IsTrue(new Number(100, 0) > new Number(99, 0));
+            Assert.IsTrue(new Number(BigInteger.Parse("19999999999999"), 13) < new Number(2, 0));
+            Assert.IsTrue(Number.Parse("5.25000".GetBytes()) == new Number(525, 2));
+            Assert.IsFalse(Number.Parse("5.25000".GetBytes()) != new Number(525, 2));
+            Assert.IsTrue(new Number(0, 0) > Number.Null);
+            Assert.IsTrue(new Number(0, 0) >= Number.Null);
+            Assert.IsTrue(Number.Null < new Number(-100, 0));
 
-            Assert.IsTrue(CreateNumber("000000.1").Equals(CreateNumber("0.1")));
-            Assert.IsFalse(CreateNumber("10").Equals(new BigInteger(10)));
-            Assert.IsTrue(CreateNumber("000000.1") == CreateNumber("0.1"));
-            Assert.IsFalse(CreateNumber("000000.1").Equals(CreateNumber("0.11")));
-            Assert.IsTrue(Number.Null == Number.Parse("nUlL"));
-            Assert.IsFalse(Number.Parse("0") == Number.Null);
+            Assert.IsTrue(Number.Parse("000000.1".GetBytes()).Equals(new Number(1, 1)));
+            Assert.IsFalse(new Number(10, 0).Equals(new BigInteger(10)));
+            Assert.IsTrue(Number.Parse("000000.1".GetBytes()) == new Number(1, 1));
+            Assert.IsFalse(Number.Parse("000000.1".GetBytes()).Equals(new Number(11, 2)));
+            Assert.IsTrue(Number.Null == Number.Parse("nUlL".GetBytes()));
+            Assert.IsFalse(Number.Parse("0".GetBytes()) == Number.Null);
 
-            Assert.IsTrue(CreateNumber("0.001") < CreateNumber("0.01"));
-            Assert.IsTrue(CreateNumber("0.001") <= CreateNumber("0.01"));
-            Assert.IsFalse(CreateNumber("0.001") > CreateNumber("0.01"));
-            Assert.IsFalse(CreateNumber("0.001") >= CreateNumber("0.01"));
+            Assert.IsTrue(new Number(1, 3) < new Number(1, 2));
+            Assert.IsTrue(new Number(1, 3) <= new Number(1, 2));
+            Assert.IsFalse(new Number(1, 3) > new Number(1, 2));
+            Assert.IsFalse(new Number(1, 3) >= new Number(1, 2));
         }
 
         [TestMethod]
-        public void ArithmeticalNumberTest()
+        public void AddNumbersTest()
         {
-            Assert.AreEqual(CreateNumber("5.5") + CreateNumber("6.67"), CreateNumber("12.17"));
-            Assert.AreEqual(CreateNumber("5.5") + CreateNumber("6.67"), Number.Add(CreateNumber("5.5"), CreateNumber("6.67")));
-            Assert.AreEqual(CreateNumber("3") + CreateNumber("2.123456789"), CreateNumber("5.123456789"));
-            Assert.AreEqual(CreateNumber("1000000000000000") + CreateNumber("1.999999999"), CreateNumber("1000000000000001.999999999"));
-            Assert.AreEqual(CreateNumber("1") + CreateNumber("1"), CreateNumber("2"));
-            Assert.AreEqual(CreateNumber("1") + Number.Null, Number.Null);
-            Assert.AreEqual(Number.Null + CreateNumber("10"), Number.Null);
+            Assert.AreEqual(new Number(55, 1) + new Number(667, 2), new Number(1217, 2));
+            Assert.AreEqual(new Number(55, 1) + new Number(667, 2), Number.Add(new Number(55, 1), new Number(667, 2)));
+            Assert.AreEqual(new Number(3, 0) + new Number(2123456789, 9), new Number(5123456789, 9));
+            Assert.AreEqual(new Number(1000000000000000, 0) + new Number(1999999999, 9), new Number(BigInteger.Parse("1000000000000001999999999"), 9));
+            Assert.AreEqual(new Number(1, 0) + new Number(1, 0), new Number(2, 0));
+            Assert.AreEqual(new Number(1, 0) + Number.Null, Number.Null);
+            Assert.AreEqual(Number.Null + new Number(10, 0), Number.Null);
 
-            Assert.AreEqual(CreateNumber("5.67") - CreateNumber("6.67"), CreateNumber("-1"));
-            Assert.AreEqual(CreateNumber("5.67") - CreateNumber("6.67"), Number.Subtract(CreateNumber("5.67"), CreateNumber("6.67")));
-            Assert.AreEqual(CreateNumber("5.67") - CreateNumber("6.67"), CreateNumber("-1.000000000"));
-            Assert.AreEqual(CreateNumber("33") - CreateNumber("2.123456789"), CreateNumber("30.876543211"));
-            Assert.AreEqual(CreateNumber("100000") - CreateNumber("1.999999999"), CreateNumber("99998.000000001"));
-            Assert.AreEqual(CreateNumber("1") - CreateNumber("1"), CreateNumber("0.0"));
-            Assert.AreEqual(CreateNumber("1") - Number.Null, Number.Null);
-            Assert.AreEqual(Number.Null - CreateNumber("10"), Number.Null);
-
-            Assert.AreEqual(-CreateNumber("1"), CreateNumber("-1"));
-            Assert.AreEqual(+CreateNumber("123.456"), CreateNumber("123.456"));
-            Assert.AreEqual(-Number.Null, Number.Null);
+            Assert.AreEqual(+new Number(123456, 3), new Number(123456, 3));
             Assert.AreEqual(+Number.Null, Number.Null);
 
-            Number number = CreateNumber("5.123");
-            Assert.AreEqual(++number, CreateNumber("6.123"));
+            Number number = new Number(5123, 3);
+            Assert.AreEqual(++number, new Number(6123, 3));
             number++;
-            Assert.AreEqual(number, CreateNumber("7.123"));
-            Assert.AreEqual(--number, CreateNumber("6.123"));
-            number = CreateNumber("8");
-            Assert.AreEqual(++number, CreateNumber("9.0"));
-            Assert.AreEqual(--number, CreateNumber("8"));
-            number--;
-            Assert.AreEqual(number, CreateNumber("7"));
+            Assert.AreEqual(number, new Number(7123, 3));
+            number = new Number(8, 0);
+            Assert.AreEqual(++number, new Number(9, 0));
             number = Number.Null;
             Assert.AreEqual(++number, Number.Null);
             Assert.AreEqual(number++, Number.Null);
+        }
+
+        [TestMethod]
+        public void DivideNumbersTest()
+        {
+            Assert.AreEqual(new Number(539, 3) / new Number(11, 2), new Number(49, 1));
+            Assert.AreEqual(new Number(539, 3) / new Number(11, 2), Number.Divide(new Number(539, 3), new Number(11, 2)));
+            Assert.AreEqual(new Number(91, 1) / new Number(7, 0), new Number(13, 1));
+            Assert.AreEqual(new Number(64, 1) / new Number(4, 1), new Number(16, 0));
+            Assert.AreEqual(new Number(15, 0) / new Number(2, 1), new Number(75, 0));
+            Assert.AreEqual(new Number(15, 0) / Number.Null, Number.Null);
+            Assert.AreEqual(Number.Null / new Number(3, 0), Number.Null);
+            Number number = new Number(1, 0) / new Number(3, 0);
+            Assert.AreEqual(100, number.Scale);
+            Assert.AreEqual(number, new Number(BigInteger.Parse("3333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333"), 100));
+            number = Number.Divide(new Number(1, 0), new Number(3, 0), 10);
+            Assert.AreEqual(number, new Number(3333333333, 10));
+            Assert.AreEqual(10, number.Scale);
+            Assert.AreEqual(new Number(100000, 0) / new Number(-10, 0), new Number(-10000, 0));
+            Assert.AreEqual(Number.Divide(new Number(-7545, 1), new Number(347, 1), 10), new Number(-217435158501, 10));
+        }
+
+        [TestMethod]
+        public void MultiplyNumbersTest()
+        {
+            Assert.AreEqual(new Number(125, 2) * new Number(3, 0), new Number(375, 2));
+            Assert.AreEqual(new Number(125, 2) * new Number(3, 0), Number.Multiply(new Number(125, 2), new Number(3, 0)));
+            Assert.AreEqual(new Number(-10, 0) * new Number(-10, 0), new Number(100, 0));
+            Assert.AreEqual(new Number(-105, 1) * new Number(40123, 3), new Number(-4212915, 4));
+            Assert.AreEqual(new Number(-105, 1) * Number.Null, Number.Null);
+            Assert.AreEqual(Number.Null * Number.Null, Number.Null);
+        }
+
+        [TestMethod]
+        public void SubtractNumbersTest()
+        {
+            Assert.AreEqual(new Number(567, 2) - new Number(667, 2), new Number(-1, 0));
+            Assert.AreEqual(new Number(567, 2) - new Number(667, 2), Number.Subtract(new Number(567, 2), new Number(667, 2)));
+            Assert.AreEqual(new Number(567, 2) - new Number(667, 2), new Number(-1000000000, 9));
+            Assert.AreEqual(new Number(33, 0) - new Number(2123456789, 9), new Number(30876543211, 9));
+            Assert.AreEqual(new Number(100000, 0) - new Number(1999999999, 9), new Number(99998000000001, 9));
+            Assert.AreEqual(new Number(1, 0) - new Number(1, 0), new Number(0, 0));
+            Assert.AreEqual(new Number(1, 0) - Number.Null, Number.Null);
+            Assert.AreEqual(Number.Null - new Number(10, 0), Number.Null);
+
+            Assert.AreEqual(-new Number(1, 0), new Number(-1, 0));
+            Assert.AreEqual(-Number.Null, Number.Null);
+
+            Number number = new Number(7123, 3);
+            Assert.AreEqual(--number, new Number(6123, 3));
+            number--;
+            Assert.AreEqual(number, new Number(5123, 3));
+            number = Number.Null;
             Assert.AreEqual(--number, Number.Null);
             Assert.AreEqual(number--, Number.Null);
-
-            Assert.AreEqual(CreateNumber("1.25") * CreateNumber("3"), CreateNumber("3.75"));
-            Assert.AreEqual(CreateNumber("1.25") * CreateNumber("3"), Number.Multiply(CreateNumber("1.25"), CreateNumber("3")));
-            Assert.AreEqual(CreateNumber("-10") * CreateNumber("-10"), CreateNumber("100"));
-            Assert.AreEqual(CreateNumber("-10.5") * CreateNumber("40.123"), CreateNumber("-421.2915"));
-            Assert.AreEqual(CreateNumber("-10.5") * Number.Null, Number.Null);
-            Assert.AreEqual(Number.Null * Number.Null, Number.Null);
-
-            Assert.AreEqual(CreateNumber("0.539") / CreateNumber("0.11"), CreateNumber("4.9"));
-            Assert.AreEqual(CreateNumber("0.539") / CreateNumber("0.11"), Number.Divide(CreateNumber("0.539"), CreateNumber("0.11")));
-            Assert.AreEqual(CreateNumber("9.1") / CreateNumber("7"), CreateNumber("1.3"));
-            Assert.AreEqual(CreateNumber("6.4") / CreateNumber("0.4"), CreateNumber("16"));
-            Assert.AreEqual(CreateNumber("15") / CreateNumber("0.2"), CreateNumber("75"));
-            Assert.AreEqual(CreateNumber("15") / Number.Null, Number.Null);
-            Assert.AreEqual(Number.Null / CreateNumber("3"), Number.Null);
-            number = CreateNumber("1") / CreateNumber("3");
-            Assert.AreEqual(number, CreateNumber("0.3333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333"));
-            Assert.AreEqual(100, number.Scale);
-            number = Number.Divide(CreateNumber("1"), CreateNumber("3"), 10);
-            Assert.AreEqual(number, CreateNumber("0.3333333333"));
-            Assert.AreEqual(10, number.Scale);
-            Assert.AreEqual(CreateNumber("100000") / CreateNumber("-10"), CreateNumber("-10000"));
-            Assert.AreEqual(Number.Divide(CreateNumber("-754.5"), CreateNumber("34.7"), 10), CreateNumber("-21.7435158501"));
-
-            Assert.AreEqual(Number.Abs(CreateNumber("-123.456")), CreateNumber("123.456"));
-            Assert.AreEqual(Number.Abs(CreateNumber("123")), CreateNumber("123"));
-            Assert.AreEqual(Number.Abs(CreateNumber("-1")), CreateNumber("1"));
-            Assert.AreEqual(Number.Abs(CreateNumber("123.4")), CreateNumber("123.4"));
-            Assert.AreEqual(Number.Abs(Number.Null), Number.Null);
         }
 
         [TestMethod]
@@ -217,21 +307,23 @@ namespace Millistream.Streaming.DataTypes.UnitTests
 
             Assert.AreEqual($"123{decimalSeparator}45", new Number(12345, 2).ToString());
             Assert.AreEqual($"123{decimalSeparator}45", new Number(12345, 2).ToString());
-            Assert.AreEqual($"123{decimalSeparator}4500", new Number(1234500, 4).ToString());
-            Assert.AreEqual($"0123{decimalSeparator}4500", CreateNumber("0123.4500").ToString());
-            Assert.AreEqual($"00123{decimalSeparator}45", CreateNumber("00123.45").ToString());
+            Assert.AreEqual($"123{decimalSeparator}45", new Number(1234500, 4).ToString());
+            Assert.AreEqual($"123{decimalSeparator}45", CreateNumber("0123.4500").ToString());
+            Assert.AreEqual($"123{decimalSeparator}45", CreateNumber("00123.45").ToString());
             Assert.AreEqual($"9999999999999999999999999999999999999999{decimalSeparator}9999999999", CreateNumber("9999999999999999999999999999999999999999.9999999999").ToString());
             Assert.AreEqual($"-9999999999999999999999999999999999999999{decimalSeparator}9999999999", CreateNumber("-9999999999999999999999999999999999999999.9999999999").ToString());
-            Assert.AreEqual("010101", CreateNumber("010101").ToString());
+            Assert.AreEqual($"0{decimalSeparator}00000001", new Number(1, 8).ToString());
+            Assert.AreEqual($"0{decimalSeparator}007", new Number(7, 3).ToString());
+            Assert.AreEqual("10101", CreateNumber("010101").ToString());
             Assert.AreEqual($"-10000{decimalSeparator}4", new Number(-100004, 1).ToString());
             Assert.AreEqual("NULL", Number.Null.ToString());
-            Assert.AreEqual($"153{decimalSeparator}10000", new Number(15310000, 5).ToString());
-            Assert.AreEqual($"-0153{decimalSeparator}10000", CreateNumber("-0153.10000").ToString());
-            Assert.AreEqual($"-0153{decimalSeparator}10001", CreateNumber("-0153.10001").ToString());
+            Assert.AreEqual($"153{decimalSeparator}1", new Number(15310000, 5).ToString());
+            Assert.AreEqual($"-153{decimalSeparator}1", CreateNumber("-0153.10000").ToString());
+            Assert.AreEqual($"-153{decimalSeparator}10001", CreateNumber("-0153.10001").ToString());
 
             Assert.AreEqual("123,45", new Number(12345, 2).ToString(null, new CultureInfo("sv")));
-            Assert.AreEqual("00123,45", CreateNumber("00123.45").ToString(null, new CultureInfo("da")));
-            Assert.AreEqual("-0153,10001", CreateNumber("-0153.10001").ToString(null, new CultureInfo("fr")));
+            Assert.AreEqual("123,45", CreateNumber("00123.45").ToString(null, new CultureInfo("da")));
+            Assert.AreEqual("-153,10001", CreateNumber("-0153.10001").ToString(null, new CultureInfo("fr")));
             Assert.AreEqual("-978.453", new Number(-978453, 3).ToString(null, new CultureInfo("en-US")));
 
             //"C" or "c" - Currency
@@ -361,14 +453,6 @@ namespace Millistream.Streaming.DataTypes.UnitTests
         [TestMethod]
         [ExpectedException(typeof(FormatException))]
         public void FormattingUsingAnUnknownFormatter() => new Number(1, 0).ToString("M");
-
-        private static void ParseNumberTest(string s)
-        {
-            Assert.IsTrue(Number.TryParse(s, out Number number));
-            Assert.AreEqual(s, number.ToString(CultureInfo.InvariantCulture));
-            Assert.IsTrue(Number.TryParse(s.GetBytes(), out number));
-            Assert.AreEqual(s, number.ToString(CultureInfo.InvariantCulture));
-        }
 
         private static Number CreateNumber(string s) => Number.Parse(s.GetBytes());
     }
