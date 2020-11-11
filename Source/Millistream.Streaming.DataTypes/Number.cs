@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Millistream.Streaming.DataTypes.Formatting;
+using System;
 using System.Globalization;
-using System.Linq;
 using System.Numerics;
 using System.Text;
 
@@ -9,7 +9,7 @@ namespace Millistream.Streaming.DataTypes
     /// <summary>
     /// Represents an arbitrarily large signed integer with any number of decimals between 0 and 2,147,483,647.
     /// </summary>
-    public readonly struct Number : IComparable, IComparable<Number>, IEquatable<Number>
+    public readonly struct Number : IFormattable, IComparable, IComparable<Number>, IEquatable<Number>
     {
         #region Constants
         private const char DecimalPoint = '.';
@@ -17,8 +17,8 @@ namespace Millistream.Streaming.DataTypes
         #endregion
 
         #region Fields
-        private readonly bool _isNull;
-        private readonly BigInteger _unscaledNumber;
+        internal readonly bool _isNull;
+        internal readonly BigInteger _unscaledNumber;
         private readonly int? _precision;
         #endregion
 
@@ -319,9 +319,25 @@ namespace Millistream.Streaming.DataTypes
         /// Converts the numeric value of the current <see cref="Number"/> object to its equivalent string representation by using the specified culture-specific formatting information.
         /// </summary>
         /// <param name="formatProvider"> An object that supplies culture-specific formatting information.</param>
-        /// <returns>The string representation of the current <see cref="Number"/> value in the format specified by the provider parameter.</returns>
-        public readonly string ToString(IFormatProvider formatProvider) =>
-            ToString(NumberFormatInfo.GetInstance(formatProvider).NumberDecimalSeparator?.FirstOrDefault() ?? DecimalPoint);
+        /// <returns>The string representation of the current <see cref="Number"/> value in the format specified by the <paramref name="formatProvider"/> parameter.</returns>
+        public readonly string ToString(IFormatProvider formatProvider) => ToString(null, formatProvider);
+
+        /// <summary>
+        /// Converts the numeric value of the current <see cref="Number"/> object to its equivalent string representation by using the specified format.
+        /// </summary>
+        /// <param name="format">A standard or custom numeric format string.</param>
+        /// <returns>The string representation of the current <see cref="Number"/> value in the format specified by the <paramref name="format"/> parameter.</returns>
+        /// <exception cref="FormatException"></exception>
+        public readonly string ToString(string format) => ToString(format, NumberFormatInfo.CurrentInfo);
+
+        /// <summary>
+        /// Converts the numeric value of the current <see cref="Number"/> object to its equivalent string representation by using the specified format and culture-specific format information.
+        /// </summary>
+        /// <param name="format">A standard or custom numeric format string.</param>
+        /// <param name="formatProvider"> An object that supplies culture-specific formatting information.</param>
+        /// <returns>The string representation of the current <see cref="Number"/> value in the format specified by the <paramref name="formatProvider"/> and <paramref name="format"/> parameters.</returns>
+        /// <exception cref="FormatException"></exception>
+        public readonly string ToString(string format, IFormatProvider formatProvider) => NumberFormatter.Format(this, format, formatProvider);
 
         /// <summary>
         /// Returns a value indicating whether this instance is equal to a specified <see cref="Number"/> value.
@@ -340,7 +356,7 @@ namespace Millistream.Streaming.DataTypes
         /// Converts the value of the current <see cref="Number"/> object to its equivalent string representation.
         /// </summary>
         /// <returns>A string representation of the value of the current <see cref="Number"/> object.</returns>
-        public readonly override string ToString() => ToString(DecimalPoint);
+        public readonly override string ToString() => ToString(null, NumberFormatInfo.CurrentInfo);
 
         private static void ValidateScale(int scale)
         {
@@ -366,45 +382,6 @@ namespace Millistream.Streaming.DataTypes
             }
             number = default;
             return false;
-        }
-
-        private readonly string ToString(char decimalSeparator)
-        {
-            if (_isNull)
-                return "NULL";
-
-            int negativeSignOffset = IsNegative ? 1 : 0;
-            bool hasDecimals = Scale > 0;
-            int precision = GetPrecision();
-            //Create a new char array for all digits and the optional sign and decimal point
-            Span<char> destination = stackalloc char[precision
-                + negativeSignOffset
-                + (hasDecimals ? 1 : 0)];
-            //Call "ToString("G")" on the BigInteger
-            const char Format = 'G';
-            _unscaledNumber.TryFormat(destination, out int charsWritten, stackalloc char[1] { Format });
-
-            //If charsWritten is less than Precision, add leading zeros by shifting the written chars to the right
-            //e.g. a value of 0.001 gets formatted as 1 _ _ _
-            int leadingZeros = precision - charsWritten;
-            if (leadingZeros > 0)
-            {
-                const char Zero = '0';
-                for (int i = charsWritten - 1; i >= 0; i--)
-                    destination[i + leadingZeros] = destination[i];
-                for (int i = 0; i < leadingZeros; ++i)
-                    destination[i] = Zero;
-            }
-
-            if (hasDecimals)
-            {
-                //Shift the decimals one step to the right
-                for (int i = destination.Length - 1; i > precision - Scale; i--)
-                    destination[i] = destination[i - 1];
-                //...and insert the decimal separator in between the whole part and the fractional part
-                destination[precision - Scale + negativeSignOffset] = decimalSeparator;
-            }
-            return destination.ToString();
         }
         #endregion
 
