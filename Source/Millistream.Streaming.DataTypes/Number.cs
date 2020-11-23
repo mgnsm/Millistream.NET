@@ -2,14 +2,13 @@
 using System;
 using System.Globalization;
 using System.Numerics;
-using System.Text;
 
 namespace Millistream.Streaming.DataTypes
 {
     /// <summary>
     /// Represents an arbitrarily large signed integer with any number of decimals between 0 and 2,147,483,647.
     /// </summary>
-    public readonly struct Number : IFormattable, IComparable, IComparable<Number>, IEquatable<Number>
+    public readonly partial struct Number : IFormattable, IComparable, IComparable<Number>, IEquatable<Number>
     {
         #region Constants
         private const int MaxNumberOfDecimals = 100;
@@ -48,10 +47,10 @@ namespace Millistream.Streaming.DataTypes
             Scale = scale;
         }
 
-        private Number(BigInteger unscaledNumber, int scale, object _)
+        private Number(BigInteger unscaledNumber, int scale, bool invert)
         {
             // Bypass validation of scale.
-            _unscaledNumber = unscaledNumber;
+            _unscaledNumber = invert ? -unscaledNumber : unscaledNumber;
             _isNull = false;
             Scale = scale;
         }
@@ -104,17 +103,17 @@ namespace Millistream.Streaming.DataTypes
             if (scaleDiff == 0)
             {
                 BigInteger unscaledNumber = left._unscaledNumber + right._unscaledNumber;
-                return new Number(unscaledNumber, left.Scale, default);
+                return new Number(unscaledNumber, left.Scale, false);
             }
             else if (scaleDiff < 0) //right has more decimals. Multiply it by 10^scalediff to get the same scale as left.
             {
                 BigInteger value = left._unscaledNumber * BigInteger.Pow(10, Math.Abs(scaleDiff));
-                return new Number(value + right._unscaledNumber, right.Scale, default);
+                return new Number(value + right._unscaledNumber, right.Scale, false);
             }
             else //left has more decimals. Muliply it by 10^scalediff to get the same scale as right.
             {
                 BigInteger value1 = right._unscaledNumber * BigInteger.Pow(10, scaleDiff);
-                return new Number(left._unscaledNumber + value1, left.Scale, default);
+                return new Number(left._unscaledNumber + value1, left.Scale, false);
             }
         }
 
@@ -163,7 +162,7 @@ namespace Millistream.Streaming.DataTypes
                 result = result * 10 + decimalDigit;
                 scale++;
             }
-            return new Number(result, scale, default);
+            return new Number(result, scale, false);
         }
 
         /// <summary>
@@ -177,7 +176,7 @@ namespace Millistream.Streaming.DataTypes
 
             int precision = FormattingHelpers.CountDigits(_unscaledNumber);
             int scale = Scale;
-            if (precision < scale)
+            if (precision <= scale)
                 return precision + (scale - precision) + 1;
             return precision;
         }
@@ -189,7 +188,7 @@ namespace Millistream.Streaming.DataTypes
         /// <param name="right">The second value to multiply.</param>
         /// <returns>The product of the <paramref name="left"/> and <paramref name="right"/>.</returns>
         public static Number Multiply(Number left, Number right) => left._isNull || right._isNull ? Null
-            : new Number(left._unscaledNumber * right._unscaledNumber, left.Scale + right.Scale, default);
+            : new Number(left._unscaledNumber * right._unscaledNumber, left.Scale + right.Scale, false);
 
 
         /// <summary>
@@ -200,16 +199,6 @@ namespace Millistream.Streaming.DataTypes
         /// <exception cref="ArgumentException"></exception>
         public static Number Parse(ReadOnlySpan<char> value) =>
             TryParse(value, out Number number) ? number : throw new ArgumentException(Constants.ParseArgumentExceptionMessage, nameof(value));
-
-        /// <summary>
-        /// Converts a memory span that contains the bytes of a UTF-8 string representation of a sequence of digits with an optional decimal point and sign character ('-', '0'–'9' and '.') to its <see cref="Number"/> equivalent.
-        /// </summary>
-        /// <param name="value">The memory span that contains the bytes of the UTF-8 string value to parse.</param>
-        /// <returns>A <see cref="Number"/> object that is equivalent to the value contained in <paramref name="value"/>.</returns>
-        /// <exception cref="ArgumentException"></exception>
-        public static Number Parse(ReadOnlySpan<byte> value) =>
-            TryParse(value, out Number number) ? number : throw new ArgumentException(Constants.ParseArgumentExceptionMessage, nameof(value));
-
 
         /// <summary>
         ///  Subtracts one <see cref="Number"/> value from another and returns the result.
@@ -226,17 +215,17 @@ namespace Millistream.Streaming.DataTypes
             if (scaleDiff == 0)
             {
                 BigInteger unscaledNumber = left._unscaledNumber - right._unscaledNumber;
-                return new Number(unscaledNumber, left.Scale, default);
+                return new Number(unscaledNumber, left.Scale, false);
             }
             else if (scaleDiff < 0) //right has more decimals. Multiply it by 10^scalediff to get the same scale as left.
             {
                 BigInteger value = left._unscaledNumber * BigInteger.Pow(10, Math.Abs(scaleDiff));
-                return new Number(value - right._unscaledNumber, right.Scale, default);
+                return new Number(value - right._unscaledNumber, right.Scale, false);
             }
             else //left has more decimals. Muliply it by 10^scalediff to get the same scale as right.
             {
                 BigInteger value1 = right._unscaledNumber * BigInteger.Pow(10, scaleDiff);
-                return new Number(left._unscaledNumber - value1, left.Scale, default);
+                return new Number(left._unscaledNumber - value1, left.Scale, false);
             }
         }
 
@@ -248,7 +237,7 @@ namespace Millistream.Streaming.DataTypes
         /// <returns>true if the <paramref name="value"/> parameter was converted successfully; otherwise, false.</returns>
         public static bool TryParse(ReadOnlySpan<char> value, out Number number)
         {
-            if (value.Length == 0)
+            if (value.Length < 1)
             {
                 number = default;
                 return false;
@@ -259,26 +248,35 @@ namespace Millistream.Streaming.DataTypes
             {
                 if (index-- == 0)
                 {
-                    number = new Number(BigInteger.Zero, 0, default);
+                    number = new Number(BigInteger.Zero, 0, false);
                     return true;
                 }
             }
 
-            //Find the optional decimal point character (.)
+            //Find the optional decimal point character (.).
             for (int i = index; i >= 0; i--)
             {
                 if (value[i] == '.')
                 {
-                    if (i == value.Length - 1 || i == 0 || !char.IsDigit(value[i + 1]) || !char.IsDigit(value[i - 1]))
+                    // It has to be preceded or succeeded by a digit , i.e. "5." and ".5" are valid but "." is not.
+                    if (value.Length == 1
+                        || (i > 0 && !char.IsDigit(value[i - 1]))
+                        || (i < (value.Length - 1) && !char.IsDigit(value[i + 1])))
                     {
                         number = default;
                         return false;
                     }
 
+                    if (index == 0)
+                    {
+                        number = new Number(BigInteger.Zero, 0, false);
+                        return true;
+                    }
+
                     Span<char> chars = stackalloc char[value.Length - 1];
                     for (int j = 0; j < i; j++)
                         chars[j] = value[j];
-                    //...and remove it by shifting all digits to the right of it one step to the left
+                    // Remove the decimal point it by shifting all digits to the right of it one step to the left.
                     for (int j = i + 1; j <= index; j++)
                         chars[j - 1] = value[j];
 
@@ -286,19 +284,6 @@ namespace Millistream.Streaming.DataTypes
                 }
             }
             return TryParse(value, 0, out number);
-        }
-
-        /// <summary>
-        /// Tries to convert a memory span that contains the bytes of a UTF-8 string representation of a sequence of digits with an optional decimal point and sign character ('-', '0'–'9' and '.') to its <see cref="Number"/> equivalent and returns a value that indicates whether the conversion succeeded.
-        /// </summary>
-        /// <param name="value">The memory span that contains the bytes of the UTF-8 string value to parse.</param>
-        /// <param name="number">Contains the <see cref="Number"/> value equivalent to the value contained in <paramref name="value"/>, if the conversion succeeded, or default if the conversion failed.</param>
-        /// <returns>true if the <paramref name="value"/> parameter was converted successfully; otherwise, false.</returns>
-        public static bool TryParse(ReadOnlySpan<byte> value, out Number number)
-        {
-            Span<char> chars = stackalloc char[value.Length];
-            Encoding.UTF8.GetChars(value, chars);
-            return TryParse(chars, out number);
         }
 
         /// <summary>
@@ -395,7 +380,7 @@ namespace Millistream.Streaming.DataTypes
             }
             else if (BigInteger.TryParse(value, out BigInteger bigInteger))
             {
-                number = new Number(bigInteger, scale, default);
+                number = new Number(bigInteger, scale, false);
                 return true;
             }
             number = default;
@@ -464,21 +449,21 @@ namespace Millistream.Streaming.DataTypes
         /// </summary>
         /// <param name="value">The <see cref="Number"/> to negate.</param>
         /// <returns>The result of the <paramref name="value"/> parameter multiplied by negative one (-1).</returns>
-        public static Number operator -(Number value) => value._isNull ? value : new Number(-value._unscaledNumber, value.Scale, default);
+        public static Number operator -(Number value) => value._isNull ? value : new Number(-value._unscaledNumber, value.Scale, false);
 
         /// <summary>
         /// Increments a <see cref="Number"/> value by 1.
         /// </summary>
         /// <param name="value"> The value to increment.</param>
         /// <returns>The value of the <paramref name="value"/> parameter incremented by 1.</returns>
-        public static Number operator ++(Number value) => value._isNull ? value : value + new Number(BigInteger.One, 0, default);
+        public static Number operator ++(Number value) => value._isNull ? value : value + new Number(BigInteger.One, 0, false);
 
         /// <summary>
         /// Decrements a <see cref="Number"/> value by 1.
         /// </summary>
         /// <param name="value"> The value to decrement.</param>
         /// <returns>The value of the <paramref name="value"/> parameter decremented by 1.</returns>
-        public static Number operator --(Number value) => value._isNull ? value : value - new Number(BigInteger.One, 0, default);
+        public static Number operator --(Number value) => value._isNull ? value : value - new Number(BigInteger.One, 0, false);
 
         /// <summary>
         /// Adds two specified <see cref="Number"/> objects.
