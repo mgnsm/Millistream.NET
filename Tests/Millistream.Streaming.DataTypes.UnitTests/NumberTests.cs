@@ -119,6 +119,7 @@ namespace Millistream.Streaming.DataTypes.UnitTests
             ParseNumberTest("9999999999999999999", 19, 0, false);
             ParseNumberTest("999.9999999999999999", 19, 16, false);
             ParseNumberTest("9.999999999999999999", 19, 18, false);
+            ParseNumberTest("123456789123456789.1", 19, 1, false);
             ParseNumberTest("999999999999999999.9", 19, 1, false);
             ParseNumberTest("-9999999999999999999", 19, 0, true);
             ParseNumberTest("-999.9999999999999999", 19, 16, true);
@@ -140,17 +141,28 @@ namespace Millistream.Streaming.DataTypes.UnitTests
             ParseNumberTest("-9999999999999999999999999999999999999999.9999999999", 50, 10, true);
             ParseNumberTest("0010.4400", 4, 2, false);
             ParseNumberTest("-0010.9900", 4, 2, true);
+            ParseNumberTest("0.", 1, 0, false);
+            ParseNumberTest("10.", 2, 0, false);
+            ParseNumberTest(".123", 4, 3, false);
+            ParseNumberTest(".0", 1, 0, false);
+            ParseNumberTest(".1", 2, 1, false);
+            ParseNumberTest("-99999999999999999999999999999999999999999999999999.", 50, 0, true);
+            ParseNumberTest("99999999999999999999999999999999999999999999999999.", 50, 0, false);
+            ParseNumberTest("1000000", 7, 0, false);
+            ParseNumberTest("000000", 1, 0, false);
+            ParseNumberTest("1.000000", 1, 0, false);
+            ParseNumberTest("-1.000000", 1, 0, true);
+            ParseNumberTest("-1.000001", 7, 6, true);
+            ParseNumberTest("-1.", 1, 0, true);
+            ParseNumberTest("999999999999999.999999999999999", 30, 15, false);
 
-            Assert.IsFalse(Number.TryParse("0.".GetBytes(), out _));
-            Assert.IsFalse(Number.TryParse("10.".GetBytes(), out _));
+            Assert.IsFalse(Number.TryParse(".", out _));
             Assert.IsFalse(Number.TryParse(".".GetBytes(), out _));
-            Assert.IsFalse(Number.TryParse(".123".GetBytes(), out _));
-            Assert.IsFalse(Number.TryParse(".0".GetBytes(), out _));
-            Assert.IsFalse(Number.TryParse(".1".GetBytes(), out _));
-            Assert.IsFalse(Number.TryParse("-99999999999999999999999999999999999999999999999999.".GetBytes(), out _));
-            Assert.IsFalse(Number.TryParse("99999999999999999999999999999999999999999999999999.".GetBytes(), out _));
+            Assert.IsFalse(Number.TryParse(".99999999999999999999999999999999999999999999999999.", out _));
             Assert.IsFalse(Number.TryParse(".99999999999999999999999999999999999999999999999999.".GetBytes(), out _));
+            Assert.IsFalse(Number.TryParse("-.", out _));
             Assert.IsFalse(Number.TryParse("-.".GetBytes(), out _));
+            Assert.IsFalse(Number.TryParse("-.1", out _));
             Assert.IsFalse(Number.TryParse("-.1".GetBytes(), out _));
         }
 
@@ -224,6 +236,7 @@ namespace Millistream.Streaming.DataTypes.UnitTests
         public void AddNumbersTest()
         {
             Assert.AreEqual(new Number(55, 1) + new Number(667, 2), new Number(1217, 2));
+            Assert.AreEqual(new Number(55, 0) - new Number(667, 0), new Number(-612, 0));
             Assert.AreEqual(new Number(55, 1) + new Number(667, 2), Number.Add(new Number(55, 1), new Number(667, 2)));
             Assert.AreEqual(new Number(3, 0) + new Number(2123456789, 9), new Number(5123456789, 9));
             Assert.AreEqual(new Number(1000000000000000, 0) + new Number(1999999999, 9), new Number(BigInteger.Parse("1000000000000001999999999"), 9));
@@ -238,11 +251,17 @@ namespace Millistream.Streaming.DataTypes.UnitTests
             Assert.AreEqual(++number, new Number(6123, 3));
             number++;
             Assert.AreEqual(number, new Number(7123, 3));
+            number = new Number(-1, 0);
+            number++;
+            Assert.AreEqual(new Number(0, 0), number);
             number = new Number(8, 0);
             Assert.AreEqual(++number, new Number(9, 0));
             number = Number.Null;
             Assert.AreEqual(++number, Number.Null);
             Assert.AreEqual(number++, Number.Null);
+
+            Number negative = new Number(-501, 1);
+            Assert.AreEqual(new Number(199, 1), negative + new Number(70, 0));
         }
 
         [TestMethod]
@@ -298,6 +317,9 @@ namespace Millistream.Streaming.DataTypes.UnitTests
             number = Number.Null;
             Assert.AreEqual(--number, Number.Null);
             Assert.AreEqual(number--, Number.Null);
+
+            Number positive = new Number(501, 1);
+            Assert.AreEqual(new Number(-199, 1), positive - new Number(70, 0));
         }
 
         [TestMethod]
