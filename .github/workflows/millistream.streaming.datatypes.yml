@@ -2,7 +2,7 @@ name: Millistream.Streaming.DataTypes
 
 env:
   major: 1
-  minor: 0
+  minor: 1
   patch: 0
 
 on:
@@ -32,7 +32,7 @@ jobs:
       shell: bash
       run: |
         runNumber=$GITHUB_RUN_NUMBER
-        revision=$((runNumber-1))
+        revision=$((runNumber-2))
         version=$major.$minor.$revision
         dotnet build Source/Millistream.Streaming.DataTypes/Millistream.Streaming.DataTypes.csproj -c Release -p:Version=$version
         dotnet build Tests/Millistream.Streaming.DataTypes.UnitTests/Millistream.Streaming.DataTypes.UnitTests.csproj -c Release -p:Version=$version
