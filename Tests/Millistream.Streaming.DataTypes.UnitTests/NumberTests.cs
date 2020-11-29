@@ -343,7 +343,8 @@ namespace Millistream.Streaming.DataTypes.UnitTests
             Assert.AreEqual($"-153{decimalSeparator}1", CreateNumber("-0153.10000").ToString());
             Assert.AreEqual($"-153{decimalSeparator}10001", CreateNumber("-0153.10001").ToString());
 
-            Assert.AreEqual("123,45", new Number(12345, 2).ToString(null, new CultureInfo("sv")));
+            NumberFormatInfo svSe = NumberFormatInfo.GetInstance(new CultureInfo("sv-SE"));
+            Assert.AreEqual("123,45", new Number(12345, 2).ToString(null, svSe));
             Assert.AreEqual("123,45", CreateNumber("00123.45").ToString(null, new CultureInfo("da")));
             Assert.AreEqual("-153,10001", CreateNumber("-0153.10001").ToString(null, new CultureInfo("fr")));
             Assert.AreEqual("-978.453", new Number(-978453, 3).ToString(null, new CultureInfo("en-US")));
@@ -351,11 +352,14 @@ namespace Millistream.Streaming.DataTypes.UnitTests
             //"C" or "c" - Currency
             Assert.AreEqual("$123.46", new Number(123456, 3).ToString("C", new CultureInfo("en-US")));
             Assert.AreEqual("123,46 €", new Number(123456, 3).ToString("C", new CultureInfo("fr-FR")));
-            Assert.AreEqual("¥123", new Number(123456, 3).ToString("C", new CultureInfo("ja-JP")));
-            Assert.AreEqual("($123.456)", new Number(-123456, 3).ToString("C3", new CultureInfo("en-US")));
+            NumberFormatInfo jaJp = NumberFormatInfo.GetInstance(new CultureInfo("ja-JP"));
+            Assert.AreEqual($"{jaJp.CurrencySymbol}123", new Number(123456, 3).ToString("C", new CultureInfo("ja-JP")));
+            Assert.AreEqual("(¤123.456)", new Number(-123456, 3).ToString("C3", CultureInfo.InvariantCulture));
+            decimal d = -123.456m;
+            Assert.AreEqual(d.ToString("C3", new CultureInfo("en-US")), new Number(-123456, 3).ToString("C3", new CultureInfo("en-US")));
             Assert.AreEqual("-123,456 €", new Number(-123456, 3).ToString("C3", new CultureInfo("fr-FR")));
-            Assert.AreEqual("-¥123.456", new Number(-123456, 3).ToString("C3", new CultureInfo("ja-JP")));
-            Assert.AreEqual(ulong.MaxValue.ToString("C2", new CultureInfo("sv-SE")), new Number(ulong.MaxValue, 0).ToString("C2", new CultureInfo("sv-SE")));
+            Assert.AreEqual($"-{jaJp.CurrencySymbol}123.456", new Number(-123456, 3).ToString("C3", new CultureInfo("ja-JP")));
+            Assert.AreEqual(ulong.MaxValue.ToString("C2", svSe), new Number(ulong.MaxValue, 0).ToString("C2", svSe));
             Assert.AreEqual(BigInteger.Parse("9999999999999999999999999999999999999999").ToString("C", new CultureInfo("en-US")),
                 CreateNumber("9999999999999999999999999999999999999999").ToString("C", new CultureInfo("en-US")));
 
@@ -374,8 +378,8 @@ namespace Millistream.Streaming.DataTypes.UnitTests
             Assert.AreEqual(0.123456789.ToString("G"), new Number(123456789, 9).ToString("G"));
 
             //"F" or "f" - Fixed-point
-            Assert.AreEqual("1234.57", new Number(1234567, 3).ToString("F", new CultureInfo("en-US")));
-            Assert.AreEqual("1234,57", new Number(1234567, 3).ToString("F", new CultureInfo("de-DE")));
+            Assert.AreEqual(1234.567m.ToString("F", new CultureInfo("en-US")), new Number(1234567, 3).ToString("F", new CultureInfo("en-US")));
+            Assert.AreEqual(1234.567m.ToString("F", new CultureInfo("de-DE")), new Number(1234567, 3).ToString("F", new CultureInfo("de-DE")));
             Assert.AreEqual("1234.0", new Number(1234, 0).ToString("F1", new CultureInfo("en-US")));
             Assert.AreEqual("1234,0", new Number(1234, 0).ToString("F1", new CultureInfo("de-DE")));
             Assert.AreEqual("-1234.5600", new Number(-123456, 2).ToString("F4", new CultureInfo("en-US")));
@@ -384,25 +388,26 @@ namespace Millistream.Streaming.DataTypes.UnitTests
 
             //"G" or "g" - General
             Assert.AreEqual("-123.456", new Number(-123456, 3).ToString("G", new CultureInfo("en-US")));
-            Assert.AreEqual("-123,456", new Number(-123456, 3).ToString("G", new CultureInfo("sv-SE")));
+            
+            Assert.AreEqual($"{svSe.NegativeSign}123,456", new Number(-123456, 3).ToString("G", svSe));
             Assert.AreEqual("123.5", new Number(1234546, 4).ToString("G4", new CultureInfo("en-US")));
-            Assert.AreEqual("123,5", new Number(1234546, 4).ToString("G4", new CultureInfo("sv-SE")));
-            Assert.AreEqual("-0,000000000000000000000000123456789", CreateNumber("-0.000000000000000000000000123456789").ToString("G", new CultureInfo("sv-SE")));
+            Assert.AreEqual("123,5", new Number(1234546, 4).ToString("G4", svSe));
+            Assert.AreEqual($"{svSe.NegativeSign}0,000000000000000000000000123456789", CreateNumber("-0.000000000000000000000000123456789").ToString("G", svSe));
 
             //"N" or "n" - Number
-            Assert.AreEqual("1,234.57", new Number(1234567, 3).ToString("N", new CultureInfo("en-US")));
-            Assert.AreEqual("1 234,57", new Number(1234567, 3).ToString("N", new CultureInfo("sv-SE")));
+            Assert.AreEqual(1234.567m.ToString("N", new CultureInfo("en-US")), new Number(1234567, 3).ToString("N", new CultureInfo("en-US")));
+            Assert.AreEqual(1234.567m.ToString("N", svSe), new Number(1234567, 3).ToString("N", svSe));
             Assert.AreEqual("1,234.0", new Number(1234, 0).ToString("N1", new CultureInfo("en-US")));
-            Assert.AreEqual("1 234,0", new Number(1234, 0).ToString("N1", new CultureInfo("sv-SE")));
+            Assert.AreEqual("1 234,0", new Number(1234, 0).ToString("N1", svSe));
             Assert.AreEqual("-1,234.560", new Number(-123456, 2).ToString("N3", new CultureInfo("en-US")));
-            Assert.AreEqual("-1 234,560", new Number(-123456, 2).ToString("N3", new CultureInfo("sv-SE")));
+            Assert.AreEqual($"{svSe.NegativeSign}1 234,560", new Number(-123456, 2).ToString("N3", svSe));
 
             //"P" or "p" - Percent
-            Assert.AreEqual("100.00%", new Number(1, 0).ToString("P", new CultureInfo("en-US")));
-            Assert.AreEqual("100,00 %", new Number(1, 0).ToString("P", new CultureInfo("fr-FR")));
+            Assert.AreEqual(1.ToString("P", new CultureInfo("en-US")), new Number(1, 0).ToString("P", new CultureInfo("en-US")));
+            Assert.AreEqual(1.ToString("P", new CultureInfo("fr-FR")), new Number(1, 0).ToString("P", new CultureInfo("fr-FR")));
             Assert.AreEqual("-39.7%", new Number(-39678, 5).ToString("P1", new CultureInfo("en-US")));
             Assert.AreEqual("-39,7 %", new Number(-39678, 5).ToString("P1", new CultureInfo("fr-FR")));
-            Assert.AreEqual("-39,68 %", new Number(-39678, 5).ToString("P2", new CultureInfo("sv-SE")));
+            Assert.AreEqual($"{svSe.NegativeSign}39,68 %", new Number(-39678, 5).ToString("P2", svSe));
             Assert.AreEqual("3.97%", new Number(39678, 6).ToString("P2", new CultureInfo("en-US")));
             Assert.AreEqual("0.40%", new Number(39678, 7).ToString("P2", new CultureInfo("en-US")));
             Assert.AreEqual(10.ToString("p"), new Number(10, 0).ToString("p"));
@@ -438,8 +443,8 @@ namespace Millistream.Streaming.DataTypes.UnitTests
             //"‰" - Per mille placeholder
             Assert.AreEqual("36.97‰", new Number(3697, 5).ToString("#0.00‰", new CultureInfo("en-US")));
             Assert.AreEqual("36,97‰", new Number(3697, 5).ToString("#0.00‰", new CultureInfo("ru-RU")));
-            Assert.AreEqual("3,6970‰", new Number(3697, 6).ToString("#0.0000‰", new CultureInfo("sv-SE")));
-            Assert.AreEqual("369,70‰", new Number(3697, 4).ToString("#0.00‰", new CultureInfo("sv-SE")));
+            Assert.AreEqual("3,6970‰", new Number(3697, 6).ToString("#0.0000‰", svSe));
+            Assert.AreEqual("369,70‰", new Number(3697, 4).ToString("#0.00‰", svSe));
 
             //Exponential notation
             Assert.AreEqual("98.8e4", new Number(987654, 0).ToString("#0.0e0", new CultureInfo("en-US")));
