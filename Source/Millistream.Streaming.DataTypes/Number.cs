@@ -169,6 +169,7 @@ namespace Millistream.Streaming.DataTypes
         /// Gets the total number of digits in the <see cref="Number"/>.
         /// </summary>
         /// <returns>The total number of digits in the <see cref="Number"/></returns>
+        /// <exception cref="InvalidOperationException">The precision is greater than <see cref="int.MaxValue" />.</exception>
         public readonly int GetPrecision()
         {
             if (_isNull)
@@ -329,6 +330,7 @@ namespace Millistream.Streaming.DataTypes
         /// </summary>
         /// <param name="formatProvider"> An object that supplies culture-specific formatting information.</param>
         /// <returns>The string representation of the current <see cref="Number"/> value in the format specified by the <paramref name="formatProvider"/> parameter.</returns>
+        /// <exception cref="InvalidOperationException">The precision is greater than <see cref="int.MaxValue" />.</exception>
         public readonly string ToString(IFormatProvider formatProvider) => ToString(null, formatProvider);
 
         /// <summary>
@@ -337,6 +339,7 @@ namespace Millistream.Streaming.DataTypes
         /// <param name="format">A standard or custom numeric format string.</param>
         /// <returns>The string representation of the current <see cref="Number"/> value in the format specified by the <paramref name="format"/> parameter.</returns>
         /// <exception cref="FormatException"></exception>
+        /// <exception cref="InvalidOperationException">The precision is greater than <see cref="int.MaxValue" />.</exception>
         public readonly string ToString(string format) => ToString(format, NumberFormatInfo.CurrentInfo);
 
         /// <summary>
@@ -346,6 +349,7 @@ namespace Millistream.Streaming.DataTypes
         /// <param name="formatProvider"> An object that supplies culture-specific formatting information.</param>
         /// <returns>The string representation of the current <see cref="Number"/> value in the format specified by the <paramref name="formatProvider"/> and <paramref name="format"/> parameters.</returns>
         /// <exception cref="FormatException"></exception>
+        /// <exception cref="InvalidOperationException">The precision is greater than <see cref="int.MaxValue" />.</exception>
         public readonly string ToString(string format, IFormatProvider formatProvider) => NumberFormatter.Format(this, format, formatProvider);
 
         /// <summary>
@@ -365,6 +369,7 @@ namespace Millistream.Streaming.DataTypes
         /// Converts the value of the current <see cref="Number"/> object to its equivalent string representation.
         /// </summary>
         /// <returns>A string representation of the value of the current <see cref="Number"/> object.</returns>
+        /// <exception cref="InvalidOperationException">The precision is greater than 2,147,483,647.</exception>
         public readonly override string ToString() => ToString(null, NumberFormatInfo.CurrentInfo);
 
         private static bool TryParse(ReadOnlySpan<char> value, int scale, out Number number)
