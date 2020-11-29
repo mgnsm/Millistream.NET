@@ -12,6 +12,7 @@
     <Copyright>Copyright 2020 mgnsm</Copyright>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <RootNamespace>Millistream.Streaming.DataTypes</RootNamespace>
+    <PackageReleaseNotes>https://github.com/mgnsm/Millistream.NET/releases</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup>
