@@ -123,6 +123,27 @@ namespace Millistream.Streaming.DataTypes
         /// <returns>true if value was converted successfully; otherwise, false.</returns>
         public static bool TryParse(ReadOnlySpan<char> value, out List @list)
         {
+            try
+            {
+                Span<byte> bytes = stackalloc byte[value.Length];
+                Encoding.UTF8.GetBytes(value, bytes);
+                return TryParse(bytes, out @list);
+            }
+            catch
+            {
+                @list = default;
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Tries to convert a memory span that contains the bytes of a UTF-8 string representation of a space separated list of instrument references to its <see cref="List"/> equivalent and returns a value that indicates whether the conversion succeeded.
+        /// </summary>
+        /// <param name="value">The memory span that contains the UTF-8 string value to parse.</param>
+        /// <param name="list">The converted <see cref="List"/> value or default depending on whether the conversion succeeded or failed.</param>
+        /// <returns>true if value was converted successfully; otherwise, false.</returns>
+        public static bool TryParse(ReadOnlySpan<byte> value, out List @list)
+        {
             //trim leading spaces
             while (value.Length > 0 && value[0] == SpacePrefix)
                 value = value.Slice(1);
@@ -132,15 +153,15 @@ namespace Millistream.Streaming.DataTypes
             {
                 switch (value[0])
                 {
-                    case AddPrefix:
+                    case (byte)AddPrefix:
                         prefix = ListPrefix.Add;
                         value = value.Slice(1);
                         break;
-                    case RemovePrefix:
+                    case (byte)RemovePrefix:
                         prefix = ListPrefix.Remove;
                         value = value.Slice(1);
                         break;
-                    case ReplacePrefix:
+                    case (byte)ReplacePrefix:
                         prefix = ListPrefix.Replace;
                         value = value.Slice(1);
                         break;
@@ -151,10 +172,11 @@ namespace Millistream.Streaming.DataTypes
 
             List<InsRef> instrumentReferences = new List<InsRef>();
             int index;
-            while ((index = value.IndexOf(SpacePrefix)) != -1 && index < value.Length - 1)
+            const byte ByteSpace = (byte)SpacePrefix;
+            while ((index = value.IndexOf(ByteSpace)) != -1 && index < value.Length - 1)
             {
-                ReadOnlySpan<char> longChars = value.Slice(0, index);
-                if (!InsRef.TryParse(longChars, out InsRef insRef))
+                ReadOnlySpan<byte> longUtf8Bytes = value.Slice(0, index);
+                if (!InsRef.TryParse(longUtf8Bytes, out InsRef insRef))
                     return false;
                 instrumentReferences.Add(insRef);
                 value = value.Slice(index + 1);
@@ -172,19 +194,6 @@ namespace Millistream.Streaming.DataTypes
 
             @list = new List(prefix, instrumentReferences);
             return true;
-        }
-
-        /// <summary>
-        /// Tries to convert a memory span that contains the bytes of a UTF-8 string representation of a space separated list of instrument references to its <see cref="List"/> equivalent and returns a value that indicates whether the conversion succeeded.
-        /// </summary>
-        /// <param name="value">The memory span that contains the UTF-8 string value to parse.</param>
-        /// <param name="list">The converted <see cref="List"/> value or default depending on whether the conversion succeeded or failed.</param>
-        /// <returns>true if value was converted successfully; otherwise, false.</returns>
-        public static bool TryParse(ReadOnlySpan<byte> value, out List @list)
-        {
-            Span<char> chars = stackalloc char[value.Length];
-            Encoding.UTF8.GetChars(value, chars);
-            return TryParse(chars, out @list);
         }
 
         /// <summary>

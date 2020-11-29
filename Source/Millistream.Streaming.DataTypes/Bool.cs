@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers.Text;
 using System.Text;
 
 namespace Millistream.Streaming.DataTypes
@@ -47,9 +48,9 @@ namespace Millistream.Streaming.DataTypes
         /// <returns>true if value was converted successfully; otherwise, false.</returns>
         public static bool TryParse(ReadOnlySpan<char> value, out Bool @bool)
         {
-            if (value.Length == 1 && int.TryParse(value, out int i))
+            if (value.Length == 1 && byte.TryParse(value, out byte b))
             {
-                switch (i)
+                switch (b)
                 {
                     case 0:
                         @bool = new Bool(false);
@@ -71,11 +72,17 @@ namespace Millistream.Streaming.DataTypes
         /// <returns>true if value was converted successfully; otherwise, false.</returns>
         public static bool TryParse(ReadOnlySpan<byte> value, out Bool @bool)
         {
-            if (value.Length == 1)
+            if (value.Length == 1 && Utf8Parser.TryParse(value, out byte b, out int _))
             {
-                Span<char> chars = stackalloc char[1];
-                Encoding.UTF8.GetChars(value, chars);
-                return TryParse(chars, out @bool);
+                switch (b)
+                {
+                    case 0:
+                        @bool = new Bool(false);
+                        return true;
+                    case 1:
+                        @bool = new Bool(true);
+                        return true;
+                }
             }
             @bool = default;
             return false;

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Millistream.Streaming.DataTypes.Parsing;
+using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
@@ -117,26 +118,44 @@ namespace Millistream.Streaming.DataTypes
         /// <returns>true if the <paramref name="value"/> parameter was converted successfully; otherwise, false.</returns>
         public static bool TryParse(ReadOnlySpan<char> value, out Time time)
         {
+            if (value.Length < 8 || value.Length > 18)
+            {
+                time = default;
+                return false;
+            }
+            Span<byte> bytes = stackalloc byte[value.Length];
+            Encoding.UTF8.GetBytes(value, bytes);
+            return TryParse(bytes, out time);
+        }
+
+        /// <summary>
+        /// Tries to convert a memory span that contains the bytes of a UTF-8 string representation of a time to its <see cref="Time"/> equivalent and returns a value that indicates whether the conversion succeeded. Valid formats are HH:MM:SS, HH:MM:SS.mmm and HH:MM:SS.nnnnnnnnn.
+        /// </summary>
+        /// <param name="value">The memory span that contains the bytes of the UTF-8 string value to parse.</param>
+        /// <param name="time">Contains the <see cref="Time"/> value equivalent to the value contained in <paramref name="value"/>, if the conversion succeeded, or default if the conversion failed.</param>
+        /// <returns>true if the <paramref name="value"/> parameter was converted successfully; otherwise, false.</returns>
+        public static bool TryParse(ReadOnlySpan<byte> value, out Time time)
+        {
             if (value.Length >= 8
                 && value[2] == Colon && value[5] == Colon
-                && int.TryParse(value.Slice(0, 2), out int hours)
-                && int.TryParse(value.Slice(3, 2), out int minutes)
-                && int.TryParse(value.Slice(6, 2), out int seconds))
+                && Utf8Parser.TryParse(value.Slice(0, 2), out uint hours)
+                && Utf8Parser.TryParse(value.Slice(3, 2), out uint minutes)
+                && Utf8Parser.TryParse(value.Slice(6, 2), out uint seconds))
             {
                 try
                 {
                     switch (value.Length)
                     {
                         case 8: //HH:MM:SS
-                            time = new Time(hours, minutes, seconds);
+                            time = new Time((int)hours, (int)minutes, (int)seconds);
                             return true;
                         default:
-                            if (value[8] == Dot && int.TryParse(value[9..], out int fractionalSeconds))
+                            if (value[8] == Dot && Utf8Parser.TryParse(value[9..], out uint fractionalSeconds))
                             {
                                 switch (value.Length)
                                 {
                                     case 12: //HH:MM:SS.mmm
-                                        time = new Time(hours, minutes, seconds, fractionalSeconds, default);
+                                        time = new Time((int)hours, (int)minutes, (int)seconds, (int)fractionalSeconds, default);
                                         return true;
                                     case 18: //HH:MM:SS.nnnnnnnnn
                                         Span<char> destination = stackalloc char[9];
@@ -148,7 +167,7 @@ namespace Millistream.Streaming.DataTypes
                                                 && int.TryParse(destination.Slice(3, 6), out int nanoseconds))
                                                 || int.TryParse(destination.Slice(0, charsWritten), out nanoseconds))
                                             {
-                                                time = new Time(hours, minutes, seconds, milliseconds, nanoseconds);
+                                                time = new Time((int)hours, (int)minutes, (int)seconds, milliseconds, nanoseconds);
                                                 return true;
                                             }
                                         }
@@ -162,24 +181,6 @@ namespace Millistream.Streaming.DataTypes
             }
             time = default;
             return false;
-        }
-
-        /// <summary>
-        /// Tries to convert a memory span that contains the bytes of a UTF-8 string representation of a time to its <see cref="Time"/> equivalent and returns a value that indicates whether the conversion succeeded. Valid formats are HH:MM:SS, HH:MM:SS.mmm and HH:MM:SS.nnnnnnnnn.
-        /// </summary>
-        /// <param name="value">The memory span that contains the bytes of the UTF-8 string value to parse.</param>
-        /// <param name="time">Contains the <see cref="Time"/> value equivalent to the value contained in <paramref name="value"/>, if the conversion succeeded, or default if the conversion failed.</param>
-        /// <returns>true if the <paramref name="value"/> parameter was converted successfully; otherwise, false.</returns>
-        public static bool TryParse(ReadOnlySpan<byte> value, out Time time)
-        {
-            if (value.Length < 8 || value.Length > 18)
-            {
-                time = default;
-                return false;
-            }
-            Span<char> chars = stackalloc char[value.Length];
-            Encoding.UTF8.GetChars(value, chars);
-            return TryParse(chars, out time);
         }
 
         /// <summary>

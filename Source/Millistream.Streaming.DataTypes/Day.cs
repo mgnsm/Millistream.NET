@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Millistream.Streaming.DataTypes.Parsing;
+using System;
 using System.Text;
 
 namespace Millistream.Streaming.DataTypes
@@ -74,20 +75,11 @@ namespace Millistream.Streaming.DataTypes
         /// <returns>true if the <paramref name="value"/> parameter was converted successfully; otherwise, false.</returns>
         public static bool TryParse(ReadOnlySpan<char> value, out Day day)
         {
-            const char Separator = '-';
-            if (value.Length == 10
-                && value[4] == Separator
-                && value[7] == Separator
-                && int.TryParse(value.Slice(0, 4), out int year)
-                && int.TryParse(value.Slice(5, 2), out int month)
-                && int.TryParse(value.Slice(8, 2), out int dayNumber))
+            if (value.Length == 10)
             {
-                try
-                {
-                    day = new Day(new Month(new Year(year), month), dayNumber);
-                    return true;
-                }
-                catch { }
+                Span<byte> bytes = stackalloc byte[10];
+                Encoding.UTF8.GetBytes(value, bytes);
+                return TryParse(bytes, out day);
             }
             day = default;
             return false;
@@ -101,11 +93,20 @@ namespace Millistream.Streaming.DataTypes
         /// <returns>true if the <paramref name="value"/> parameter was converted successfully; otherwise, false.</returns>
         public static bool TryParse(ReadOnlySpan<byte> value, out Day day)
         {
-            if (value.Length == 10)
+            const byte Separator = (byte)'-';
+            if (value.Length == 10
+                && value[4] == Separator
+                && value[7] == Separator
+                && Utf8Parser.TryParse(value.Slice(0, 4), out uint year)
+                && Utf8Parser.TryParse(value.Slice(5, 2), out uint month)
+                && Utf8Parser.TryParse(value.Slice(8, 2), out uint dayNumber))
             {
-                Span<char> chars = stackalloc char[value.Length];
-                Encoding.UTF8.GetChars(value, chars);
-                return TryParse(chars, out day);
+                try
+                {
+                    day = new Day(new Month(new Year((int)year), (int)month), (int)dayNumber);
+                    return true;
+                }
+                catch { }
             }
             day = default;
             return false;

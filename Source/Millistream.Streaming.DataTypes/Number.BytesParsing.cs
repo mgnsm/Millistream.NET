@@ -1,7 +1,7 @@
 ﻿using Millistream.Streaming.DataTypes.Formatting;
+using Millistream.Streaming.DataTypes.Parsing;
 using System;
 using System.Numerics;
-using System.Runtime.CompilerServices;
 
 namespace Millistream.Streaming.DataTypes
 {
@@ -52,7 +52,7 @@ namespace Millistream.Streaming.DataTypes
                 case Plus:
                     index++;
                     // Sign must be followed by a digit.
-                    if (index == value.Length || !IsDigit(value[index] - 48))
+                    if (index == value.Length || !ParserHelpers.IsDigit(value[index] - 48))
                     {
                         number = default;
                         return false;
@@ -75,7 +75,7 @@ namespace Millistream.Streaming.DataTypes
                     break;
             }
 
-            // Throw away any leading zeroes
+            // Throw away any leading zeroes.
             while (index != value.Length)
             {
                 c = value[index];
@@ -89,7 +89,7 @@ namespace Millistream.Streaming.DataTypes
             for (; index < length; index++)
             {
                 int nextDigit = value[index] - 48;
-                if (!IsDigit(nextDigit))
+                if (!ParserHelpers.IsDigit(nextDigit))
                     break;
                 parsedValue = parsedValue * 10 + nextDigit;
             }
@@ -110,7 +110,7 @@ namespace Millistream.Streaming.DataTypes
                 {
                     c = value[index];
                     int nextDigit = c - 48;
-                    if (!IsDigit(nextDigit))
+                    if (!ParserHelpers.IsDigit(nextDigit))
                     {
                         number = default;
                         return false;
@@ -142,7 +142,7 @@ namespace Millistream.Streaming.DataTypes
 
                 // Try to squeeze in another digit into the Int64.
                 int digit = value[index] - 48;
-                if (!IsDigit(digit))
+                if (!ParserHelpers.IsDigit(digit))
                 {
                     number = default;
                     return false;
@@ -161,7 +161,7 @@ namespace Millistream.Streaming.DataTypes
                 for (; index < value.Length; index++)
                 {
                     int nextDigit = value[index] - 48;
-                    if (!IsDigit(nextDigit))
+                    if (!ParserHelpers.IsDigit(nextDigit))
                     {
                         number = default;
                         return false;
@@ -185,7 +185,7 @@ namespace Millistream.Streaming.DataTypes
             {
                 // The parsed value may be too big to fit into an Int64.
                 int nextDigit = c - 48;
-                if (!IsDigit(nextDigit))
+                if (!ParserHelpers.IsDigit(nextDigit))
                 {
                     number = default;
                     return false;
@@ -208,7 +208,7 @@ namespace Millistream.Streaming.DataTypes
                 {
                     c = value[index];
                     nextDigit = c - 48;
-                    if (!IsDigit(nextDigit))
+                    if (!ParserHelpers.IsDigit(nextDigit))
                     {
                         if (c != Period)
                         {
@@ -232,7 +232,7 @@ namespace Millistream.Streaming.DataTypes
                 for (; index < value.Length; index++)
                 {
                     nextDigit = value[index] - 48;
-                    if (!IsDigit(nextDigit))
+                    if (!ParserHelpers.IsDigit(nextDigit))
                     {
                         number = default;
                         return false;
@@ -253,8 +253,5 @@ namespace Millistream.Streaming.DataTypes
                 return true;
             }
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsDigit(int digit) => digit > -1 && digit < 10;
     }
 }
