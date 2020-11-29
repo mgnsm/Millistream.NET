@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Millistream.Streaming.DataTypes.Parsing;
+using System;
 using System.Text;
 
 namespace Millistream.Streaming.DataTypes
@@ -66,18 +67,11 @@ namespace Millistream.Streaming.DataTypes
         /// <returns>true if the <paramref name="value"/> parameter was converted successfully; otherwise, false.</returns>
         public static bool TryParse(ReadOnlySpan<char> value, out Quarter quarter)
         {
-            if (value.Length == 7
-                && value[4] == '-'
-                && value[5] == 'Q'
-                && int.TryParse(value.Slice(0, 4), out int year)
-                && int.TryParse(value.Slice(6, 1), out int q))
+            if (value.Length == 7)
             {
-                try
-                {
-                    quarter = new Quarter(new Year(year), q);
-                    return true;
-                }
-                catch { }
+                Span<byte> bytes = stackalloc byte[7];
+                Encoding.UTF8.GetBytes(value, bytes);
+                return TryParse(bytes, out quarter);
             }
             quarter = default;
             return false;
@@ -91,11 +85,18 @@ namespace Millistream.Streaming.DataTypes
         /// <returns>true if the <paramref name="value"/> parameter was converted successfully; otherwise, false.</returns>
         public static bool TryParse(ReadOnlySpan<byte> value, out Quarter quarter)
         {
-            if (value.Length == 7)
+            if (value.Length == 7
+                && value[4] == (byte)'-'
+                && value[5] == (byte)'Q'
+                && Utf8Parser.TryParse(value.Slice(0, 4), out uint year)
+                && Utf8Parser.TryParse(value.Slice(6, 1), out uint q))
             {
-                Span<char> chars = stackalloc char[value.Length];
-                Encoding.UTF8.GetChars(value, chars);
-                return TryParse(chars, out quarter);
+                try
+                {
+                    quarter = new Quarter(new Year((int)year), (int)q);
+                    return true;
+                }
+                catch { }
             }
             quarter = default;
             return false;

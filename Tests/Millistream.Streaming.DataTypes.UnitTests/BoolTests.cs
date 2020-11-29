@@ -55,6 +55,8 @@ namespace Millistream.Streaming.DataTypes.UnitTests
             Assert.AreEqual(default, @bool);
             Assert.IsFalse(Bool.TryParse("11", out @bool));
             Assert.AreEqual(default, @bool);
+            Assert.IsFalse(Bool.TryParse("1.", out _));
+            Assert.IsFalse(Bool.TryParse("1.1", out _));
         }
 
         [TestMethod]

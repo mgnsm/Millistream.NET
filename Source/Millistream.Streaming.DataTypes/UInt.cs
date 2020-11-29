@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Millistream.Streaming.DataTypes.Parsing;
+using System;
 using System.Text;
 
 namespace Millistream.Streaming.DataTypes
@@ -64,14 +65,13 @@ namespace Millistream.Streaming.DataTypes
         /// <returns>true if the <paramref name="value"/> parameter was converted successfully; otherwise, false.</returns>
         public static bool TryParse(ReadOnlySpan<byte> value, out UInt @uint)
         {
-            if (value.Length > 10)
+            if (Utf8Parser.TryParse(value, out uint i))
             {
-                @uint = default;
-                return false;
+                @uint = new UInt(i);
+                return true;
             }
-            Span<char> chars = stackalloc char[value.Length];
-            Encoding.UTF8.GetChars(value, chars);
-            return TryParse(chars, out @uint);
+            @uint = default;
+            return false;
         }
 
         /// <summary>
