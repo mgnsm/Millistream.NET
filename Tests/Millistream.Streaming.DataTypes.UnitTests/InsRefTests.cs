@@ -58,6 +58,10 @@ namespace Millistream.Streaming.DataTypes.UnitTests
             Assert.AreEqual(default, insRef);
             Assert.IsFalse(InsRef.TryParse("184467440737095516150".GetBytes(), out insRef));
             Assert.AreEqual(default, insRef);
+            Assert.IsTrue(InsRef.TryParse("00000000000000000000000184467440".GetBytes(), out insRef));
+            Assert.AreEqual(184467440ul, insRef);
+            Assert.IsFalse(InsRef.TryParse("00000000000000000000000184467440737095516150".GetBytes(), out insRef));
+            Assert.AreEqual(default, insRef);
         }
 
         [TestMethod]

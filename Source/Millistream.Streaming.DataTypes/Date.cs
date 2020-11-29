@@ -192,6 +192,24 @@ namespace Millistream.Streaming.DataTypes
         /// <returns>true if the <paramref name="value"/> parameter was converted successfully; otherwise, false.</returns>
         public static bool TryParse(ReadOnlySpan<char> value, out Date date)
         {
+            if (value.Length > 10)
+            {
+                date = default;
+                return false;
+            }
+            Span<byte> bytes = stackalloc byte[value.Length];
+            Encoding.UTF8.GetBytes(value, bytes);
+            return TryParse(bytes, out date);
+        }
+
+        /// <summary>
+        /// Tries to convert a memory span that contains the bytes of a UTF-8 string representation of a date to its <see cref="Date"/> equivalent and returns a value that indicates whether the conversion succeeded. Valid formats are YYYY-MM-DD, YYYY-MM, YYYY, YYYY-Qx (where x is a quarter between 1 and 4), YYYY-Tx (where t is a tertiary between 1 and 3), YYYY-Hx (where x is a semi-annual between 1 and 2) and YYYY-Wxx (where xx is a ISO-8601 week number between 1 and 53).
+        /// </summary>
+        /// <param name="value">The memory span that contains the bytes of the UTF-8 string value to parse.</param>
+        /// <param name="date">Contains the <see cref="Date"/> value equivalent to the value contained in <paramref name="value"/>, if the conversion succeeded, or default if the conversion failed.</param>
+        /// <returns>true if the <paramref name="value"/> parameter was converted successfully; otherwise, false.</returns>
+        public static bool TryParse(ReadOnlySpan<byte> value, out Date date)
+        {
             switch (value.Length)
             {
                 case 4: //YYYY
@@ -202,31 +220,31 @@ namespace Millistream.Streaming.DataTypes
                     }
                     break;
                 case 7:
-                    char c = value[5];
+                    byte c = value[5];
                     switch (c)
                     {
-                        case 'H': //YYYY-Hx (x is the semi-annual; 1-2)
+                        case (byte)'H': //YYYY-Hx (x is the semi-annual; 1-2)
                             if (DataTypes.SemiAnnual.TryParse(value, out SemiAnnual semiAnnual))
                             {
                                 date = new Date(semiAnnual);
                                 return true;
                             }
                             break;
-                        case 'Q': //YYYY-Qx (x is the quarter; 1-4)
+                        case (byte)'Q': //YYYY-Qx (x is the quarter; 1-4)
                             if (DataTypes.Quarter.TryParse(value, out Quarter quarter))
                             {
                                 date = new Date(quarter);
                                 return true;
                             }
                             break;
-                        case 'T': //YYYY-Tx (x is the tertiary; 1-3)
+                        case (byte)'T': //YYYY-Tx (x is the tertiary; 1-3)
                             if (DataTypes.Tertiary.TryParse(value, out Tertiary tertiary))
                             {
                                 date = new Date(tertiary);
                                 return true;
                             }
                             break;
-                        case 'W': //YYYY-Wx (x is the ISO-8601 week number; 1-53)
+                        case (byte)'W': //YYYY-Wx (x is the ISO-8601 week number; 1-53)
                             if (DataTypes.Week.TryParse(value, out Week weekWithOneDigit))
                             {
                                 date = new Date(weekWithOneDigit);
@@ -259,24 +277,6 @@ namespace Millistream.Streaming.DataTypes
             }
             date = default;
             return false;
-        }
-
-        /// <summary>
-        /// Tries to convert a memory span that contains the bytes of a UTF-8 string representation of a date to its <see cref="Date"/> equivalent and returns a value that indicates whether the conversion succeeded. Valid formats are YYYY-MM-DD, YYYY-MM, YYYY, YYYY-Qx (where x is a quarter between 1 and 4), YYYY-Tx (where t is a tertiary between 1 and 3), YYYY-Hx (where x is a semi-annual between 1 and 2) and YYYY-Wxx (where xx is a ISO-8601 week number between 1 and 53).
-        /// </summary>
-        /// <param name="value">The memory span that contains the bytes of the UTF-8 string value to parse.</param>
-        /// <param name="date">Contains the <see cref="Date"/> value equivalent to the value contained in <paramref name="value"/>, if the conversion succeeded, or default if the conversion failed.</param>
-        /// <returns>true if the <paramref name="value"/> parameter was converted successfully; otherwise, false.</returns>
-        public static bool TryParse(ReadOnlySpan<byte> value, out Date date)
-        {
-            if (value.Length > 10)
-            {
-                date = default;
-                return false;
-            }
-            Span<char> chars = stackalloc char[value.Length];
-            Encoding.UTF8.GetChars(value, chars);
-            return TryParse(chars, out date);
         }
 
         /// <summary>

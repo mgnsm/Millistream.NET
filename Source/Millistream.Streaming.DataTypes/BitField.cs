@@ -1,5 +1,5 @@
-﻿using System;
-using System.Text;
+﻿using Millistream.Streaming.DataTypes.Parsing;
+using System;
 
 namespace Millistream.Streaming.DataTypes
 {
@@ -54,9 +54,9 @@ namespace Millistream.Streaming.DataTypes
         /// <returns>true if the <paramref name="value"/> parameter was converted successfully; otherwise, false.</returns>
         public static bool TryParse(ReadOnlySpan<char> value, out BitField bitField)
         {
-            if (uint.TryParse(value, out uint i))
+            if (uint.TryParse(value, out uint flag))
             {
-                bitField = new BitField(i);
+                bitField = new BitField(flag);
                 return true;
             }
             bitField = default;
@@ -71,14 +71,13 @@ namespace Millistream.Streaming.DataTypes
         /// <returns>true if the <paramref name="value"/> parameter was converted successfully; otherwise, false.</returns>
         public static bool TryParse(ReadOnlySpan<byte> value, out BitField bitField)
         {
-            if (value.Length > 10)
+            if (Utf8Parser.TryParse(value, out uint flag))
             {
-                bitField = default;
-                return false;
+                bitField = new BitField(flag);
+                return true;
             }
-            Span<char> chars = stackalloc char[value.Length];
-            Encoding.UTF8.GetChars(value, chars);
-            return TryParse(chars, out bitField);
+            bitField = default;
+            return false;
         }
 
         /// <summary>

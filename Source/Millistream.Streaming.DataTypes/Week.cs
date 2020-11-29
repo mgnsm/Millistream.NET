@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Millistream.Streaming.DataTypes.Parsing;
+using System;
 using System.Text;
 
 namespace Millistream.Streaming.DataTypes
@@ -65,21 +66,14 @@ namespace Millistream.Streaming.DataTypes
         /// <returns>true if the <paramref name="value"/> parameter was converted successfully; otherwise, false.</returns>
         public static bool TryParse(ReadOnlySpan<char> value, out Week week)
         {
-            if ((value.Length == 7 || value.Length == 8)
-                && value[4] == '-'
-                && value[5] == 'W'
-                && int.TryParse(value.Slice(0, 4), out int year)
-                && int.TryParse(value[6..], out int weekNumber))
+            if (value.Length < 7 || value.Length > 8)
             {
-                try
-                {
-                    week = new Week(new Year(year), weekNumber);
-                    return true;
-                }
-                catch { }
+                week = default;
+                return false;
             }
-            week = default;
-            return false;
+            Span<byte> bytes = stackalloc byte[value.Length];
+            Encoding.UTF8.GetBytes(value, bytes);
+            return TryParse(bytes, out week);
         }
 
         /// <summary>
@@ -90,14 +84,21 @@ namespace Millistream.Streaming.DataTypes
         /// <returns>true if the <paramref name="value"/> parameter was converted successfully; otherwise, false.</returns>
         public static bool TryParse(ReadOnlySpan<byte> value, out Week week)
         {
-            if (value.Length < 7 || value.Length > 8)
+            if ((value.Length == 7 || value.Length == 8)
+                && value[4] == (byte)'-'
+                && value[5] == (byte)'W'
+                && Utf8Parser.TryParse(value.Slice(0, 4), out uint year)
+                && Utf8Parser.TryParse(value[6..], out uint weekNumber))
             {
-                week = default;
-                return false;
+                try
+                {
+                    week = new Week(new Year((int)year), (int)weekNumber);
+                    return true;
+                }
+                catch { }
             }
-            Span<char> chars = stackalloc char[value.Length];
-            Encoding.UTF8.GetChars(value, chars);
-            return TryParse(chars, out week);
+            week = default;
+            return false;
         }
 
         /// <summary>

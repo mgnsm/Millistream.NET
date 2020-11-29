@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Millistream.Streaming.DataTypes.Parsing;
+using System;
 using System.Text;
 
 namespace Millistream.Streaming.DataTypes
@@ -47,14 +48,11 @@ namespace Millistream.Streaming.DataTypes
         /// <returns>true if the <paramref name="value"/> parameter was converted successfully; otherwise, false.</returns>
         public static bool TryParse(ReadOnlySpan<char> value, out Year year)
         {
-            if (value.Length == 4 && int.TryParse(value, out int y))
+            if (value.Length == 4)
             {
-                try
-                {
-                    year = new Year(y);
-                    return true;
-                }
-                catch { }
+                Span<byte> bytes = stackalloc byte[4];
+                Encoding.UTF8.GetBytes(value, bytes);
+                return TryParse(bytes, out year);
             }
             year = default;
             return false;
@@ -70,9 +68,24 @@ namespace Millistream.Streaming.DataTypes
         {
             if (value.Length == 4)
             {
-                Span<char> chars = stackalloc char[value.Length];
-                Encoding.UTF8.GetChars(value, chars);
-                return TryParse(chars, out year);
+                int y = 0;
+                for (int i = 0; i < 4; i++)
+                {
+                    int digit = value[i] - '0';
+                    if (!ParserHelpers.IsDigit(digit))
+                    {
+                        year = default;
+                        return false;
+                    }
+                    y = y * 10 + digit;
+                }
+
+                try
+                {
+                    year = new Year(y);
+                    return true;
+                }
+                catch { }
             }
             year = default;
             return false;

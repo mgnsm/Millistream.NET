@@ -1,5 +1,5 @@
-﻿using System;
-using System.Text;
+﻿using Millistream.Streaming.DataTypes.Parsing;
+using System;
 
 namespace Millistream.Streaming.DataTypes
 {
@@ -64,14 +64,106 @@ namespace Millistream.Streaming.DataTypes
         /// <returns>true if the <paramref name="value"/> parameter was converted successfully; otherwise, false.</returns>
         public static bool TryParse(ReadOnlySpan<byte> value, out InsRef insRef)
         {
-            if (value.Length > 20)
+            const int Int64OverflowLength = 19;
+
+            if (value.Length < 1)
             {
                 insRef = default;
                 return false;
             }
-            Span<char> chars = stackalloc char[value.Length];
-            Encoding.UTF8.GetChars(value, chars);
-            return TryParse(chars, out insRef);
+
+            int index = 0;
+
+            // Throw away any leading spaces.
+            const int Space = 32;
+            byte b = value[0];
+            if (b == Space)
+            {
+                do
+                {
+                    index++;
+                    if (index >= value.Length)
+                    {
+                        insRef = default;
+                        return false;
+                    }
+                    b = value[index];
+                } while (b == Space);
+            }
+
+            // Throw away any trailing spaces.
+            int length = value.Length;
+            if (value[length - 1] == Space)
+            {
+                do
+                {
+                    length--;
+                } while (value[length - 1] == Space && length > 0);
+            }
+
+            // Parse the first digit separately. If invalid here, we need to return false.
+            ulong parsedValue = b - 48u; // '0'
+            if (parsedValue > 9)
+            {
+                insRef = default;
+                return false;
+            }
+
+            if (++index == length)
+            {
+                insRef = new InsRef(parsedValue);
+                return true;
+            }
+
+            if ((length - index) < Int64OverflowLength)
+            {
+                // Length is less than Parsers.Int64OverflowLength; overflow is not possible
+                for (; index < length; index++)
+                {
+                    ulong nextDigit = value[index] - 48u; // '0'
+                    if (nextDigit > 9)
+                    {
+                        insRef = default;
+                        return false;
+                    }
+                    parsedValue = parsedValue * 10 + nextDigit;
+                }
+            }
+            else
+            {
+                // Length is greater than Parsers.Int64OverflowLength; overflow is only possible after Parsers.Int64OverflowLength
+                // digits. There may be no overflow after Parsers.Int64OverflowLength if there are leading zeroes.
+                for (; index < Int64OverflowLength - 1; index++)
+                {
+                    ulong nextDigit = value[index] - 48u; // '0'
+                    if (nextDigit > 9)
+                    {
+                        insRef = default;
+                        return false;
+                    }
+                    parsedValue = parsedValue * 10 + nextDigit;
+                }
+                for (int i = Int64OverflowLength - 1; i < value.Length; i++)
+                {
+                    ulong nextDigit = value[i] - 48u; // '0'
+                    if (nextDigit > 9)
+                    {
+                        insRef = default;
+                        return false;
+                    }
+                    // If parsedValue > (ulong.MaxValue / 10), any more appended digits will cause overflow.
+                    // if parsedValue == (ulong.MaxValue / 10), any nextDigit greater than 5 implies overflow.
+                    if (parsedValue > ulong.MaxValue / 10 || (parsedValue == ulong.MaxValue / 10 && nextDigit > 5))
+                    {
+                        insRef = default;
+                        return false;
+                    }
+                    parsedValue = parsedValue * 10 + nextDigit;
+                }
+            }
+
+            insRef = new InsRef(parsedValue);
+            return true;
         }
 
         /// <summary>
