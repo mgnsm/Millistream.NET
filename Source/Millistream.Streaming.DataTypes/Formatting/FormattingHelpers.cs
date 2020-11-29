@@ -1,11 +1,11 @@
-﻿using System.Numerics;
+﻿using System;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 
 namespace Millistream.Streaming.DataTypes.Formatting
 {
     internal static class FormattingHelpers
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static int CountDigits(BigInteger bigInteger)
         {
             if (bigInteger < BigInteger.Zero)
@@ -20,6 +20,8 @@ namespace Millistream.Streaming.DataTypes.Formatting
             do
             {
                 bigInteger /= 10;
+                if (precision == int.MaxValue)
+                    throw new InvalidOperationException();
                 precision++;
             }
             while (bigInteger >= 1000000000000000000);
