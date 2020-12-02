@@ -16,6 +16,6 @@
         /// </summary>
         public MessageReference MessageReference { get; }
 
-        internal abstract void AddFields(IMessage message);
+        internal abstract void AddFields(Message message);
     }
 }
