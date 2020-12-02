@@ -39,7 +39,7 @@
         #endregion
 
         #region Methods
-        internal override void AddFields(IMessage message)
+        internal override void AddFields(Message message)
         {
             message.Add(0, MessageReference);
             message.AddRequestClasses(s_requestClasses);

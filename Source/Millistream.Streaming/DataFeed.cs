@@ -32,7 +32,7 @@ namespace Millistream.Streaming
         private readonly INativeImplementation _nativeImplementation;
         private readonly IntPtr _feedHandle;
         private readonly IntPtr _messageHandle;
-        private readonly IMessage _message;
+        private readonly Message _message;
         private readonly mdf_status_callback _statusCallback;
         private readonly mdf_data_callback _dataCallback;
         private bool _hasConnected;
