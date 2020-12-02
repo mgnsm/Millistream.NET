@@ -1,5 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -186,6 +187,41 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.IsTrue(receivedMessageTypes.Count > 1);
             Assert.IsTrue(receivedInstrumentReferences.Count > 1);
             UnsubscribeAndClear(null);
+        }
+
+        [TestMethod]
+        public void CreateInstrumentsTest()
+        {
+            const string RequestId = "rid3";
+            bool? succeeded = default;
+            using AutoResetEvent autoResetEvent = new AutoResetEvent(false);
+            void OnNext(ResponseMessage responseMessage)
+            {
+                switch (responseMessage.MessageReference)
+                {
+                    case MessageReference.MDF_M_INSREF:
+                        succeeded = true;
+                        autoResetEvent.Set();
+                        break;
+                    case MessageReference.MDF_M_REQUESTFINISHED:
+                        if (responseMessage.Fields.TryGetValue(Field.MDF_F_REQUESTSTATUS, out ReadOnlyMemory<byte> value)
+                            && Utf8Parser.TryParse(value.Span, out uint @uint, out int _)
+                            && @uint == 101)
+                        {
+                            //no permissions to create instruments
+                            succeeded = false;
+                            autoResetEvent.Set();
+                        }
+                        break;
+                }
+            }
+
+            using DataFeed dataFeed = new DataFeed();
+            using IDisposable sub = dataFeed.Data.Subscribe(new ResponseMessageObserver(OnNext, null, null));
+            Connect(dataFeed);
+            dataFeed.Request(new CreateInstrumentMessage(2) { RequestId = RequestId });
+            autoResetEvent.WaitOne();
+            Assert.IsTrue(succeeded.HasValue);
         }
 
         private void Connect(IDataFeed dataFeed) =>
