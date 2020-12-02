@@ -34,6 +34,15 @@ namespace Millistream.Streaming.UnitTests
             //The Connect method should return true whenever mdf_get_next_message returns 1 and sets message to MDF_M_LOGONGREETING.
             Assert.IsTrue(dataFeed.Connect(Host, Username, Password));
 
+            const string ExtraCredential = "extra_credential";
+            nativeImplementationMock.Verify(x => x.mdf_message_add(It.IsAny<IntPtr>(), 0, (int)MessageReference.MDF_M_LOGON));
+            nativeImplementationMock.Verify(x => x.mdf_message_add_string(It.IsAny<IntPtr>(), (uint)Field.MDF_F_USERNAME, Username));
+            nativeImplementationMock.Verify(x => x.mdf_message_add_string(It.IsAny<IntPtr>(), (uint)Field.MDF_F_PASSWORD, Password));
+            nativeImplementationMock.Verify(x => x.mdf_message_add_string(It.IsAny<IntPtr>(), (uint)Field.MDF_F_EXTRACREDENTIAL, ExtraCredential), Times.Never);
+
+            Assert.IsTrue(dataFeed.Connect(Host, Username, Password, ExtraCredential));
+            nativeImplementationMock.Verify(x => x.mdf_message_add_string(It.IsAny<IntPtr>(), (uint)Field.MDF_F_EXTRACREDENTIAL, ExtraCredential));
+
             //The Disconnect() method should be called if the Connect method is called again
             Assert.IsTrue(dataFeed.Connect(Host, Username, Password));
             nativeImplementationMock.Verify(x => x.mdf_disconnect(It.IsAny<IntPtr>()));

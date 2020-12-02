@@ -177,7 +177,19 @@ namespace Millistream.Streaming
         /// <param name="username">The username to authenticate with the server.</param>
         /// <param name="password">The password to authenticate with the server.</param>
         /// <returns>A value indicating whether the connect attempt was successful.</returns>
-        public bool Connect(string host, string username, string password)
+        public bool Connect(string host, string username, string password) =>
+            Connect(host, username, password, null);
+
+        /// <summary>
+        /// Connects to the first server in <paramref name="host"/>, which can be a comma separated list of 'host:port' pairs, where 'host' can be a DNS host name or an ip address (IPv6 addressed must be enclosed in brackets).
+        /// The method will try each server in turn until it find one that answers.
+        /// </summary>
+        /// <param name="host">A comma separated list of 'host:port' pairs to try to connect to.</param>
+        /// <param name="username">The username to authenticate with the server.</param>
+        /// <param name="password">The password to authenticate with the server.</param>
+        /// <param name="extraCredential">An extra credential that is required if the account is setup to use two-factor authentication.</param>
+        /// <returns>A value indicating whether the connect attempt was successful.</returns>
+        public bool Connect(string host, string username, string password, string extraCredential)
         {
             if (string.IsNullOrEmpty(host))
                 throw new ArgumentNullException(nameof(host));
@@ -189,7 +201,7 @@ namespace Millistream.Streaming
             lock (_lock)
             {
                 ThrowIfDisposed();
-                
+
                 //enable the connection status callback
                 if (_hasConnected)
                     Disconnect();
@@ -204,6 +216,8 @@ namespace Millistream.Streaming
                 _nativeImplementation.mdf_message_add(_messageHandle, 0, (int)MessageReference.MDF_M_LOGON);
                 _nativeImplementation.mdf_message_add_string(_messageHandle, (uint)Field.MDF_F_USERNAME, username);
                 _nativeImplementation.mdf_message_add_string(_messageHandle, (uint)Field.MDF_F_PASSWORD, password);
+                if (!string.IsNullOrEmpty(extraCredential))
+                    _nativeImplementation.mdf_message_add_string(_messageHandle, (uint)Field.MDF_F_EXTRACREDENTIAL, extraCredential);
                 _nativeImplementation.mdf_message_send(_feedHandle, _messageHandle);
                 _nativeImplementation.mdf_message_reset(_messageHandle);
 
