@@ -468,6 +468,14 @@ namespace Millistream.Streaming.UnitTests
             _ = dataFeed.TimeDifference;
         }
 
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void CannotSubscribeWithInsRefRequestClass()
+        {
+            using DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object);
+            dataFeed.Request(new SubscribeMessage(RequestType.MDF_RT_FULL, new RequestClass[1] { RequestClass.MDF_RC_INSREF }));
+        }
+
         private void GetAndSetPropertyTest(MDF_OPTION option, Func<DataFeed, int> getter, Action<DataFeed> setter)
         {
             const int Value = 5;
