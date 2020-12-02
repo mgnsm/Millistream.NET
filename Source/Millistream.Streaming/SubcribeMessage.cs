@@ -31,10 +31,20 @@ namespace Millistream.Streaming
         #endregion
 
         #region Properties
+        private IEnumerable<RequestClass> _requestClasses;
         /// <summary>
         ///  An enumerable sequence of the request classes to be requested. If the sequence is empty, the request will be for all request classes available. 
         /// </summary>
-        public IEnumerable<RequestClass> RequestClasses { get; set; }
+        public IEnumerable<RequestClass> RequestClasses
+        {
+            get => _requestClasses;
+            set
+            {
+                if (value != null && value.Contains(RequestClass.MDF_RC_INSREF))
+                    throw new ArgumentException($"Invalid request class {RequestClass.MDF_RC_INSREF}. The {nameof(CreateInstrumentMessage)} type must be used to request new instrument references to be created.");
+                _requestClasses = value;
+            }
+        }
 
         /// <summary>
         /// The type of request to be sent.
