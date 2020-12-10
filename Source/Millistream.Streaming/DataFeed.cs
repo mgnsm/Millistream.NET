@@ -26,7 +26,6 @@ namespace Millistream.Streaming
         private static readonly ImmutableHashSet<uint> s_fieldReferences = ImmutableHashSet.Create((uint[])Enum.GetValues(typeof(Field)));
         private static readonly Func<ResponseMessage> s_responseMessageFactory = () => new ResponseMessage();
         private readonly object _lock = new object();
-        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         private readonly ObjectPool<ResponseMessage> _objectPool = new ObjectPool<ResponseMessage>(s_responseMessageFactory);
         private readonly Subject<ResponseMessage> _subject = new Subject<ResponseMessage>();
         private readonly INativeImplementation _nativeImplementation;
@@ -35,6 +34,7 @@ namespace Millistream.Streaming
         private readonly Message _message;
         private readonly mdf_status_callback _statusCallback;
         private readonly mdf_data_callback _dataCallback;
+        private CancellationTokenSource _cancellationTokenSource;
         private bool _hasConnected;
         private Task _consumeTask;
         private bool _isDisposed;
@@ -240,6 +240,7 @@ namespace Millistream.Streaming
                                         //enable data callbacks
                                         _nativeImplementation.mdf_set_property(_feedHandle, MDF_OPTION.MDF_OPT_DATA_CALLBACK_FUNCTION, Marshal.GetFunctionPointerForDelegate(_dataCallback));
                                         //start consuming the feed on a background thread
+                                        _cancellationTokenSource = new CancellationTokenSource();
                                         _consumeTask = Task.Factory.StartNew(Consume, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning);
                                         _hasConnected = true;
                                         return true;
@@ -265,13 +266,16 @@ namespace Millistream.Streaming
             {
                 ThrowIfDisposed();
                 //wait for the consume task to finish
-                if (_consumeTask != null)
+                if (_cancellationTokenSource != null)
                 {
                     _cancellationTokenSource.Cancel();
-                    _consumeTask.Wait();
+                    _consumeTask?.Wait();
+                    _cancellationTokenSource.Dispose();
+                    _cancellationTokenSource = null;
                 }
                 Logout();
                 _nativeImplementation.mdf_disconnect(_feedHandle);
+                _hasConnected = false;
             }
         }
 
