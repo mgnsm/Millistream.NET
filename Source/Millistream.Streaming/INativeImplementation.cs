@@ -31,5 +31,6 @@ namespace Millistream.Streaming
         int mdf_message_get_num(IntPtr message);
         int mdf_message_get_num_active(IntPtr message);
         int mdf_message_send(IntPtr handle, IntPtr message);
+        int mdf_message_set_compression_level(IntPtr message, int level);
     }
 }
