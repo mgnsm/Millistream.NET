@@ -19,7 +19,7 @@ namespace Millistream.Streaming.IntegrationTests
             string username = GetTestRunParameter("username");
             string password = GetTestRunParameter("password");
             using DataFeed dataFeed = new DataFeed();
-            using ManualResetEvent manualResetEvent = new ManualResetEvent(false);
+            using AutoResetEvent autoResetEvent = new AutoResetEvent(false);
             dataFeed.ConsumeTimeout = 1;
 
             bool isConnected = false;
@@ -28,14 +28,14 @@ namespace Millistream.Streaming.IntegrationTests
                 if (e.ConnectionStatus == ConnectionStatus.MDF_STATUS_CONNECTED)
                 {
                     isConnected = true;
-                    manualResetEvent.Set();
+                    autoResetEvent.Set();
                 }
             }
             dataFeed.ConnectionStatusChanged += ConnectedHandler;
             //assert that the feed can be connected to
             Assert.IsTrue(dataFeed.Connect(host, username, password));
             //assert that a ConnectionStatusChanged is raised when the feed is connected 
-            manualResetEvent.WaitOne();
+            autoResetEvent.WaitOne();
             Assert.IsTrue(isConnected);
 
             //connect again
@@ -48,26 +48,46 @@ namespace Millistream.Streaming.IntegrationTests
                 if (e.ConnectionStatus == ConnectionStatus.MDF_STATUS_DISCONNECTED)
                 {
                     isConnected = false;
-                    manualResetEvent.Set();
+                    autoResetEvent.Set();
                 }
             }
             dataFeed.ConnectionStatusChanged += DisconnectedHandler;
             dataFeed.Disconnect();
             //assert that a ConnectionStatusChanged is raised when the feed is disconnected
-            manualResetEvent.WaitOne();
+            autoResetEvent.WaitOne();
             Assert.IsFalse(isConnected);
 
-            //connect again
+            //disconnect again
             dataFeed.ConnectionStatusChanged -= DisconnectedHandler;
+            dataFeed.Disconnect();
+
+            //connect again
             dataFeed.ConnectionStatusChanged += ConnectedHandler;
             Assert.IsTrue(dataFeed.Connect(host, username, password));
-            manualResetEvent.WaitOne();
+            autoResetEvent.WaitOne();
             Assert.IsTrue(isConnected);
+
+            //issue a request after having disconnected and connected again
+            void OnNext(ResponseMessage message)
+            {
+                if (message.MessageReference == MessageReference.MDF_M_REQUESTFINISHED)
+                    autoResetEvent.Set();
+            }
+
+            dataFeed.Data.Subscribe(new ResponseMessageObserver(OnNext, null, null));
+            RequestClass[] requestClasses = new RequestClass[2] { RequestClass.MDF_RC_BASICDATA, RequestClass.MDF_RC_QUOTE };
+            dataFeed.Request(new SubscribeMessage(RequestType.MDF_RT_IMAGE, requestClasses)
+            {
+                InstrumentReferences = new ulong[1] { 772 },
+                RequestId = "rid"
+            });
+            autoResetEvent.WaitOne();
+
             //disconnect again
             dataFeed.ConnectionStatusChanged -= ConnectedHandler;
             dataFeed.ConnectionStatusChanged += DisconnectedHandler;
             dataFeed.Disconnect();
-            manualResetEvent.WaitOne();
+            autoResetEvent.WaitOne();
             Assert.IsFalse(isConnected);
         }
 
