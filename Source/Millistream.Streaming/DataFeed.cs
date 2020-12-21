@@ -30,7 +30,6 @@ namespace Millistream.Streaming
         private readonly Subject<ResponseMessage> _subject = new Subject<ResponseMessage>();
         private readonly INativeImplementation _nativeImplementation;
         private readonly IntPtr _feedHandle;
-        private readonly IntPtr _messageHandle;
         private readonly Message _message;
         private readonly mdf_status_callback _statusCallback;
         private readonly mdf_data_callback _dataCallback;
@@ -44,14 +43,13 @@ namespace Millistream.Streaming
         /// <summary>
         /// Creates an instance of the <see cref="DataFeed"/> class.
         /// </summary>
-        public DataFeed() : this(GetNativeImplementation()) { }
+        public DataFeed() : this(NativeImplementation.Get()) { }
 
         internal DataFeed(INativeImplementation nativeImplementation)
         {
             _nativeImplementation = nativeImplementation ?? throw new ArgumentNullException(nameof(nativeImplementation));
             _feedHandle = _nativeImplementation.mdf_create();
-            _messageHandle = _nativeImplementation.mdf_message_create();
-            _message = new Message(_nativeImplementation, _messageHandle);
+            _message = new Message(nativeImplementation);
             _statusCallback = OnConnectionStatusChanged;
             _dataCallback = OnDataReceived;
         }
@@ -177,6 +175,7 @@ namespace Millistream.Streaming
         /// <param name="username">The username to authenticate with the server.</param>
         /// <param name="password">The password to authenticate with the server.</param>
         /// <returns>A value indicating whether the connect attempt was successful.</returns>
+        /// <exception cref="ArgumentNullException" />
         public bool Connect(string host, string username, string password) =>
             Connect(host, username, password, null);
 
@@ -189,6 +188,7 @@ namespace Millistream.Streaming
         /// <param name="password">The password to authenticate with the server.</param>
         /// <param name="extraCredential">An extra credential that is required if the account is setup to use two-factor authentication.</param>
         /// <returns>A value indicating whether the connect attempt was successful.</returns>
+        /// <exception cref="ArgumentNullException" />
         public bool Connect(string host, string username, string password, string extraCredential)
         {
             if (string.IsNullOrEmpty(host))
@@ -213,13 +213,13 @@ namespace Millistream.Streaming
                     return false;
 
                 //try to login
-                _nativeImplementation.mdf_message_add(_messageHandle, 0, (int)MessageReference.MDF_M_LOGON);
-                _nativeImplementation.mdf_message_add_string(_messageHandle, (uint)Field.MDF_F_USERNAME, username);
-                _nativeImplementation.mdf_message_add_string(_messageHandle, (uint)Field.MDF_F_PASSWORD, password);
+                _nativeImplementation.mdf_message_add(_message.Handle, 0, (int)MessageReference.MDF_M_LOGON);
+                _nativeImplementation.mdf_message_add_string(_message.Handle, (uint)Field.MDF_F_USERNAME, username);
+                _nativeImplementation.mdf_message_add_string(_message.Handle, (uint)Field.MDF_F_PASSWORD, password);
                 if (!string.IsNullOrEmpty(extraCredential))
-                    _nativeImplementation.mdf_message_add_string(_messageHandle, (uint)Field.MDF_F_EXTRACREDENTIAL, extraCredential);
-                _nativeImplementation.mdf_message_send(_feedHandle, _messageHandle);
-                _nativeImplementation.mdf_message_reset(_messageHandle);
+                    _nativeImplementation.mdf_message_add_string(_message.Handle, (uint)Field.MDF_F_EXTRACREDENTIAL, extraCredential);
+                _nativeImplementation.mdf_message_send(_feedHandle, _message.Handle);
+                _nativeImplementation.mdf_message_reset(_message.Handle);
 
                 DateTime startTime = DateTime.UtcNow;
                 int connectionTimeout = ConnectionTimeout;
@@ -298,10 +298,11 @@ namespace Millistream.Streaming
         /// <summary>
         /// Sends a request to the server.
         /// </summary>
-        /// <param name="requestMessage">The reqest message to be sent to the server.</param>
+        /// <param name="requestMessage">The request message to be sent to the server.</param>
         /// <remarks>
         /// You must call the <see cref="Connect(string, string, string)"/> method before calling this method.
         /// </remarks>
+        /// <exception cref="ArgumentNullException" />
         public void Request(RequestMessage requestMessage)
         {
             if (requestMessage == null)
@@ -312,11 +313,11 @@ namespace Millistream.Streaming
                 ThrowIfDisposed();
 
                 if (!_hasConnected)
-                    throw new InvalidOperationException($"You must call the {nameof(Connect)} method to connect to the feed before you call {nameof(Request)}.");
+                    throw new InvalidOperationException($"You must call the {nameof(Connect)} method to connect to the feed and authenticate before you call {nameof(Request)}.");
 
                 requestMessage.AddFields(_message);
-                _nativeImplementation.mdf_message_send(_feedHandle, _messageHandle);
-                _nativeImplementation.mdf_message_reset(_messageHandle);
+                _nativeImplementation.mdf_message_send(_feedHandle, _message.Handle);
+                _nativeImplementation.mdf_message_reset(_message.Handle);
             }
         }
 
@@ -355,9 +356,9 @@ namespace Millistream.Streaming
             //disable the any data callbacks
             _nativeImplementation.mdf_set_property(_feedHandle, MDF_OPTION.MDF_OPT_DATA_CALLBACK_FUNCTION, IntPtr.Zero);
             //try to log out
-            _nativeImplementation.mdf_message_add(_messageHandle, 0, (int)MessageReference.MDF_M_LOGOFF);
-            int send = _nativeImplementation.mdf_message_send(_feedHandle, _messageHandle);
-            _nativeImplementation.mdf_message_reset(_messageHandle);
+            _nativeImplementation.mdf_message_add(_message.Handle, 0, (int)MessageReference.MDF_M_LOGOFF);
+            int send = _nativeImplementation.mdf_message_send(_feedHandle, _message.Handle);
+            _nativeImplementation.mdf_message_reset(_message.Handle);
             if (send == 1)
             {
                 DateTime startTime = DateTime.UtcNow;
@@ -456,18 +457,6 @@ namespace Millistream.Streaming
                 throw new ObjectDisposedException(typeof(DataFeed).FullName);
         }
 
-        private static INativeImplementation GetNativeImplementation()
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                return new NativeWindowsImplementation();
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                return new NativeLinuxImplementation();
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                return new NativeMacOsImplementation();
-
-            throw new PlatformNotSupportedException();
-        }
-
         #region IDisposable
         /// <summary>
         /// Releases any resources used by the <see cref="DataFeed"/> instance.
@@ -488,8 +477,8 @@ namespace Millistream.Streaming
                     {
                         _cancellationTokenSource?.Dispose();
                         _subject.Dispose();
+                        _message.Dispose();
                     }
-                    _nativeImplementation.mdf_message_destroy(_messageHandle);
                     _nativeImplementation.mdf_destroy(_feedHandle);
                     _isDisposed = true;
                 }
