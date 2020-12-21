@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace Millistream.Streaming
@@ -46,11 +45,14 @@ namespace Millistream.Streaming
         internal override void AddFields(Message message)
         {
             message.Add(0, MessageReference);
-            message.AddRequestClasses(RequestClasses?.ToArray());
+            if (RequestClasses != null && RequestClasses.Any())
+                message.AddList(RequestClasses);
+            else
+                message.AddString(Field.MDF_F_REQUESTCLASS, "*");
             if (!string.IsNullOrEmpty(RequestId))
                 message.AddString(Field.MDF_F_REQUESTID, RequestId);
             if (InstrumentReferences != null && InstrumentReferences.Any())
-                message.AddInstrumentReferences(Field.MDF_F_INSREFLIST, InstrumentReferences.ToArray());
+                message.AddList(Field.MDF_F_INSREFLIST, InstrumentReferences);
         }
         #endregion
     }

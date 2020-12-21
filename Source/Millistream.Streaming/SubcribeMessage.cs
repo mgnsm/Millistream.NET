@@ -74,17 +74,25 @@ namespace Millistream.Streaming
         internal override void AddFields(Message message)
         {
             message.Add(0, MessageReference);
-            message.AddRequestClasses(RequestClasses?.ToArray());
-            message.AddUInt32(Field.MDF_F_REQUESTTYPE, (uint)RequestType);
+            if (RequestClasses != null && RequestClasses.Any())
+                message.AddList(RequestClasses);
+            else
+                message.AddString(Field.MDF_F_REQUESTCLASS, "*");
+            message.AddNumeric(Field.MDF_F_REQUESTTYPE, ((uint)RequestType).ToString());
             if (!string.IsNullOrEmpty(RequestId))
                 message.AddString(Field.MDF_F_REQUESTID, RequestId);
             if (InstrumentReferences != null && InstrumentReferences.Any())
-                message.AddInstrumentReferences(Field.MDF_F_INSREFLIST, InstrumentReferences.ToArray());
+                message.AddList(Field.MDF_F_INSREFLIST, InstrumentReferences);
             if (UtcStartTime.HasValue)
             {
-                message.AddDate(Field.MDF_F_DATE, UtcStartTime.Value.Date);
-                if (UtcStartTime.Value.TimeOfDay != default)
-                    message.AddTime(Field.MDF_F_TIME, UtcStartTime.Value.TimeOfDay);
+                message.AddDate(Field.MDF_F_DATE, UtcStartTime.Value.Year, UtcStartTime.Value.Month, UtcStartTime.Value.Day);
+                TimeSpan time = UtcStartTime.Value.TimeOfDay;
+                if (time != default)
+                {
+                    long ticks = time.Ticks % TimeSpan.TicksPerDay;
+                    int nanoseconds = (int)(ticks % TimeSpan.TicksPerSecond) * 100;
+                    message.AddTime3(Field.MDF_F_TIME, time.Hours, time.Minutes, time.Seconds, nanoseconds);
+                }
             }
         }
         #endregion
