@@ -118,12 +118,18 @@ namespace Millistream.Streaming.UnitTests
                 .Setup(x => x.mdf_message_add(It.IsAny<IntPtr>(), It.IsAny<ulong>(), It.IsAny<int>()))
                 .Returns<IntPtr, ulong, int>(mdf_message_add);
 
-            SubscribeMessage subscribeMessage = new SubscribeMessage(requestType, requestClasses);
+            DateTime utcStartTime = new DateTime(2020, 12, 21, 22, 16, 35, 999).AddTicks(2);
+            SubscribeMessage subscribeMessage = new SubscribeMessage(requestType, requestClasses)
+            {
+                UtcStartTime = utcStartTime
+            };
             dataFeed.Request(subscribeMessage);
             //assert that the expected methods of the INativeImplementation were actually called
             nativeImplementationMock.Verify(x => x.mdf_message_add_list(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<string>()));
             nativeImplementationMock.Verify(x => x.mdf_message_add_numeric(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<string>()));
             nativeImplementationMock.Verify(x => x.mdf_message_add(It.IsAny<IntPtr>(), It.IsAny<ulong>(), It.IsAny<int>()));
+            nativeImplementationMock.Verify(x => x.mdf_message_add_date2(It.IsAny<IntPtr>(), It.IsAny<uint>(), utcStartTime.Year, utcStartTime.Month, utcStartTime.Day));
+            nativeImplementationMock.Verify(x => x.mdf_message_add_time3(It.IsAny<IntPtr>(), It.IsAny<uint>(), utcStartTime.Hour, utcStartTime.Minute, utcStartTime.Second, utcStartTime.Millisecond * 1_000_000 + 200));
             nativeImplementationMock.Invocations.Clear();
             //subscribe to some instruments
             subscribeMessage.InstrumentReferences = instrumentReferences;

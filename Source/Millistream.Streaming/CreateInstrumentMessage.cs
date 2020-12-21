@@ -42,8 +42,8 @@
         internal override void AddFields(Message message)
         {
             message.Add(0, MessageReference);
-            message.AddRequestClasses(s_requestClasses);
-            message.AddUInt32(Field.MDF_F_REQUESTTYPE, Count);
+            message.AddList(s_requestClasses);
+            message.AddNumeric(Field.MDF_F_REQUESTTYPE, Count.ToString());
             if (!string.IsNullOrEmpty(RequestId))
                 message.AddString(Field.MDF_F_REQUESTID, RequestId);
         }
