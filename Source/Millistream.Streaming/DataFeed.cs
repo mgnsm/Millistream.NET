@@ -119,7 +119,12 @@ namespace Millistream.Streaming
                 lock (_lock)
                 {
                     ThrowIfDisposed();
-                    _nativeImplementation.mdf_set_property(_feedHandle, MDF_OPTION.MDF_OPT_TCP_NODELAY, new IntPtr(value ? 1 : 0));
+                    int i = value ? 1 : 0;
+                    unsafe
+                    {
+                        int* p = &i;
+                        _nativeImplementation.mdf_set_property(_feedHandle, MDF_OPTION.MDF_OPT_TCP_NODELAY, (IntPtr)p);
+                    }
                 }
             }
         }
