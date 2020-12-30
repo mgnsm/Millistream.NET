@@ -25,5 +25,11 @@
         MDF_RC_L10N = 17,
         MDF_RC_CI = 18,
         MDF_RC_CIHISTORY = 19,
+        MDF_RC_PRIIP = 20,
+        MDF_RC_MIFID = 21,
+        MDF_RC_MIFIDHISTORY = 22,
+        MDF_RC_MAPPINGS = 23,
+        MDF_RC_MBO = 24,
+        MDF_RC_GREEKS = 25
     }
 }
