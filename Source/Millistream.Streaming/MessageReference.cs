@@ -43,6 +43,11 @@
         MDF_M_PRIIP = 35,
         MDF_M_MIFID = 36,
         MDF_M_MIFIDHISTORY = 37,
-        MDF_M_MAPPINGS = 38
+        MDF_M_MAPPINGS = 38,
+        MDF_M_MBOADD = 39,
+        MDF_M_MBOUPDATE = 40,
+        MDF_M_MBODELETE = 41,
+        MDF_M_GREEKS = 42,
+        MDF_M_QUOTEBBO = 43
     }
 }
