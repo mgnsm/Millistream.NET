@@ -10,6 +10,7 @@ namespace Millistream.Streaming
         int mdf_get_next_field(IntPtr handle, ref uint tag, ref IntPtr value);
         int mdf_get_property(IntPtr handle, MDF_OPTION option, ref IntPtr value);
         int mdf_set_property(IntPtr handle, MDF_OPTION option, IntPtr value);
+        int mdf_set_property(IntPtr handle, MDF_OPTION option, string value);
         int mdf_connect(IntPtr handle, string server);
         void mdf_disconnect(IntPtr handle);
         int mdf_consume(IntPtr handle, int timeout);
