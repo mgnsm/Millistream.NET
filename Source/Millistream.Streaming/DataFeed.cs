@@ -1,9 +1,8 @@
 ﻿using Millistream.Streaming.Rx;
 using System;
-using System.Collections.Immutable;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Mdf = Millistream.Streaming.Mdf<object, object>;
 
 namespace Millistream.Streaming
 {
@@ -12,27 +11,13 @@ namespace Millistream.Streaming
     /// </summary>
     public class DataFeed : IDataFeed, IDisposable
     {
-        #region Constants
-        internal const int MinConnectionTimeout = 1;
-        internal const int MaxConnectionTimeout = 60;
-        internal const int MinHeartbeatInterval = 1;
-        internal const int MaxHeartbeatInterval = 86400;
-        internal const int MinMissedHeartbeats = 1;
-        internal const int MaxMissedHeartbeats = 100;
-        #endregion
-
         #region Fields
-        private static readonly ImmutableHashSet<int> s_messageReferences = ImmutableHashSet.Create((int[])Enum.GetValues(typeof(MessageReference)));
-        private static readonly ImmutableHashSet<uint> s_fieldReferences = ImmutableHashSet.Create((uint[])Enum.GetValues(typeof(Field)));
         private static readonly Func<ResponseMessage> s_responseMessageFactory = () => new ResponseMessage();
         private readonly object _lock = new object();
         private readonly ObjectPool<ResponseMessage> _objectPool = new ObjectPool<ResponseMessage>(s_responseMessageFactory);
         private readonly Subject<ResponseMessage> _subject = new Subject<ResponseMessage>();
-        private readonly INativeImplementation _nativeImplementation;
-        private readonly IntPtr _feedHandle;
+        private readonly Mdf _mdf;
         private readonly Message _message;
-        private readonly mdf_status_callback _statusCallback;
-        private readonly mdf_data_callback _dataCallback;
         private CancellationTokenSource _cancellationTokenSource;
         private bool _hasConnected;
         private Task _consumeTask;
@@ -47,11 +32,8 @@ namespace Millistream.Streaming
 
         internal DataFeed(INativeImplementation nativeImplementation)
         {
-            _nativeImplementation = nativeImplementation ?? throw new ArgumentNullException(nameof(nativeImplementation));
-            _feedHandle = _nativeImplementation.mdf_create();
+            _mdf = new Mdf(nativeImplementation);
             _message = new Message(nativeImplementation);
-            _statusCallback = OnConnectionStatusChanged;
-            _dataCallback = OnDataReceived;
         }
         #endregion
 
@@ -61,14 +43,47 @@ namespace Millistream.Streaming
         /// </summary>
         public int ConnectionTimeout
         {
-            get => (int)GetProperty(MDF_OPTION.MDF_OPT_CONNECT_TIMEOUT);
-            set => SetProperty(MDF_OPTION.MDF_OPT_CONNECT_TIMEOUT, value, MinConnectionTimeout, MaxConnectionTimeout);
+            get
+            {
+                lock (_lock)
+                {
+                    ThrowIfDisposed();
+                    return _mdf.ConnectionTimeout;
+                }
+            }
+            set
+            {
+                lock (_lock)
+                {
+                    ThrowIfDisposed();
+                    _mdf.ConnectionTimeout = value;
+                }
+            }
         }
 
+        private int _consumeTimeout = 10;
         /// <summary>
         /// The number of seconds to wait for if there currently is no data when consuming the feed. If set to zero (0) the consume function will return immediately. The default value is 10.
         /// </summary>
-        public int ConsumeTimeout { get; set; } = 10;
+        public int ConsumeTimeout
+        {
+            get
+            {
+                lock (_lock)
+                {
+                    ThrowIfDisposed();
+                    return _consumeTimeout;
+                }
+            }
+            set
+            {
+                lock (_lock)
+                {
+                    ThrowIfDisposed();
+                    _consumeTimeout = value;
+                }
+            }
+        }
 
         /// <summary>
         /// An observable stream of data produced by the feed. This is where all response messages are read from.
@@ -88,15 +103,39 @@ namespace Millistream.Streaming
         /// <summary>
         /// The current API error code.
         /// </summary>
-        public Error ErrorCode => (Error)GetProperty(MDF_OPTION.MDF_OPT_ERROR);
+        public Error ErrorCode
+        {
+            get
+            {
+                lock (_lock)
+                {
+                    ThrowIfDisposed();
+                    return _mdf.ErrorCode;
+                }
+            }
+        }
 
         /// <summary>
         /// The number of seconds the connection must be idle before the API sends a heartbeat request to the server. Valid values are 1 to 86400. The default is 30.
         /// </summary>
         public int HeartbeatInterval
         {
-            get => (int)GetProperty(MDF_OPTION.MDF_OPT_HEARTBEAT_INTERVAL);
-            set => SetProperty(MDF_OPTION.MDF_OPT_HEARTBEAT_INTERVAL, value, MinHeartbeatInterval, MaxHeartbeatInterval);
+            get
+            {
+                lock (_lock)
+                {
+                    ThrowIfDisposed();
+                    return _mdf.HeartbeatInterval;
+                }
+            }
+            set
+            {
+                lock (_lock)
+                {
+                    ThrowIfDisposed();
+                    _mdf.HeartbeatInterval = value;
+                }
+            }
         }
 
         /// <summary>
@@ -104,8 +143,22 @@ namespace Millistream.Streaming
         /// </summary>
         public int MaximumMissedHeartbeats
         {
-            get => (int)GetProperty(MDF_OPTION.MDF_OPT_HEARTBEAT_MAX_MISSED);
-            set => SetProperty(MDF_OPTION.MDF_OPT_HEARTBEAT_MAX_MISSED, value, MinMissedHeartbeats, MaxMissedHeartbeats);
+            get
+            {
+                lock (_lock)
+                {
+                    ThrowIfDisposed();
+                    return _mdf.MaximumMissedHeartbeats;
+                }
+            }
+            set
+            {
+                lock (_lock)
+                {
+                    ThrowIfDisposed();
+                    _mdf.MaximumMissedHeartbeats = value;
+                }
+            }
         }
 
         /// <summary>
@@ -113,18 +166,20 @@ namespace Millistream.Streaming
         /// </summary>
         public bool NoDelay
         {
-            get => Convert.ToBoolean((int)GetProperty(MDF_OPTION.MDF_OPT_TCP_NODELAY));
+            get
+            {
+                lock (_lock)
+                {
+                    ThrowIfDisposed();
+                    return _mdf.NoDelay;
+                }
+            }
             set
             {
                 lock (_lock)
                 {
                     ThrowIfDisposed();
-                    int i = value ? 1 : 0;
-                    unsafe
-                    {
-                        int* p = &i;
-                        _nativeImplementation.mdf_set_property(_feedHandle, MDF_OPTION.MDF_OPT_TCP_NODELAY, (IntPtr)p);
-                    }
+                    _mdf.NoDelay = value;
                 }
             }
         }
@@ -132,17 +187,47 @@ namespace Millistream.Streaming
         /// <summary>
         /// The number of bytes received from the server since connecting.
         /// </summary>
-        public ulong ReceivedBytes => (ulong)GetProperty(MDF_OPTION.MDF_OPT_RCV_BYTES);
+        public ulong ReceivedBytes
+        {
+            get
+            {
+                lock(_lock)
+                {
+                    ThrowIfDisposed();
+                    return _mdf.ReceivedBytes;
+                }
+            }
+        }
 
         /// <summary>
         /// The total number of bytes sent to the server.
         /// </summary>
-        public ulong SentBytes => (ulong)GetProperty(MDF_OPTION.MDF_OPT_SENT_BYTES);
+        public ulong SentBytes
+        {
+            get
+            {
+                lock (_lock)
+                {
+                    ThrowIfDisposed();
+                    return _mdf.SentBytes;
+                }
+            }
+        }
 
         /// <summary>
         /// The time difference in number of seconds between the client and the server. The value should be added to the current time on the client in order to get the server time. Please not that this value can be negative if the client clock is ahead of the server clock.
         /// </summary>
-        public int TimeDifference => (int)GetProperty(MDF_OPTION.MDF_OPT_TIME_DIFFERENCE);
+        public int TimeDifference
+        {
+            get
+            {
+                lock (_lock)
+                {
+                    ThrowIfDisposed();
+                    return _mdf.TimeDifference;
+                }
+            }
+        }
         #endregion
 
         #region Events
@@ -211,39 +296,36 @@ namespace Millistream.Streaming
                 if (_hasConnected)
                     Disconnect();
                 else
-                    _nativeImplementation.mdf_set_property(_feedHandle, MDF_OPTION.MDF_OPT_STATUS_CALLBACK_FUNCTION, Marshal.GetFunctionPointerForDelegate(_statusCallback));
+                    _mdf.StatusCallback = OnConnectionStatusChanged;
 
                 //try to connect
-                if (_nativeImplementation.mdf_connect(_feedHandle, host) != 1)
+                if (!_mdf.Connect(host))
                     return false;
 
                 //try to login
-                _nativeImplementation.mdf_message_add(_message.Handle, 0, (int)MessageReference.MDF_M_LOGON);
-                _nativeImplementation.mdf_message_add_string(_message.Handle, (uint)Field.MDF_F_USERNAME, username);
-                _nativeImplementation.mdf_message_add_string(_message.Handle, (uint)Field.MDF_F_PASSWORD, password);
+                _message.Add(0, (int)MessageReference.MDF_M_LOGON);
+                _message.AddString((uint)Field.MDF_F_USERNAME, username);
+                _message.AddString((uint)Field.MDF_F_PASSWORD, password);
                 if (!string.IsNullOrEmpty(extraCredential))
-                    _nativeImplementation.mdf_message_add_string(_message.Handle, (uint)Field.MDF_F_EXTRACREDENTIAL, extraCredential);
-                _nativeImplementation.mdf_message_send(_feedHandle, _message.Handle);
-                _nativeImplementation.mdf_message_reset(_message.Handle);
+                    _message.AddString((uint)Field.MDF_F_EXTRACREDENTIAL, extraCredential);
+                _mdf.Send(_message);
+                _message.Reset();
 
                 DateTime startTime = DateTime.UtcNow;
                 int connectionTimeout = ConnectionTimeout;
                 do
                 {
-                    int ret = _nativeImplementation.mdf_consume(_feedHandle, 1);
+                    int ret = _mdf.Consume(1);
                     switch (ret)
                     {
                         case 1:
-                            int mref = 0;
-                            int mclass = 0;
-                            ulong insref = 0;
-                            while (_nativeImplementation.mdf_get_next_message(_feedHandle, ref mref, ref mclass, ref insref) == 1)
+                            while (_mdf.GetNextMessage(out int mref, out int mclass, out ulong insref))
                             {
                                 switch (mref)
                                 {
                                     case (int)MessageReference.MDF_M_LOGONGREETING:
                                         //enable data callbacks
-                                        _nativeImplementation.mdf_set_property(_feedHandle, MDF_OPTION.MDF_OPT_DATA_CALLBACK_FUNCTION, Marshal.GetFunctionPointerForDelegate(_dataCallback));
+                                        _mdf.DataCallback = OnDataReceived;
                                         //start consuming the feed on a background thread
                                         _cancellationTokenSource = new CancellationTokenSource();
                                         _consumeTask = Task.Factory.StartNew(Consume, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning);
@@ -279,7 +361,7 @@ namespace Millistream.Streaming
                     _cancellationTokenSource = null;
                 }
                 Logout();
-                _nativeImplementation.mdf_disconnect(_feedHandle);
+                _mdf.Disconnect();
                 _hasConnected = false;
             }
         }
@@ -321,37 +403,15 @@ namespace Millistream.Streaming
                     throw new InvalidOperationException($"You must call the {nameof(Connect)} method to connect to the feed and authenticate before you call {nameof(Request)}.");
 
                 requestMessage.AddFields(_message);
-                _nativeImplementation.mdf_message_send(_feedHandle, _message.Handle);
-                _nativeImplementation.mdf_message_reset(_message.Handle);
-            }
-        }
-
-        private IntPtr GetProperty(MDF_OPTION option)
-        {
-            lock (_lock)
-            {
-                ThrowIfDisposed();
-                IntPtr value = new IntPtr();
-                _nativeImplementation.mdf_get_property(_feedHandle, option, ref value);
-                return value;
-            }
-        }
-
-        private void SetProperty(MDF_OPTION option, int value, int minValue, int maxValue)
-        {
-            lock (_lock)
-            {
-                ThrowIfDisposed();
-                if (value < minValue || value > maxValue)
-                    throw new ArgumentOutOfRangeException();
-                _nativeImplementation.mdf_set_property(_feedHandle, option, new IntPtr(value));
+                _mdf.Send(_message);
+                _message.Reset();
             }
         }
 
         private void Consume(object state)
         {
             CancellationToken cancellationToken = (CancellationToken)state;
-            while (_nativeImplementation.mdf_consume(_feedHandle, ConsumeTimeout) != -1)
+            while (_mdf.Consume(_consumeTimeout) != -1)
                 if (cancellationToken.IsCancellationRequested)
                     break;
         }
@@ -359,25 +419,22 @@ namespace Millistream.Streaming
         private void Logout()
         {
             //disable the any data callbacks
-            _nativeImplementation.mdf_set_property(_feedHandle, MDF_OPTION.MDF_OPT_DATA_CALLBACK_FUNCTION, IntPtr.Zero);
+            _mdf.DataCallback = null;
             //try to log out
-            _nativeImplementation.mdf_message_add(_message.Handle, 0, (int)MessageReference.MDF_M_LOGOFF);
-            int send = _nativeImplementation.mdf_message_send(_feedHandle, _message.Handle);
-            _nativeImplementation.mdf_message_reset(_message.Handle);
-            if (send == 1)
+            _message.Add(0, (int)MessageReference.MDF_M_LOGOFF);
+            bool sent = _mdf.Send(_message);
+            _message.Reset();
+            if (sent)
             {
                 DateTime startTime = DateTime.UtcNow;
                 int connectionTimeout = ConnectionTimeout;
                 do
                 {
-                    int consume = _nativeImplementation.mdf_consume(_feedHandle, 1);
+                    int consume = _mdf.Consume(1);
                     switch (consume)
                     {
                         case 1:
-                            int mref = 0;
-                            int mclass = 0;
-                            ulong insref = 0;
-                            while (_nativeImplementation.mdf_get_next_message(_feedHandle, ref mref, ref mclass, ref insref) == 1)
+                            while (_mdf.GetNextMessage(out int mref, out int _, out ulong _))
                                 if (mref == (int)MessageReference.MDF_M_LOGOFF)
                                     return;
                             break;
@@ -388,7 +445,7 @@ namespace Millistream.Streaming
             }
         }
 
-        private void OnConnectionStatusChanged(IntPtr data, ConnectionStatus connectionStatus, string host, string ip)
+        private void OnConnectionStatusChanged(object _, ConnectionStatus connectionStatus, string host, string ip)
         {
             ConnnectionStatusChangedEventHandler eventHandler;
             lock (_lock)
@@ -396,53 +453,36 @@ namespace Millistream.Streaming
             eventHandler?.Invoke(this, new ConnectionStatusChangedEventArgs(host, ip, connectionStatus));
         }
 
-        private void OnDataReceived(IntPtr userData, IntPtr handle)
+        private void OnDataReceived(object _, Mdf<object, object> handle)
         {
-            int messageReference = 0;
-            int messageClass = 0;
-            ulong instrumentId = 0;
-            while (_nativeImplementation.mdf_get_next_message(_feedHandle, ref messageReference, ref messageClass, ref instrumentId) == 1)
+            while (_mdf.GetNextMessage(out int messageReference, out int messageClass, out ulong instrumentId))
             {
-                if (s_messageReferences.Contains(messageReference))
+                if (Mdf.s_messageReferences.Contains(messageReference))
                 {
                     ResponseMessage message = _objectPool.Allocate() ?? s_responseMessageFactory();
                     message.InstrumentReference = instrumentId;
                     message.MessageReference = (MessageReference)messageReference;
                     message.MessageClass = messageClass;
 
-                    uint fieldTag = 0;
                     int messageOffset = 0;
-                    IntPtr value = new IntPtr();
-                    while (_nativeImplementation.mdf_get_next_field(_feedHandle, ref fieldTag, ref value) == 1)
+                    while (_mdf.GetNextField(out uint fieldTag, out ReadOnlySpan<byte> value))
                     {
-                        if (s_fieldReferences.Contains(fieldTag))
+                        if (Mdf.s_fields.Contains(fieldTag))
                         {
                             Field field = (Field)fieldTag;
-                            if (value != IntPtr.Zero)
+                            int length = value.Length;
+                            if (length > 0)
                             {
-                                unsafe
+                                try
                                 {
-                                    try
-                                    {
-                                        byte* pointer = (byte*)value;
-                                        ReadOnlySpan<byte> span;
-                                        int fieldOffset = 0;
-                                        do
-                                        {
-                                            span = new ReadOnlySpan<byte>(pointer + fieldOffset++, 1);
-                                        } while (span[0] != 0);
-
-                                        int length = fieldOffset - 1;
-                                        span = new ReadOnlySpan<byte>(pointer, length);
-                                        for (int i = 0; i < length; i++)
-                                            message.Data.Add(span[i]);
-                                        message.SetField(field, new ReadOnlyMemory<byte>(message.Data.Items, messageOffset, length));
-                                        messageOffset += length;
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        _subject.OnError(ex);
-                                    }
+                                    for (int i = 0; i < length; i++)
+                                        message.Data.Add(value[i]);
+                                    message.SetField(field, new ReadOnlyMemory<byte>(message.Data.Items, messageOffset, length));
+                                    messageOffset += length;
+                                }
+                                catch (Exception ex)
+                                {
+                                    _subject.OnError(ex);
                                 }
                             }
                             else
@@ -482,9 +522,9 @@ namespace Millistream.Streaming
                     {
                         _cancellationTokenSource?.Dispose();
                         _subject.Dispose();
+                        _mdf.Dispose();
                         _message.Dispose();
                     }
-                    _nativeImplementation.mdf_destroy(_feedHandle);
                     _isDisposed = true;
                 }
             }

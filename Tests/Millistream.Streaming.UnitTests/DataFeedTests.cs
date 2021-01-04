@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Mdf = Millistream.Streaming.Mdf<object, object>;
 
 namespace Millistream.Streaming.UnitTests
 {
@@ -14,7 +15,6 @@ namespace Millistream.Streaming.UnitTests
         private const string Password = "password";
 
         private delegate void mdf_get_next_message_callback(IntPtr handle, ref int message, ref int message_class, ref ulong instrument);
-        private delegate void mdf_get_property_callback(IntPtr handle, MDF_OPTION option, ref IntPtr value);
 
         [TestMethod]
         public void ConnectAndAuthenticateTest()
@@ -23,6 +23,8 @@ namespace Millistream.Streaming.UnitTests
             nativeImplementationMock.Setup(x => x.mdf_connect(It.IsAny<IntPtr>(), It.IsAny<string>())).Returns(1);
             nativeImplementationMock.Setup(x => x.mdf_disconnect(It.IsAny<IntPtr>()));
             nativeImplementationMock.Setup(x => x.mdf_consume(It.IsAny<IntPtr>(), It.IsAny<int>())).Returns(1);
+            nativeImplementationMock.Setup(x => x.mdf_get_property(It.IsAny<IntPtr>(), It.IsAny<MDF_OPTION>(), ref It.Ref<int>.IsAny)).Returns(1);
+            nativeImplementationMock.Setup(x => x.mdf_set_property(It.IsAny<IntPtr>(), It.IsAny<MDF_OPTION>(), It.IsAny<IntPtr>())).Returns(1);
             int returnedMessage = (int)MessageReference.MDF_M_LOGONGREETING;
             nativeImplementationMock
                 .Setup(x => x.mdf_get_next_message(It.IsAny<IntPtr>(), ref It.Ref<int>.IsAny, ref It.Ref<int>.IsAny, ref It.Ref<ulong>.IsAny))
@@ -66,6 +68,8 @@ namespace Millistream.Streaming.UnitTests
             Mock<INativeImplementation> nativeImplementationMock = new Mock<INativeImplementation>();
             nativeImplementationMock.Setup(x => x.mdf_connect(It.IsAny<IntPtr>(), It.IsAny<string>())).Returns(1);
             nativeImplementationMock.Setup(x => x.mdf_consume(It.IsAny<IntPtr>(), It.IsAny<int>())).Returns(1);
+            nativeImplementationMock.Setup(x => x.mdf_get_property(It.IsAny<IntPtr>(), It.IsAny<MDF_OPTION>(), ref It.Ref<int>.IsAny)).Returns(1);
+            nativeImplementationMock.Setup(x => x.mdf_set_property(It.IsAny<IntPtr>(), It.IsAny<MDF_OPTION>(), It.IsAny<IntPtr>())).Returns(1);
             int returnedMessage = (int)MessageReference.MDF_M_LOGONGREETING;
             nativeImplementationMock.Setup(x => x.mdf_get_next_message(It.IsAny<IntPtr>(),
                 ref It.Ref<int>.IsAny, ref It.Ref<int>.IsAny, ref It.Ref<ulong>.IsAny))
@@ -173,7 +177,7 @@ namespace Millistream.Streaming.UnitTests
         {
             using DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object)
             {
-                ConnectionTimeout = DataFeed.MinConnectionTimeout - 1
+                ConnectionTimeout = Mdf.MinConnectionTimeout - 1
             };
         }
 
@@ -183,7 +187,7 @@ namespace Millistream.Streaming.UnitTests
         {
             using DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object)
             {
-                ConnectionTimeout = DataFeed.MaxConnectionTimeout + 1
+                ConnectionTimeout = Mdf.MaxConnectionTimeout + 1
             };
         }
 
@@ -193,8 +197,9 @@ namespace Millistream.Streaming.UnitTests
             const Error ErrorCode = Error.MDF_ERR_MSG_TO_LARGE;
             Mock<INativeImplementation> nativeImplementationMock = new Mock<INativeImplementation>();
             nativeImplementationMock
-                .Setup(x => x.mdf_get_property(It.IsAny<IntPtr>(), MDF_OPTION.MDF_OPT_ERROR, ref It.Ref<IntPtr>.IsAny))
-                .Callback(new mdf_get_property_callback((IntPtr handler, MDF_OPTION option_, ref IntPtr value) => value = (IntPtr)ErrorCode));
+                .Setup(x => x.mdf_get_property(It.IsAny<IntPtr>(), MDF_OPTION.MDF_OPT_ERROR, ref It.Ref<int>.IsAny))
+                .Returns(1)
+                .Callback(new GetInt32PropertyCallback((IntPtr handler, MDF_OPTION option_, ref int value) => value = (int)ErrorCode));
 
             using DataFeed dataFeed = new DataFeed(nativeImplementationMock.Object);
             Assert.AreEqual(ErrorCode, dataFeed.ErrorCode);
@@ -209,7 +214,7 @@ namespace Millistream.Streaming.UnitTests
         {
             using DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object)
             {
-                HeartbeatInterval = DataFeed.MinHeartbeatInterval - 1
+                HeartbeatInterval = Mdf.MinHeartbeatInterval - 1
             };
         }
 
@@ -219,7 +224,7 @@ namespace Millistream.Streaming.UnitTests
         {
             using DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object)
             {
-                HeartbeatInterval = DataFeed.MaxHeartbeatInterval + 1
+                HeartbeatInterval = Mdf.MaxHeartbeatInterval + 1
             };
         }
 
@@ -232,7 +237,7 @@ namespace Millistream.Streaming.UnitTests
         {
             using DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object)
             {
-                MaximumMissedHeartbeats = DataFeed.MinMissedHeartbeats - 1
+                MaximumMissedHeartbeats = Mdf.MinMissedHeartbeats - 1
             };
         }
 
@@ -242,7 +247,7 @@ namespace Millistream.Streaming.UnitTests
         {
             using DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object)
             {
-                MaximumMissedHeartbeats = DataFeed.MaxMissedHeartbeats + 1
+                MaximumMissedHeartbeats = Mdf.MaxMissedHeartbeats + 1
             };
         }
 
@@ -250,19 +255,21 @@ namespace Millistream.Streaming.UnitTests
         public void GetAndSetNoDelayTest()
         {
             Mock<INativeImplementation> nativeImplementationMock = new Mock<INativeImplementation>();
-            IntPtr returnValue = new IntPtr(1);
+            int returnValue = 1;
             nativeImplementationMock
-                .Setup(x => x.mdf_get_property(It.IsAny<IntPtr>(), MDF_OPTION.MDF_OPT_TCP_NODELAY, ref It.Ref<IntPtr>.IsAny))
-                .Callback(new mdf_get_property_callback((IntPtr handler, MDF_OPTION option_, ref IntPtr value) => value = returnValue));
+                .Setup(x => x.mdf_get_property(It.IsAny<IntPtr>(), MDF_OPTION.MDF_OPT_TCP_NODELAY, ref It.Ref<int>.IsAny))
+                .Returns(1)
+                .Callback(new GetInt32PropertyCallback((IntPtr handler, MDF_OPTION option_, ref int value) => value = returnValue));
 
             nativeImplementationMock
                 .Setup(x => x.mdf_set_property(It.IsAny<IntPtr>(), MDF_OPTION.MDF_OPT_TCP_NODELAY, It.IsAny<IntPtr>()))
+                .Returns(1)
                 .Verifiable();
 
             using DataFeed dataFeed = new DataFeed(nativeImplementationMock.Object);
             //assert that the expected values are returned from the getter
             Assert.AreEqual(true, dataFeed.NoDelay);
-            returnValue = new IntPtr(0);
+            returnValue = 0;
             Assert.AreEqual(false, dataFeed.NoDelay);
             //set the property
             dataFeed.NoDelay = true;
@@ -282,8 +289,9 @@ namespace Millistream.Streaming.UnitTests
             const int Difference = 1;
             Mock<INativeImplementation> nativeImplementationMock = new Mock<INativeImplementation>();
             nativeImplementationMock
-                .Setup(x => x.mdf_get_property(It.IsAny<IntPtr>(), MDF_OPTION.MDF_OPT_TIME_DIFFERENCE, ref It.Ref<IntPtr>.IsAny))
-                .Callback(new mdf_get_property_callback((IntPtr handler, MDF_OPTION option, ref IntPtr value) => value = (IntPtr)Difference));
+                .Setup(x => x.mdf_get_property(It.IsAny<IntPtr>(), MDF_OPTION.MDF_OPT_TIME_DIFFERENCE, ref It.Ref<int>.IsAny))
+                .Returns(1)
+                .Callback(new GetInt32PropertyCallback((IntPtr handler, MDF_OPTION option, ref int value) => value = Difference));
 
             using DataFeed dataFeed = new DataFeed(nativeImplementationMock.Object);
             Assert.AreEqual(Difference, dataFeed.TimeDifference);
@@ -487,10 +495,12 @@ namespace Millistream.Streaming.UnitTests
             const int Value = 5;
             Mock<INativeImplementation> nativeImplementationMock = new Mock<INativeImplementation>();
             nativeImplementationMock
-                .Setup(x => x.mdf_get_property(It.IsAny<IntPtr>(), option, ref It.Ref<IntPtr>.IsAny))
-                .Callback(new mdf_get_property_callback((IntPtr handler, MDF_OPTION option_, ref IntPtr value) => value = new IntPtr(Value)));
+                .Setup(x => x.mdf_get_property(It.IsAny<IntPtr>(), option, ref It.Ref<int>.IsAny))
+                .Returns(1)
+                .Callback(new GetInt32PropertyCallback((IntPtr handler, MDF_OPTION option_, ref int value) => value = Value));
             nativeImplementationMock
                 .Setup(x => x.mdf_set_property(It.IsAny<IntPtr>(), option, It.IsAny<IntPtr>()))
+                .Returns(1)
                 .Verifiable();
 
             using DataFeed dataFeed = new DataFeed(nativeImplementationMock.Object);
@@ -507,8 +517,9 @@ namespace Millistream.Streaming.UnitTests
             const ulong Bytes = 100;
             Mock<INativeImplementation> nativeImplementationMock = new Mock<INativeImplementation>();
             nativeImplementationMock
-                .Setup(x => x.mdf_get_property(It.IsAny<IntPtr>(), option, ref It.Ref<IntPtr>.IsAny))
-                .Callback(new mdf_get_property_callback((IntPtr handler, MDF_OPTION option_, ref IntPtr value) => value = (IntPtr)Bytes));
+                .Setup(x => x.mdf_get_property(It.IsAny<IntPtr>(), option, ref It.Ref<ulong>.IsAny))
+                .Returns(1)
+                .Callback(new GetUInt64PropertyCallback((IntPtr handler, MDF_OPTION option_, ref ulong value) => value = Bytes));
 
             //assert that the property returns the correct value
             using DataFeed dataFeed = new DataFeed(nativeImplementationMock.Object);

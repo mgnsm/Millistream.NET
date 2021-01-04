@@ -15,9 +15,9 @@ namespace Millistream.Streaming.IntegrationTests
         [TestMethod]
         public void ConnectAndDisconnectIntegrationTest()
         {
-            string host = GetTestRunParameter("host");
-            string username = GetTestRunParameter("username");
-            string password = GetTestRunParameter("password");
+            string host = TestContext.GetTestRunParameter("host");
+            string username = TestContext.GetTestRunParameter("username");
+            string password = TestContext.GetTestRunParameter("password");
             using DataFeed dataFeed = new DataFeed();
             using AutoResetEvent autoResetEvent = new AutoResetEvent(false);
             dataFeed.ConsumeTimeout = 1;
@@ -182,9 +182,13 @@ namespace Millistream.Streaming.IntegrationTests
 
             Connect(dataFeed);
 
-            //subscribe to a specific request class (MDF_RC_BASICDATA) for all instruments
+            //subscribe to a specific request class (MDF_RC_BASICDATA) for a couple of instruments
             RequestClass[] requestClasses = new RequestClass[1] { RequestClass.MDF_RC_BASICDATA };
-            dataFeed.Request(new SubscribeMessage(RequestType.MDF_RT_IMAGE, requestClasses) { RequestId = RequestId });
+            dataFeed.Request(new SubscribeMessage(RequestType.MDF_RT_IMAGE, requestClasses)
+            { 
+                RequestId = RequestId,
+                InstrumentReferences = new ulong[4] { 354, 772, 928, 1168 }
+            });
             autoResetEvent.WaitOne();
             Assert.IsTrue(receivedMessageTypes.Count == 1);
             Assert.IsTrue(receivedInstrumentReferences.Count > 1);
@@ -199,13 +203,6 @@ namespace Millistream.Streaming.IntegrationTests
             autoResetEvent.WaitOne();
             Assert.IsTrue(receivedMessageTypes.Count > 1);
             Assert.IsTrue(receivedInstrumentReferences.Count == 1);
-            UnsubscribeAndClear(null);
-
-            //subscribe to all request classes and all instruments that the account is entitled for
-            dataFeed.Request(new SubscribeMessage(RequestType.MDF_RT_IMAGE) { RequestId = RequestId });
-            autoResetEvent.WaitOne();
-            Assert.IsTrue(receivedMessageTypes.Count > 1);
-            Assert.IsTrue(receivedInstrumentReferences.Count > 1);
             UnsubscribeAndClear(null);
         }
 
@@ -245,15 +242,7 @@ namespace Millistream.Streaming.IntegrationTests
         }
 
         private void Connect(IDataFeed dataFeed) =>
-            Assert.IsTrue(dataFeed.Connect(GetTestRunParameter("host"), GetTestRunParameter("username"), GetTestRunParameter("password")),
+            Assert.IsTrue(dataFeed.Connect(TestContext.GetTestRunParameter("host"), TestContext.GetTestRunParameter("username"), TestContext.GetTestRunParameter("password")),
                 "Connect failed.");
-
-        private string GetTestRunParameter(string parameterName)
-        {
-            string parameterValue = TestContext.Properties[parameterName] as string;
-            if (string.IsNullOrEmpty(parameterValue))
-                Assert.Fail($"No {parameterName} was specified in the .runsettings file.");
-            return parameterValue;
-        }
     }
 }
