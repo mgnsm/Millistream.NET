@@ -20,7 +20,6 @@ namespace Millistream.Streaming.IntegrationTests
             string password = TestContext.GetTestRunParameter("password");
             using DataFeed dataFeed = new DataFeed();
             using AutoResetEvent autoResetEvent = new AutoResetEvent(false);
-            dataFeed.ConsumeTimeout = 1;
 
             bool isConnected = false;
             void ConnectedHandler(object s, ConnectionStatusChangedEventArgs e)
@@ -100,15 +99,14 @@ namespace Millistream.Streaming.IntegrationTests
             ulong[] instrumentReferences = new ulong[1] { InstrumentReference };
             List<ResponseMessage> receivedResponseMessages = new List<ResponseMessage>();
             using DataFeed dataFeed = new DataFeed();
-            using ManualResetEvent manualResetEvent = new ManualResetEvent(false);
-            dataFeed.ConsumeTimeout = 1;
+            using AutoResetEvent autoResetEvent = new AutoResetEvent(false);
 
             void OnNext(ResponseMessage message)
             {
                 if (message.MessageReference == MessageReference.MDF_M_REQUESTFINISHED
                     && message.Fields.TryGetValue(Field.MDF_F_REQUESTID, out ReadOnlyMemory<byte> requestId)
                     && Encoding.UTF8.GetString(requestId.Span) == RequestId)
-                    manualResetEvent.Set(); //signal when the request has been completed in full
+                    autoResetEvent.Set(); //signal when the request has been completed in full
                 else
                     receivedResponseMessages.Add(message);
             }
@@ -124,7 +122,7 @@ namespace Millistream.Streaming.IntegrationTests
                 RequestId = RequestId
             });
 
-            manualResetEvent.WaitOne();
+            autoResetEvent.WaitOne();
             //assert that some responses were received
             Assert.IsTrue(receivedResponseMessages.Count > 0);
             foreach (ResponseMessage receivedResponseMessage in receivedResponseMessages)
@@ -132,7 +130,7 @@ namespace Millistream.Streaming.IntegrationTests
 
             //unsubscribe
             dataFeed.Request(new UnsubscribeMessage(requestClasses) { RequestId = RequestId });
-            Assert.IsTrue(manualResetEvent.WaitOne());
+            Assert.IsTrue(autoResetEvent.WaitOne());
         }
 
         [TestMethod]
@@ -141,7 +139,6 @@ namespace Millistream.Streaming.IntegrationTests
             const string RequestId = "rid2";
             using DataFeed dataFeed = new DataFeed();
             using AutoResetEvent autoResetEvent = new AutoResetEvent(false);
-            dataFeed.ConsumeTimeout = 120;
 
             Dictionary<MessageReference, int> receivedMessageTypes = new Dictionary<MessageReference, int>();
             Dictionary<ulong, int> receivedInstrumentReferences = new Dictionary<ulong, int>();
