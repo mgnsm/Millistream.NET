@@ -61,9 +61,9 @@ namespace Millistream.Streaming
             }
         }
 
-        private int _consumeTimeout = 10;
+        private int _consumeTimeout = -10000;
         /// <summary>
-        /// The number of seconds to wait for if there currently is no data when consuming the feed. If set to zero (0) the consume function will return immediately. The default value is 10.
+        /// The number of seconds to wait for if there currently is no data when consuming the feed. If set to zero (0) the consume function will return immediately. If set to a negative value, the wait period is treated as a number of microseconds instead of a number of seconds (i.e. -1000 will wait a maximum of 1000µs). The default value is -10000.
         /// </summary>
         public int ConsumeTimeout
         {
@@ -356,6 +356,8 @@ namespace Millistream.Streaming
                 if (_cancellationTokenSource != null)
                 {
                     _cancellationTokenSource.Cancel();
+                    //release lock and wait for the consume thread to finish
+                    Monitor.Wait(_lock);
                     _consumeTask?.Wait();
                     _cancellationTokenSource.Dispose();
                     _cancellationTokenSource = null;
@@ -411,9 +413,17 @@ namespace Millistream.Streaming
         private void Consume(object state)
         {
             CancellationToken cancellationToken = (CancellationToken)state;
-            while (_mdf.Consume(_consumeTimeout) != -1)
-                if (cancellationToken.IsCancellationRequested)
-                    break;
+            while (true)
+            {
+                lock (_lock)
+                {
+                    if (cancellationToken.IsCancellationRequested || _mdf.Consume(_consumeTimeout) == -1)
+                    {
+                        Monitor.Pulse(_lock);
+                        break;
+                    }
+                }
+            }
         }
 
         private void Logout()
