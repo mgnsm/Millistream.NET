@@ -263,6 +263,23 @@ namespace Millistream.Streaming
                     throw new InvalidOperationException();
             }
         }
+
+        /// <summary>
+        /// The time difference in number of nanoseconds between the client and the server. The value should be added to the current time on the client in order to get the server time. Please not that this value can be negative if the client clock is ahead of the server clock.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_TIME_DIFFERENCE_NS"/> option cannot be fetched.</exception>
+        /// <exception cref="ObjectDisposedException">The <see cref="Mdf{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
+        public long TimeDifferenceNs
+        {
+            get
+            {
+                ThrowIfDisposed();
+                long value = default;
+                if (_nativeImplementation.mdf_get_property(_feedHandle, MDF_OPTION.MDF_OPT_TIME_DIFFERENCE_NS, ref value) != 1)
+                    throw new InvalidOperationException();
+                return value;
+            }
+        }
         #endregion
 
         #region Methods

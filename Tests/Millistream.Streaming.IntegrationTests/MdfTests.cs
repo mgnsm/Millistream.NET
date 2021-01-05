@@ -3,6 +3,7 @@ using System;
 using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using Mdf = Millistream.Streaming.Mdf<object, object>;
 
@@ -81,6 +82,10 @@ namespace Millistream.Streaming.IntegrationTests
             const string BindAddress = "123";
             mdf.BindAddress = BindAddress;
             Assert.AreEqual(BindAddress, mdf.BindAddress);
+
+            //TimeDifferenceNs (requires version 1.0.24 of the native library which currently only comes as a pre-built binary on Linux)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                _ = mdf.TimeDifferenceNs;
         }
 
         [TestMethod]
