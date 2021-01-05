@@ -50,6 +50,22 @@ namespace Millistream.Streaming.UnitTests
         }
 
         [TestMethod]
+        public void GetAndSetUtf8ValidationTest()
+        {
+            Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
+            nativeImplementation.Setup(x => x.mdf_message_set_utf8_validation(It.IsAny<IntPtr>(), 0)).Returns(1).Verifiable();
+            using Message message = new Message(nativeImplementation.Object);
+            Assert.AreEqual(true, message.Utf8Validation);
+            message.Utf8Validation = false;
+            Assert.AreEqual(false, message.Utf8Validation);
+            nativeImplementation.Verify();
+            nativeImplementation.Setup(x => x.mdf_message_set_utf8_validation(It.IsAny<IntPtr>(), 1)).Returns(1).Verifiable();
+            message.Utf8Validation = true;
+            Assert.AreEqual(true, message.Utf8Validation);
+            nativeImplementation.Verify();
+        }
+
+        [TestMethod]
         public void AddTest()
         {
             Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
@@ -417,6 +433,14 @@ namespace Millistream.Streaming.UnitTests
         [TestMethod]
         [ExpectedException(typeof(ObjectDisposedException))]
         public void CannotGetActiveCountAfterDisposeTest() => _ = GetDisposedMessage().ActiveCount;
+
+        [TestMethod]
+        [ExpectedException(typeof(ObjectDisposedException))]
+        public void CannotGetUtf8ValidationAfterDisposeTest() => _ = GetDisposedMessage().Utf8Validation;
+
+        [TestMethod]
+        [ExpectedException(typeof(ObjectDisposedException))]
+        public void CannotSetUtf8ValidationAfterDisposeTest() => GetDisposedMessage().Utf8Validation = false;
 
         [TestMethod]
         public void CannotCallMethodsAfterDisposeTest()
