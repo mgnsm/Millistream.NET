@@ -11,6 +11,7 @@ namespace Millistream.Streaming
         int mdf_get_property(IntPtr handle, MDF_OPTION option, ref IntPtr value);
         int mdf_get_property(IntPtr handle, MDF_OPTION option, ref int value);
         int mdf_get_property(IntPtr handle, MDF_OPTION option, ref ulong value);
+        int mdf_get_property(IntPtr handle, MDF_OPTION option, ref long value);
         int mdf_set_property(IntPtr handle, MDF_OPTION option, IntPtr value);
         int mdf_set_property(IntPtr handle, MDF_OPTION option, string value);
         int mdf_connect(IntPtr handle, string server);

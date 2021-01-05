@@ -11,6 +11,7 @@ namespace Millistream.Streaming.UnitTests
     {
         private delegate void GetNextMessageCallback(IntPtr handle, ref int mref, ref int mclass, ref ulong insref);
         private delegate void GetNextFieldCallback(IntPtr handle, ref uint tag, ref IntPtr value);
+        private delegate void GetInt64PropertyCallback(IntPtr handle, MDF_OPTION option, ref long value);
 
         [TestMethod]
         public void GetFileDescriptorTest()
@@ -198,6 +199,22 @@ namespace Millistream.Streaming.UnitTests
             };
             _ = mdf.BindAddress;
             nativeImplementation.Verify();
+        }
+
+        [TestMethod]
+        public void GetTimeDifferenceNsTest()
+        {
+            const long Difference = long.MaxValue;
+            Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
+            IntPtr feedHandle = new IntPtr(123);
+            nativeImplementation.Setup(x => x.mdf_create()).Returns(feedHandle);
+            nativeImplementation
+                .Setup(x => x.mdf_get_property(feedHandle, MDF_OPTION.MDF_OPT_TIME_DIFFERENCE_NS, ref It.Ref<long>.IsAny))
+                .Returns(1)
+                .Callback(new GetInt64PropertyCallback((IntPtr handler, MDF_OPTION option, ref long value) => value = Difference));
+
+            using Mdf mdf = new Mdf(nativeImplementation.Object);
+            Assert.AreEqual(Difference, mdf.TimeDifferenceNs);
         }
 
         [TestMethod]
@@ -451,6 +468,10 @@ namespace Millistream.Streaming.UnitTests
         [TestMethod]
         [ExpectedException(typeof(ObjectDisposedException))]
         public void CannotSetBindAddressAfterDisposeTest() => GetDisposedMdf().BindAddress = "123";
+
+        [TestMethod]
+        [ExpectedException(typeof(ObjectDisposedException))]
+        public void CannotGetTimeDifferenceNsAfterDisposeTest() => _ = GetDisposedMdf().TimeDifferenceNs;
 
         [TestMethod]
         [ExpectedException(typeof(ObjectDisposedException))]
