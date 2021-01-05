@@ -129,7 +129,11 @@ namespace Millistream.Streaming.IntegrationTests
                 Assert.AreEqual(InstrumentReference, receivedResponseMessage.InstrumentReference);
 
             //unsubscribe
-            dataFeed.Request(new UnsubscribeMessage(requestClasses) { RequestId = RequestId });
+            dataFeed.Request(new UnsubscribeMessage(requestClasses)
+            {
+                InstrumentReferences = instrumentReferences,
+                RequestId = RequestId 
+            });
             Assert.IsTrue(autoResetEvent.WaitOne());
         }
 
@@ -165,9 +169,13 @@ namespace Millistream.Streaming.IntegrationTests
                 dataFeed.Recycle(message);
             }
 
-            void UnsubscribeAndClear(RequestClass[] requestClasses)
+            void UnsubscribeAndClear(RequestClass[] requestClasses, ulong[] instrumentReferences)
             {
-                dataFeed.Request(new UnsubscribeMessage(requestClasses) { RequestId = RequestId });
+                dataFeed.Request(new UnsubscribeMessage(requestClasses)
+                {
+                    InstrumentReferences = instrumentReferences,
+                    RequestId = RequestId
+                });
                 Assert.IsTrue(autoResetEvent.WaitOne());
                 receivedMessageTypes.Clear();
                 receivedInstrumentReferences.Clear();
@@ -181,26 +189,28 @@ namespace Millistream.Streaming.IntegrationTests
 
             //subscribe to a specific request class (MDF_RC_BASICDATA) for a couple of instruments
             RequestClass[] requestClasses = new RequestClass[1] { RequestClass.MDF_RC_BASICDATA };
+            ulong[] instrumentReferences = new ulong[4] { 354, 772, 928, 1168 };
             dataFeed.Request(new SubscribeMessage(RequestType.MDF_RT_IMAGE, requestClasses)
             { 
                 RequestId = RequestId,
-                InstrumentReferences = new ulong[4] { 354, 772, 928, 1168 }
+                InstrumentReferences = instrumentReferences
             });
             autoResetEvent.WaitOne();
             Assert.IsTrue(receivedMessageTypes.Count == 1);
             Assert.IsTrue(receivedInstrumentReferences.Count > 1);
-            UnsubscribeAndClear(requestClasses);
+            UnsubscribeAndClear(requestClasses, instrumentReferences);
 
             //subscribe to all messages for a particular instrument
+            instrumentReferences = new ulong[1] { 772 };
             dataFeed.Request(new SubscribeMessage(RequestType.MDF_RT_IMAGE)
             { 
                 RequestId = RequestId,
-                InstrumentReferences = new ulong[1] { 772 }
+                InstrumentReferences = instrumentReferences
             });
             autoResetEvent.WaitOne();
             Assert.IsTrue(receivedMessageTypes.Count > 1);
             Assert.IsTrue(receivedInstrumentReferences.Count == 1);
-            UnsubscribeAndClear(null);
+            UnsubscribeAndClear(null, instrumentReferences);
         }
 
         [TestMethod]
