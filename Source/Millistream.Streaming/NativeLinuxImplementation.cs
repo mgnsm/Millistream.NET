@@ -31,6 +31,9 @@ namespace Millistream.Streaming
             public static extern int mdf_get_property(IntPtr handle, MDF_OPTION option, ref ulong value);
 
             [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            public static extern int mdf_get_property(IntPtr handle, MDF_OPTION option, ref long value);
+
+            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_set_property(IntPtr handle, MDF_OPTION option, IntPtr value);
 
             [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
@@ -125,6 +128,7 @@ namespace Millistream.Streaming
         public int mdf_get_property(IntPtr handle, MDF_OPTION option, ref IntPtr value) => NativeLinuxMethods.mdf_get_property(handle, option, ref value);
         public int mdf_get_property(IntPtr handle, MDF_OPTION option, ref int value) => NativeLinuxMethods.mdf_get_property(handle, option, ref value);
         public int mdf_get_property(IntPtr handle, MDF_OPTION option, ref ulong value) => NativeLinuxMethods.mdf_get_property(handle, option, ref value);
+        public int mdf_get_property(IntPtr handle, MDF_OPTION option, ref long value) => NativeLinuxMethods.mdf_get_property(handle, option, ref value);
         public int mdf_message_add(IntPtr message, ulong instrument_reference, int message_reference) => NativeLinuxMethods.mdf_message_add(message, instrument_reference, message_reference);
         public int mdf_message_add_date(IntPtr message, uint tag, string value) => NativeLinuxMethods.mdf_message_add_date(message, tag, value);
         public int mdf_message_add_date2(IntPtr message, uint tag, int year, int mon, int day) => NativeLinuxMethods.mdf_message_add_date2(message, tag, year, mon, day);
