@@ -13,6 +13,7 @@ namespace Millistream.Streaming
         private const string ListSeparator = " ";
         private readonly INativeImplementation _nativeImplementation;
         private CompressionLevel _compressionLevel = CompressionLevel.Z_BEST_SPEED;
+        private bool _utf8Validation = true;
         private bool _isDisposed;
 
         /// <summary>
@@ -71,6 +72,25 @@ namespace Millistream.Streaming
             {
                 ThrowIfDisposed();
                 return _nativeImplementation.mdf_message_get_num_active(Handle);
+            }
+        }
+
+        /// <summary>
+        /// Enables or disables the UTF-8 validation for <see cref="AddString(uint, string)"/>. It's enabled by default.
+        /// </summary>
+        /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
+        public bool Utf8Validation
+        {
+            get
+            {
+                ThrowIfDisposed();
+                return _utf8Validation;
+            }
+            set
+            {
+                ThrowIfDisposed();
+                if (_nativeImplementation.mdf_message_set_utf8_validation(Handle, value ? 1 : 0) == 1)
+                    _utf8Validation = value;
             }
         }
 
