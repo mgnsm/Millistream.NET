@@ -101,6 +101,12 @@ namespace Millistream.Streaming
 
             [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_message_set_compression_level(IntPtr message, int level);
+
+            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            public static extern int mdf_message_serialize(IntPtr message, ref IntPtr result);
+
+            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            public static extern int mdf_message_deserialize(IntPtr message, string data);
         }
 
         public int mdf_connect(IntPtr handle, string server) => NativeWindowsMethods.mdf_connect(handle, server);
@@ -134,5 +140,8 @@ namespace Millistream.Streaming
         public int mdf_set_property(IntPtr handle, MDF_OPTION option, IntPtr value) => NativeWindowsMethods.mdf_set_property(handle, option, value);
         public int mdf_set_property(IntPtr handle, MDF_OPTION option, string value) => NativeWindowsMethods.mdf_set_property(handle, option, value);
         public int mdf_message_set_compression_level(IntPtr message, int level) => NativeWindowsMethods.mdf_message_set_compression_level(message, level);
+        public int mdf_message_serialize(IntPtr message, ref IntPtr result) => NativeWindowsMethods.mdf_message_serialize(message, ref result);
+        public int mdf_message_deserialize(IntPtr message, string data) => NativeWindowsMethods.mdf_message_deserialize(message, data);
+
     }
 }
