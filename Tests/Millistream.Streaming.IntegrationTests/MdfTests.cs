@@ -94,8 +94,8 @@ namespace Millistream.Streaming.IntegrationTests
             using Mdf mdf = new Mdf();
             using Message message = new Message();
             Assert.IsTrue(message.Add(0, MessageReference.MDF_M_REQUEST));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTCLASS, ((uint)RequestClass.MDF_RC_BASICDATA).ToString()));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, ((uint)RequestType.MDF_RT_IMAGE).ToString()));
+            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTCLASS, StringConstants.RequestClasses.MDF_RC_BASICDATA));
+            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE));
             Assert.IsTrue(message.AddString(Field.MDF_F_INSREFLIST, "772"));
             Assert.IsFalse(mdf.Send(message));
             //connect
@@ -129,20 +129,20 @@ namespace Millistream.Streaming.IntegrationTests
                 Guid.NewGuid().ToString()
             };
             Assert.IsTrue(message.Add(0, MessageReference.MDF_M_REQUEST));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTCLASS, ((uint)RequestClass.MDF_RC_BASICDATA).ToString()));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, ((uint)RequestType.MDF_RT_IMAGE).ToString()));
+            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTCLASS, StringConstants.RequestClasses.MDF_RC_BASICDATA));
+            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE));
             Assert.IsTrue(message.AddString(Field.MDF_F_INSREFLIST, "772"));
             Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTID, requestIds[0]));
 
             Assert.IsTrue(message.Add(0, MessageReference.MDF_M_REQUEST));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTCLASS, ((uint)RequestClass.MDF_RC_QUOTE).ToString()));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, ((uint)RequestType.MDF_RT_IMAGE).ToString()));
+            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTCLASS, StringConstants.RequestClasses.MDF_RC_QUOTE));
+            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE));
             Assert.IsTrue(message.AddString(Field.MDF_F_INSREFLIST, "1146"));
             Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTID, requestIds[1]));
 
             Assert.IsTrue(message.Add(0, MessageReference.MDF_M_REQUEST));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTCLASS, ((uint)RequestClass.MDF_RC_TRADE).ToString()));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, ((uint)RequestType.MDF_RT_IMAGE).ToString()));
+            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTCLASS, StringConstants.RequestClasses.MDF_RC_TRADE));
+            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE));
             Assert.IsTrue(message.AddString(Field.MDF_F_INSREFLIST, "105"));
             Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTID, requestIds[2]));
 
@@ -157,8 +157,8 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.AreEqual(0, message.ActiveCount);
 
             Assert.IsTrue(message.Add(0, MessageReference.MDF_M_REQUEST));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTCLASS, ((uint)RequestClass.MDF_RC_ORDER).ToString()));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, ((uint)RequestType.MDF_RT_IMAGE).ToString()));
+            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTCLASS, StringConstants.RequestClasses.MDF_RC_ORDER));
+            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE));
             Assert.IsTrue(message.AddString(Field.MDF_F_INSREFLIST, "354"));
             string requestId = Guid.NewGuid().ToString();
             Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTID, requestId));
@@ -199,8 +199,8 @@ namespace Millistream.Streaming.IntegrationTests
             mdf.DataCallback = OnDataReceived;
             //request some data
             Assert.IsTrue(message.Add(0, MessageReference.MDF_M_REQUEST));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTCLASS, ((uint)RequestClass.MDF_RC_BASICDATA).ToString()));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, ((uint)RequestType.MDF_RT_IMAGE).ToString()));
+            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTCLASS, StringConstants.RequestClasses.MDF_RC_BASICDATA));
+            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE));
             Assert.IsTrue(message.AddString(Field.MDF_F_INSREFLIST, "772"));
             Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTID, RequestId));
             Assert.IsTrue(mdf.Send(message));
@@ -259,7 +259,7 @@ namespace Millistream.Streaming.IntegrationTests
             RequestClass[] requestClasses = new RequestClass[2] { RequestClass.MDF_RC_BASICDATA, RequestClass.MDF_RC_QUOTE };
             Assert.IsTrue(message.Add(0, MessageReference.MDF_M_REQUEST));
             Assert.IsTrue(message.AddList(requestClasses));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, ((int)RequestType.MDF_RT_FULL).ToString()));
+            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_FULL));
             const string InsRef = "772";
             Assert.IsTrue(message.AddList(Field.MDF_F_INSREFLIST, InsRef));
             Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTID, requestId));
@@ -294,7 +294,7 @@ namespace Millistream.Streaming.IntegrationTests
             RequestClass[] requestClasses = new RequestClass[1] { RequestClass.MDF_RC_BASICDATA };
             Assert.IsTrue(message.Add(0, MessageReference.MDF_M_REQUEST));
             Assert.IsTrue(message.AddList(requestClasses));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, ((int)RequestType.MDF_RT_IMAGE).ToString()));
+            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE));
             Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTID, requestId));
             ulong[] instrumentReferences = new ulong[4] { 354, 772, 928, 1168 };
             Assert.IsTrue(message.AddList(Field.MDF_F_INSREFLIST, instrumentReferences));
@@ -369,8 +369,8 @@ namespace Millistream.Streaming.IntegrationTests
             requestId = "rid2";
             instrumentReferences = new ulong[1] { 772 };
             Assert.IsTrue(message.Add(0, MessageReference.MDF_M_REQUEST));
-            Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTCLASS, "*"));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, ((int)RequestType.MDF_RT_IMAGE).ToString()));
+            Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTCLASS, StringConstants.RequestClasses.All));
+            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE));
             Assert.IsTrue(message.AddList(Field.MDF_F_INSREFLIST, new ulong[1] { 772 }));
             Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTID, requestId));
             Assert.IsTrue(mdf.Send(message));
@@ -392,8 +392,8 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.IsTrue(LogOn(mdf, message, TestContext));
             //send request
             Assert.IsTrue(message.Add(0, MessageReference.MDF_M_REQUEST));
-            Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTCLASS, ((int)RequestClass.MDF_RC_INSREF).ToString()));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, "2"));
+            Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTCLASS, StringConstants.RequestClasses.MDF_RC_INSREF));
+            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_STREAM));
             Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTID, "rid"));
             Assert.IsTrue(mdf.Send(message));
             message.Reset();
