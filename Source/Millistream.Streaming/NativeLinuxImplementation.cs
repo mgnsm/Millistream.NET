@@ -110,6 +110,9 @@ namespace Millistream.Streaming
 
             [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_message_deserialize(IntPtr message, string data);
+
+            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            public static extern int mdf_message_set_utf8_validation(IntPtr message, int enable);
         }
 
         public int mdf_connect(IntPtr handle, string server) => NativeLinuxMethods.mdf_connect(handle, server);
@@ -146,5 +149,6 @@ namespace Millistream.Streaming
         public int mdf_message_move(IntPtr src, IntPtr dst, ulong insref_src, ulong insref_dst) => NativeLinuxMethods.mdf_message_move(src, dst, insref_src, insref_dst);
         public int mdf_message_serialize(IntPtr message, ref IntPtr result) => NativeLinuxMethods.mdf_message_serialize(message, ref result);
         public int mdf_message_deserialize(IntPtr message, string data) => NativeLinuxMethods.mdf_message_deserialize(message, data);
+        public int mdf_message_set_utf8_validation(IntPtr message, int enable) => NativeLinuxMethods.mdf_message_set_utf8_validation(message, enable);
     }
 }

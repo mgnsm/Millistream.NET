@@ -19,6 +19,15 @@ namespace Millistream.Streaming.IntegrationTests
         }
 
         [TestMethod]
+        public void SetUtf8ValidationTest()
+        {
+            using Message message = new Message();
+            Assert.IsTrue(message.Utf8Validation);
+            message.Utf8Validation = false;
+            Assert.IsFalse(message.Utf8Validation);
+        }
+
+        [TestMethod]
         public void AddInt64Test()
         {
             using Message message = new Message();
