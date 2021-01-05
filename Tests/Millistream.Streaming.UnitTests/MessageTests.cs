@@ -252,6 +252,30 @@ namespace Millistream.Streaming.UnitTests
         }
 
         [TestMethod]
+        public void MoveTest()
+        {
+            const ulong SourceInsref = 1;
+            const ulong DestinationInsref = 2;
+
+            Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
+            nativeImplementation.Setup(x => x.mdf_message_create()).Returns(new IntPtr(123));
+            using Message source = new Message(nativeImplementation.Object);
+
+            Mock<INativeImplementation> nativeImplementation2 = new Mock<INativeImplementation>();
+            nativeImplementation2.Setup(x => x.mdf_message_create()).Returns(new IntPtr(456));
+            using Message destination = new Message(nativeImplementation2.Object);
+
+            nativeImplementation.Setup(x => x.mdf_message_move(source.Handle, destination.Handle, SourceInsref, DestinationInsref)).Returns(1).Verifiable();
+
+            Assert.IsTrue(Message.Move(source, destination, SourceInsref, DestinationInsref, nativeImplementation.Object));
+            nativeImplementation.Verify();
+
+            nativeImplementation.Setup(x => x.mdf_message_move(source.Handle, destination.Handle, SourceInsref, DestinationInsref)).Returns(0).Verifiable();
+            Assert.IsFalse(Message.Move(source, destination, SourceInsref, DestinationInsref, nativeImplementation.Object));
+            nativeImplementation.Verify();
+        }
+
+        [TestMethod]
         public void SerializeTest()
         {
             Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
@@ -357,6 +381,16 @@ namespace Millistream.Streaming.UnitTests
         [ExpectedException(typeof(ArgumentNullException))]
         public void AddNullReferenceClassesListTest() =>
             new Message(new Mock<INativeImplementation>().Object).AddList(null);
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void MoveNullReferenceTest() =>
+            Message.Move(null, new Message(new Mock<INativeImplementation>().Object), 1, 2);
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void MoveWithoutNativeImplementationTest() =>
+            Message.Move(new Message(new Mock<INativeImplementation>().Object), new Message(new Mock<INativeImplementation>().Object), 1, 2, null);
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]

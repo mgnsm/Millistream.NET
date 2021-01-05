@@ -94,6 +94,31 @@ namespace Millistream.Streaming.IntegrationTests
         }
 
         [TestMethod]
+        public void MoveTest()
+        {
+            using Message source = new Message();
+            const ulong SourceInsRef = 1;
+            Assert.IsTrue(source.Add(SourceInsRef, MessageReference.MDF_M_REQUEST));
+            Assert.IsTrue(source.AddNumeric(Field.MDF_F_REQUESTTYPE, "1"));
+            Assert.IsTrue(source.Add(SourceInsRef, MessageReference.MDF_M_BASICDATA));
+            Assert.IsTrue(source.AddNumeric(Field.MDF_F_REQUESTTYPE, "1"));
+            Assert.IsTrue(source.Add(SourceInsRef, MessageReference.MDF_M_QUOTE));
+            Assert.IsTrue(source.AddNumeric(Field.MDF_F_REQUESTTYPE, "1"));
+            Assert.AreEqual(3, source.ActiveCount);
+            
+            using Message destination = new Message();
+            Assert.AreEqual(0, destination.ActiveCount);
+
+            Assert.IsTrue(Message.Move(source, destination, 1, 10));
+            Assert.AreEqual(0, source.ActiveCount);
+            Assert.AreEqual(3, destination.ActiveCount);
+
+            Assert.IsFalse(Message.Move(source, null, 1, 10));
+            Assert.IsTrue(Message.Move(destination, null, 10, 11));
+            Assert.IsTrue(Message.Move(destination, destination, 11, 12));
+        }
+
+        [TestMethod]
         public void SerializeAndDeserializeTest()
         {
             using Message message = new Message();

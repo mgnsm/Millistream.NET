@@ -103,6 +103,9 @@ namespace Millistream.Streaming
             public static extern int mdf_message_set_compression_level(IntPtr message, int level);
 
             [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            public static extern int mdf_message_move(IntPtr src, IntPtr dst, ulong insref_src, ulong insref_dst);
+
+            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_message_serialize(IntPtr message, ref IntPtr result);
 
             [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
@@ -140,6 +143,7 @@ namespace Millistream.Streaming
         public int mdf_set_property(IntPtr handle, MDF_OPTION option, IntPtr value) => NativeLinuxMethods.mdf_set_property(handle, option, value);
         public int mdf_set_property(IntPtr handle, MDF_OPTION option, string value) => NativeLinuxMethods.mdf_set_property(handle, option, value);
         public int mdf_message_set_compression_level(IntPtr message, int level) => NativeLinuxMethods.mdf_message_set_compression_level(message, level);
+        public int mdf_message_move(IntPtr src, IntPtr dst, ulong insref_src, ulong insref_dst) => NativeLinuxMethods.mdf_message_move(src, dst, insref_src, insref_dst);
         public int mdf_message_serialize(IntPtr message, ref IntPtr result) => NativeLinuxMethods.mdf_message_serialize(message, ref result);
         public int mdf_message_deserialize(IntPtr message, string data) => NativeLinuxMethods.mdf_message_deserialize(message, data);
     }
