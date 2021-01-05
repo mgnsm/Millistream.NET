@@ -93,13 +93,13 @@ namespace Millistream.Streaming
         /// <summary>
         /// Adds a new message to the message handle. If the current active message is empty it will be reused to carry this new message.
         /// </summary>
-        /// <param name="instrumentReference">The reference for the instrument for which the message is created for.</param>
-        /// <param name="messageReference">The type of the message to create.</param>
+        /// <param name="insref">The reference for the instrument for which the message is created for.</param>
+        /// <param name="mref">The type of the message to create.</param>
         /// <returns><see langword="true" /> if a new message was added to the message handle (or an empty message was reused) or <see langword="false" /> if there was an error.</returns>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
         /// <remarks>The corresponding native method is mdf_message_add.</remarks>
-        public bool Add(ulong instrumentReference, MessageReference messageReference) =>
-            Add(instrumentReference, (int)messageReference);
+        public bool Add(ulong insref, MessageReference mref) =>
+            Add(insref, (int)mref);
 
         /// <summary>
         /// Adds a numeric field to the current active message.
@@ -416,36 +416,36 @@ namespace Millistream.Streaming
         /// Adds a list field of instrument references to the current active message.
         /// </summary>
         /// <param name="tag">The field tag.</param>
-        /// <param name="instrumentReferences">The list of instrument references.</param>
+        /// <param name="insrefs">The sequence of instrument references.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="instrumentReferences"/> is <see langword="null" />.</exception>
-        /// <exception cref="ArgumentException"><paramref name="instrumentReferences"/> contains more than 1.000.000 elements.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="insrefs"/> is <see langword="null" />.</exception>
+        /// <exception cref="ArgumentException"><paramref name="insrefs"/> contains more than 1.000.000 elements.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
         /// <remarks>The corresponding native method is mdf_message_add_list.</remarks>
-        public bool AddList(uint tag, IEnumerable<ulong> instrumentReferences)
+        public bool AddList(uint tag, IEnumerable<ulong> insrefs)
         {
-            if (instrumentReferences == null)
-                throw new ArgumentNullException(nameof(instrumentReferences));
+            if (insrefs == null)
+                throw new ArgumentNullException(nameof(insrefs));
 
-            if (instrumentReferences.Count() > 1_000_000)
-                throw new ArgumentException("There is a current soft limit of 1,000,000 instrument references per list.", nameof(instrumentReferences));
+            if (insrefs.Count() > 1_000_000)
+                throw new ArgumentException("There is a current soft limit of 1,000,000 instrument references per list.", nameof(insrefs));
 
             ThrowIfDisposed();
-            return _nativeImplementation.mdf_message_add_list(Handle, tag, string.Join(ListSeparator, instrumentReferences)) == 1;
+            return _nativeImplementation.mdf_message_add_list(Handle, tag, string.Join(ListSeparator, insrefs)) == 1;
         }
 
         /// <summary>
         /// Adds a list field of instrument references to the current active message.
         /// </summary>
         /// <param name="tag">The field tag.</param>
-        /// <param name="instrumentReferences">The list of instrument references.</param>
+        /// <param name="insrefs">The list of instrument references.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="instrumentReferences"/> is <see langword="null" />.</exception>
-        /// <exception cref="ArgumentException"><paramref name="instrumentReferences"/> contains more than 1.000.000 elements.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="insrefs"/> is <see langword="null" />.</exception>
+        /// <exception cref="ArgumentException"><paramref name="insrefs"/> contains more than 1.000.000 elements.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
         /// <remarks>The corresponding native method is mdf_message_add_list.</remarks>
-        public bool AddList(Field tag, IEnumerable<ulong> instrumentReferences) =>
-            AddList((uint)tag, instrumentReferences);
+        public bool AddList(Field tag, IEnumerable<ulong> insrefs) =>
+            AddList((uint)tag, insrefs);
 
         /// <summary>
         /// Adds a list of request classes to the <see cref="Field.MDF_F_REQUESTCLASS"/> field of the current active message.
@@ -486,6 +486,19 @@ namespace Millistream.Streaming
             ThrowIfDisposed();
             return _nativeImplementation.mdf_message_del(Handle) == 1;
         }
+
+        /// <summary>
+        /// Moves all messages from <paramref name="source"/> with an insref matching <paramref name="sourceInsref"/> to <paramref name="destination"/> and changes the insref to <paramref name="destinationInsRef"/>. If <paramref name="destination"/> is set to the same message handle as <paramref name="source"/> or if <paramref name="destination"/> is <see langword="null" />, then the change from <paramref name="sourceInsref"/> to <paramref name="destinationInsRef"/> will be done in-place in <paramref name="source"/>.
+        /// </summary>
+        /// <param name="source">The message handle to move messages from.</param>
+        /// <param name="destination">The message handle to move messages to.</param>
+        /// <param name="sourceInsref">The instrument reference of the messages to be moved.</param>
+        /// <param name="destinationInsRef">The new instrument reference of the moved or modified messages.</param>
+        /// <returns><see langword="true" /> if the operation was successfull, or <see langword="false" /> if it failed.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null" />.</exception>
+        /// <remarks>The corresponding native method is mdf_message_move.</remarks>
+        public static bool Move(Message source, Message destination, ulong sourceInsref, ulong destinationInsRef) =>
+            Move(source, destination, sourceInsref, destinationInsRef, NativeImplementation.Get());
 
         /// <summary>
         /// Serializes the message chain in the message handle and produces a base64 encoded string to the address pointed to by <paramref name="result"/>. It's the responsibility of the caller to free the produced unmanaged string.
@@ -530,6 +543,17 @@ namespace Millistream.Streaming
                 _isDisposed = true;
                 GC.SuppressFinalize(this);
             }
+        }
+
+        internal static bool Move(Message source, Message destination, ulong insrefSource, ulong insrefDestination, INativeImplementation nativeImplementation)
+        {
+            if (source == null)
+                throw new ArgumentNullException(nameof(source));
+
+            if (nativeImplementation == null)
+                throw new ArgumentNullException(nameof(nativeImplementation));
+
+            return nativeImplementation.mdf_message_move(source.Handle, destination?.Handle ?? IntPtr.Zero, insrefSource, insrefDestination) == 1;
         }
 
         private void ThrowIfDisposed()
