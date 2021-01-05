@@ -450,7 +450,7 @@ namespace Millistream.Streaming.UnitTests
             CatchObjectDisposedException(() => disposedMessage.Add(1, 1));
             CatchObjectDisposedException(() => disposedMessage.Add(1, MessageReference.MDF_M_REQUEST));
 
-            CatchObjectDisposedException(() => disposedMessage.AddNumeric(1, "1"));
+            CatchObjectDisposedException(() => disposedMessage.AddNumeric(1, StringConstants.RequestTypes.MDF_RT_IMAGE));
             CatchObjectDisposedException(() => disposedMessage.AddNumeric(Field.MDF_F_AVERAGE, "1.1"));
 
             CatchObjectDisposedException(() => disposedMessage.AddInt64(1, -12345, 2));

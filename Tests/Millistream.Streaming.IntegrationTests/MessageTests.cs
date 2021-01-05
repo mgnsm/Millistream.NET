@@ -92,7 +92,7 @@ namespace Millistream.Streaming.IntegrationTests
         {
             using Message message = new Message();
             Assert.IsTrue(message.Add(0, MessageReference.MDF_M_QUOTE));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTCLASS, ((uint)RequestClass.MDF_RC_BASICDATA).ToString()));
+            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTCLASS, StringConstants.RequestClasses.MDF_RC_BASICDATA));
             Assert.AreEqual(1, message.ActiveCount);
             Assert.IsTrue(message.Add(0, MessageReference.MDF_M_QUOTE));
             Assert.AreEqual(2, message.ActiveCount);
@@ -108,11 +108,11 @@ namespace Millistream.Streaming.IntegrationTests
             using Message source = new Message();
             const ulong SourceInsRef = 1;
             Assert.IsTrue(source.Add(SourceInsRef, MessageReference.MDF_M_REQUEST));
-            Assert.IsTrue(source.AddNumeric(Field.MDF_F_REQUESTTYPE, "1"));
+            Assert.IsTrue(source.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE));
             Assert.IsTrue(source.Add(SourceInsRef, MessageReference.MDF_M_BASICDATA));
-            Assert.IsTrue(source.AddNumeric(Field.MDF_F_REQUESTTYPE, "1"));
+            Assert.IsTrue(source.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE));
             Assert.IsTrue(source.Add(SourceInsRef, MessageReference.MDF_M_QUOTE));
-            Assert.IsTrue(source.AddNumeric(Field.MDF_F_REQUESTTYPE, "1"));
+            Assert.IsTrue(source.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE));
             Assert.AreEqual(3, source.ActiveCount);
             
             using Message destination = new Message();
@@ -139,7 +139,7 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.IsTrue(message.Serialize(out result));
             Assert.AreNotEqual(IntPtr.Zero, result);
             Assert.IsTrue(message.Add(0, MessageReference.MDF_M_REQUEST));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, "1"));
+            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE));
             Assert.IsTrue(message.Serialize(out result));
             Assert.AreNotEqual(IntPtr.Zero, result);
             //deserialize
