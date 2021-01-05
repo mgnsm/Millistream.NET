@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Runtime.InteropServices;
 
 namespace Millistream.Streaming.IntegrationTests
 {
@@ -90,6 +91,29 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.AreEqual(1, message.ActiveCount);
             message.Delete();
             Assert.AreEqual(0, message.ActiveCount);
+        }
+
+        [TestMethod]
+        public void SerializeAndDeserializeTest()
+        {
+            using Message message = new Message();
+            Assert.IsFalse(message.Serialize(out IntPtr result));
+            Assert.AreEqual(IntPtr.Zero, result);
+            //serialize
+            Assert.IsTrue(message.Add(0, MessageReference.MDF_M_QUOTE));
+            Assert.IsTrue(message.AddNumeric(Field.MDF_F_ASKYIELD, "123"));
+            Assert.IsTrue(message.Serialize(out result));
+            Assert.AreNotEqual(IntPtr.Zero, result);
+            Assert.IsTrue(message.Add(0, MessageReference.MDF_M_REQUEST));
+            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, "1"));
+            Assert.IsTrue(message.Serialize(out result));
+            Assert.AreNotEqual(IntPtr.Zero, result);
+            //deserialize
+            string s = Marshal.PtrToStringAnsi(result);
+            using Message message2 = new Message();
+            Assert.IsTrue(message2.Deserialize(s));
+            Assert.AreEqual(2, message2.ActiveCount);
+            Assert.IsTrue(message.Deserialize(s));
         }
     }
 }

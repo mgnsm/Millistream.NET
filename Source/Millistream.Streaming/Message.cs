@@ -488,6 +488,37 @@ namespace Millistream.Streaming
         }
 
         /// <summary>
+        /// Serializes the message chain in the message handle and produces a base64 encoded string to the address pointed to by <paramref name="result"/>. It's the responsibility of the caller to free the produced unmanaged string.
+        /// </summary>
+        /// <param name="result">An unmanaged pointer to the base64 encoded string if the method returns <see langword="true" />, or <see cref="IntPtr.Zero"/> if the method returns <see langword="false" />.</param>
+        /// <returns><see langword="true" /> if there existed a message chain and if it was successfully base64 encoded, or <see langword="false" /> if there existed no message chain or if the base64 encoding failed.</returns>
+        /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
+        /// <remarks>The corresponding native method is mdf_message_serialize.</remarks>
+        public bool Serialize(out IntPtr result)
+        {
+            ThrowIfDisposed();
+            result = IntPtr.Zero;
+            return _nativeImplementation.mdf_message_serialize(Handle, ref result) == 1;
+        }
+
+        /// <summary>
+        /// Deserializes a base64 encoded message chain and replaces the existing (if any) message chain in the message handle.
+        /// </summary>
+        /// <param name="data">A base64 encoded (serialized) message chain.</param>
+        /// <returns><see langword="true" /> if the message chain was successfully deserialized, or <see langword="false" /> if the deserialization failed (if so the current message chain in the message handler is left untouched).</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="data"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
+        /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
+        /// <remarks>The corresponding native method is mdf_message_deserialize.</remarks>
+        public bool Deserialize(string data)
+        {
+            if (string.IsNullOrEmpty(data))
+                throw new ArgumentNullException(nameof(data));
+
+            ThrowIfDisposed();
+            return _nativeImplementation.mdf_message_deserialize(Handle, data) == 1;
+        }
+
+        /// <summary>
         /// Destroys the message handle and frees all allocated memory.
         /// </summary>
         /// <remarks>The corresponding native method is mdf_message_destroy.</remarks>

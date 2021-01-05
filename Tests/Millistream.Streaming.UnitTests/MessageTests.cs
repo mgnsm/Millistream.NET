@@ -8,6 +8,8 @@ namespace Millistream.Streaming.UnitTests
     [TestClass]
     public sealed class MessageTests
     {
+        private delegate void mdf_message_serialize_callback(IntPtr messageHandle, ref IntPtr result);
+
         [TestMethod]
         public void GetAndSetCompressionLevelTest()
         {
@@ -250,6 +252,45 @@ namespace Millistream.Streaming.UnitTests
         }
 
         [TestMethod]
+        public void SerializeTest()
+        {
+            Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
+            IntPtr messageHandle = new IntPtr(123);
+            nativeImplementation.Setup(x => x.mdf_message_create()).Returns(messageHandle);
+            IntPtr stringPointer = new IntPtr(456);
+            nativeImplementation.Setup(x => x.mdf_message_serialize(messageHandle, ref It.Ref<IntPtr>.IsAny))
+                .Returns(1)
+                .Callback(new mdf_message_serialize_callback((IntPtr messageHandle, ref IntPtr result) => result = stringPointer))
+                .Verifiable();
+            using Message message = new Message(nativeImplementation.Object);
+            Assert.IsTrue(message.Serialize(out IntPtr result));
+            Assert.AreEqual(stringPointer, result);
+            nativeImplementation.Verify();
+
+            nativeImplementation.Setup(x => x.mdf_message_serialize(messageHandle, ref It.Ref<IntPtr>.IsAny)).Returns(0).Verifiable();
+            Assert.IsFalse(message.Serialize(out result));
+            Assert.AreEqual(IntPtr.Zero, result);
+            nativeImplementation.Verify();
+        }
+
+        [TestMethod]
+        public void DeserializeTest()
+        {
+            Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
+            IntPtr messageHandle = new IntPtr(123);
+            nativeImplementation.Setup(x => x.mdf_message_create()).Returns(messageHandle);
+            const string Data = "ABC";
+            nativeImplementation.Setup(x => x.mdf_message_deserialize(messageHandle, Data)).Returns(1).Verifiable();
+            using Message message = new Message(nativeImplementation.Object);
+            Assert.IsTrue(message.Deserialize(Data));
+            nativeImplementation.Verify();
+
+            nativeImplementation.Setup(x => x.mdf_message_deserialize(messageHandle, Data)).Returns(0).Verifiable();
+            Assert.IsFalse(message.Deserialize(Data));
+            nativeImplementation.Verify();
+        }
+
+        [TestMethod]
         public void DisposeTest()
         {
             Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
@@ -318,6 +359,16 @@ namespace Millistream.Streaming.UnitTests
             new Message(new Mock<INativeImplementation>().Object).AddList(null);
 
         [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void DeserializeNullReferenceTest() =>
+            new Message(new Mock<INativeImplementation>().Object).Deserialize(null);
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void DeserializeEmptyStringTest() =>
+            new Message(new Mock<INativeImplementation>().Object).Deserialize(string.Empty);
+
+        [TestMethod]
         [ExpectedException(typeof(ObjectDisposedException))]
         public void CannotGetCompressionLevelAfterDisposeTest() => _ = GetDisposedMessage().CompressionLevel;
 
@@ -376,6 +427,11 @@ namespace Millistream.Streaming.UnitTests
             CatchObjectDisposedException(() => disposedMessage.Reset());
 
             CatchObjectDisposedException(() => disposedMessage.Delete());
+
+            CatchObjectDisposedException(() => disposedMessage.Serialize(out IntPtr _));
+
+            CatchObjectDisposedException(() => disposedMessage.Deserialize("ABC"));
+
         }
 
         private static Message GetDisposedMessage()
