@@ -17,8 +17,8 @@ On **Windows** you download and run an [.exe](https://packages.millistream.com/W
 
 On **macOS** you download and install a `.pkg` file, for example in a Bash shell:
 
-    curl -O https://packages.millistream.com/macOS/libmdf-1.0.21.pkg 
-    sudo installer -pkg libmdf-1.0.21.pkg -target /
+    curl -O https://packages.millistream.com/macOS/libmdf-1.0.23.pkg 
+    sudo installer -pkg libmdf-1.0.23.pkg -target /
 
 On **Linux**, the native API and the dependent libraries are available through your distribution repository. Below is an example of how to install everything needed using the `apt-get` command-line tool on Ubuntu:
 
@@ -28,7 +28,7 @@ On **Linux**, the native API and the dependent libraries are available through y
     sudo apt-get install libmdf
 
 Instructions on how to install the API on other supported distributions can be found on the [FTP server](https://bit.ly/2wD2omK). You may also want to take a look at the [YAML build pipeline](.github/workflows/millistream.streaming.yml) in this repository. It installs the native binaries and runs integration tests against them on macOS, Ubuntu and Windows using the cloud-hosted runners in GitHub Actions.
-## Basic example
+## Getting Started
 Once you have installed the native `libmdf` library on your computer, you can then [install](https://docs.microsoft.com/en-us/nuget/consume-packages/ways-to-install-a-package) Millistream.NET into your project using NuGet:
 
     PM> Install-Package Millistream.Streaming
@@ -37,79 +37,124 @@ Below is a basic example of how to use the .NET API to connect to a server and s
 
 ```cs
 using System;
+using System.Text;
 using Millistream.Streaming;
+using Mdf = Millistream.Streaming.Mdf<object, object>;
 
 namespace ConsoleApp
 {
     class Program
     {
-        static void Main(string[] args)
+        static int Main()
         {
-            const string Host = "HOST";
-            const string Username = "YOUR_USERNAME";
-            const string Password = "YOUR_PASSWORD";
-
-            //1. Create an instance of the DataFeed class.
-            using (DataFeed dataFeed = new DataFeed())
+            //1. Initialize the managed API and message handles.
+            using (Mdf mdf = new Mdf())
+            using (Message message = new Message())
             {
-                //2. Hook up an event handler to the ConnectionStatusChanged event.
-                dataFeed.ConnectionStatusChanged += OnConnectionStatusChanged;
-                //3. Subscribe to the Data observable.
-                dataFeed.Data.Subscribe(new Observer(dataFeed));
-                //4. Call the Connect method to connect to the feed and authenticate.
-                if (dataFeed.Connect(Host, Username, Password))
+                //2. Register a connection status callback (optional).
+                mdf.StatusCallback = (data, status, host, ip) =>
+                    Console.WriteLine($"{DateTime.Now.ToShortTimeString()} - " +
+                        $"Connection Status: {status}");
+
+                //3. Connect.
+                mdf.Connect("sandbox.millistream.com:9100");
+
+                //4. Send a MDF_M_LOGON message to log on.
+                message.Add(0, MessageReference.MDF_M_LOGON);
+                message.AddString(Field.MDF_F_USERNAME, "sandbox");
+                message.AddString(Field.MDF_F_PASSWORD, "sandbox");
+                mdf.Send(message);
+                message.Reset();
+
+                //5. Consume and wait for the server to send a MDF_M_LOGONGREETING message.
+                if (!Consume(mdf, MessageReference.MDF_M_LOGONGREETING))
                 {
-                    //5. Issue a subscription request and wait for data.
-                    dataFeed.Request(new SubscribeMessage(
-                        RequestType.MDF_RT_FULL, // <- The type of request. Full (image+streaming) in this case.
-                        new RequestClass[1] { RequestClass.MDF_RC_QUOTE }) //<- What kind of data to request. 
-                                                                           //   Quotes in this case.
+                    Console.WriteLine("Failed to connect to the API.");
+                    return 1;
+                }
+                Console.WriteLine($"{DateTime.Now.ToShortTimeString()} - Logged in");
+
+                //6. Register a data callback (optional).
+                mdf.DataCallback = (data, handle) =>
+                {
+                    while (handle.GetNextMessage(out MessageReference mref, out MessageClasses mclass,
+                        out ulong insref))
                     {
-                        InstrumentReferences = new ulong[1] { 772 }, //<- What instrument identifier(s) the 
-                                                                     //   request is for. 772 is the unique 
-                                                                     //   identifier for Ericsson B on Nasdaq OMX 
-                                                                     //   Stockholm.
-                    });
-                }
-                else
-                {
-                    Console.WriteLine("Failed to connect to the data feed.");
-                }
+                        Console.WriteLine($"{DateTime.Now.ToShortTimeString()} - " +
+                            $"Received an {mref} message with the following fields:");
 
-                //prevent the app from terminating until you press a key
-                Console.ReadLine();
-            }
-        }
-
-        static void OnConnectionStatusChanged(object sender,
-            ConnectionStatusChangedEventArgs e) =>
-            Console.WriteLine($"{DateTime.Now.ToShortTimeString()} - " +
-                $"Connection Status: {e.ConnectionStatus}");
-    }
-
-    class Observer : IObserver<ResponseMessage>
-    {
-        private readonly IDataFeed _dataFeed;
-
-        public Observer(IDataFeed dataFeed) => _dataFeed = dataFeed ?? 
-            throw new ArgumentNullException(nameof(dataFeed));
-
-        public void OnNext(ResponseMessage message)
-        {
-            Console.WriteLine($"{DateTime.Now.ToShortTimeString()} - " +
-                $"Received a {message.MessageReference} message with the following fields:");
-            foreach (var field in message.Fields)
-#if NET_CORE
-                Console.WriteLine($"{field.Key}: {Encoding.UTF8.GetString(field.Value.Span)}");
+                        while (handle.GetNextField(out Field field, out ReadOnlySpan<byte> value))
+                        {
+#if NET_FRAMEWORK
+                            Console.WriteLine($"{field}: {Encoding.UTF8.GetString(value.ToArray())}");
 #else
-                Console.WriteLine($"{field.Key}: {Encoding.UTF8.GetString(field.Value.ToArray())}");
+                            Console.WriteLine($"{field}: {Encoding.UTF8.GetString(value)}");
 #endif
-            _dataFeed.Recycle(message);
+                        }
+                    }
+                };
+
+                //7. Request some data.
+                message.Add(0, MessageReference.MDF_M_REQUEST);
+                message.AddList(new RequestClass[2] // <- What kind of data to request.
+                {
+                    RequestClass.MDF_RC_BASICDATA, // <- Basic data ...
+                    RequestClass.MDF_RC_QUOTE // <- ...and quotes in this case.
+                });
+                message.AddNumeric(
+                    Field.MDF_F_REQUESTTYPE, // <- The type of request.
+                    StringConstants.RequestTypes.MDF_RT_FULL //<- Full (image+streaming) in this case.
+                );
+                message.AddList(
+                    Field.MDF_F_INSREFLIST, // <- What instrument identifier(s) the request is for.
+                    new ulong[1] { 772 }); // <- 772 is the unique identifier for Ericsson B.
+                mdf.Send(message);
+                message.Reset();
+
+                // 8. Consume until a key is pressed.
+                // NOTE: If you don't register a data callback by setting the DataCallback property, 
+                // you should call the GetNextMessage and GetNextField methods after calling Consume
+                // below.
+                while (!Console.KeyAvailable)
+                {
+                    if (mdf.Consume(1) == -1)
+                        break;
+                }
+
+                // 9. Log off by sending an MDF_M_LOGOFF message (optional).
+                mdf.DataCallback = null; // Unregister the data callback before logging out.
+                message.Add(0, MessageReference.MDF_M_LOGOFF);
+                mdf.Send(message);
+                if (Consume(mdf, MessageReference.MDF_M_LOGOFF))
+                    Console.WriteLine($"{DateTime.Now.ToShortTimeString()} - Logged out");
+
+                // 10. Disconnect.
+                mdf.Disconnect();
+            } // 11. Dispose the managed handles.
+            return 0;
         }
 
-        public void OnCompleted() { }
+        static bool Consume(Mdf mdf, MessageReference messageReference)
+        {
+            DateTime time = DateTime.UtcNow;
+            do
+            {
+                int ret = mdf.Consume(1);
+                switch (ret)
+                {
+                    case 1:
+                        while (mdf.GetNextMessage(out MessageReference mref, out MessageClasses _,
+                            out ulong _))
+                            if (mref == messageReference)
+                                return true;
+                        break;
+                    case -1:
+                        return false;
+                }
 
-        public void OnError(Exception exception) => Console.WriteLine(exception.Message);
+            } while (DateTime.UtcNow.Subtract(time).TotalSeconds < 10);
+            return false;
+        }
     }
 }
 ```
