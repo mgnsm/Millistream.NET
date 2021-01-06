@@ -335,7 +335,7 @@ namespace Millistream.Streaming
             AddDate((uint)tag, year, month, day);
 
         /// <summary>
-        /// Adds a time field to the current active message. Please note that all times and dates are expressed in UTC. The format of value must be "HH:MM:SS" or "HH:MM:SS.mmm" (where mmm is the milliseconds).
+        /// Adds a time field to the current active message. Please note that all times and dates are expressed in UTC. The format of value must be "HH:MM:SS" or "HH:MM:SS.mmm" (where mmm is the milliseconds). libmdf 1.0.24 accepts up to nanoseconds resolution, i.e. "HH:MM:SS.nnnnnnnnn".
         /// </summary>
         /// <param name="tag">The field tag.</param>
         /// <param name="value">The time.</param>
@@ -353,7 +353,7 @@ namespace Millistream.Streaming
         }
 
         /// <summary>
-        /// Adds a time field to the current active message. Please note that all times and dates are expressed in UTC. The format of value must be "HH:MM:SS" or "HH:MM:SS.mmm" (where mmm is the milliseconds).
+        /// Adds a time field to the current active message. Please note that all times and dates are expressed in UTC. The format of value must be "HH:MM:SS" or "HH:MM:SS.mmm" (where mmm is the milliseconds). libmdf 1.0.24 accepts up to nanoseconds resolution, i.e. "HH:MM:SS.nnnnnnnnn".
         /// </summary>
         /// <param name="tag">The field tag.</param>
         /// <param name="value">The time.</param>
