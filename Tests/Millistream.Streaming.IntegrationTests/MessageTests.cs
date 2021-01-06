@@ -103,6 +103,15 @@ namespace Millistream.Streaming.IntegrationTests
         }
 
         [TestMethod]
+        public void AddStringTest()
+        {
+            using Message message = new Message();
+            Assert.IsTrue(message.Add(0, MessageReference.MDF_M_QUOTE));
+            Assert.IsTrue(message.AddString(Field.MDF_F_CEO, "Foo Bar", 5));
+            Assert.IsFalse(message.AddString(Field.MDF_F_CEO, "Foo Bar", -1));
+        }
+
+        [TestMethod]
         public void MoveTest()
         {
             using Message source = new Message();
