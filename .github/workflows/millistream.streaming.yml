@@ -53,8 +53,8 @@ jobs:
     - name: Download and Install libmdf on macOS
       if: ${{ matrix.os == 'macOS-latest' }}
       run: |
-        curl -O https://packages.millistream.com/macOS/libmdf-1.0.21.pkg 
-        sudo installer -pkg libmdf-1.0.21.pkg -target /
+        curl -O https://packages.millistream.com/macOS/libmdf-1.0.23.pkg 
+        sudo installer -pkg libmdf-1.0.23.pkg -target /
 
     - name: Download and Install libmdf on Linux
       if: ${{ matrix.os == 'ubuntu-latest' }}
