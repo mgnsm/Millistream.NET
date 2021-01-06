@@ -79,6 +79,9 @@ namespace Millistream.Streaming
             public static extern int mdf_message_add_string(IntPtr message, uint tag, string value);
 
             [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            public static extern int mdf_message_add_string2(IntPtr message, uint tag, string value, int len);
+
+            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_message_add_date(IntPtr message, uint tag, string value);
 
             [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
@@ -136,6 +139,7 @@ namespace Millistream.Streaming
         public int mdf_message_add_list(IntPtr message, uint tag, string value) => NativeMacOsMethods.mdf_message_add_list(message, tag, value);
         public int mdf_message_add_numeric(IntPtr message, uint tag, string value) => NativeMacOsMethods.mdf_message_add_numeric(message, tag, value);
         public int mdf_message_add_string(IntPtr message, uint tag, string value) => NativeMacOsMethods.mdf_message_add_string(message, tag, value);
+        public int mdf_message_add_string2(IntPtr message, uint tag, string value, int len) => NativeMacOsMethods.mdf_message_add_string2(message, tag, value, len);
         public int mdf_message_add_time(IntPtr message, uint tag, string value) => NativeMacOsMethods.mdf_message_add_time(message, tag, value);
         public int mdf_message_add_time2(IntPtr message, uint tag, int hour, int min, int sec, int msec) => NativeMacOsMethods.mdf_message_add_time2(message, tag, hour, min, sec, msec);
         public int mdf_message_add_time3(IntPtr message, uint tag, int hour, int min, int sec, int nsec) => NativeMacOsMethods.mdf_message_add_time3(message, tag, hour, min, sec, nsec);

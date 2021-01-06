@@ -31,7 +31,7 @@ namespace Millistream.Streaming
         ~Message() => Dispose();
 
         /// <summary>
-        /// The zlib compression level used for the <see cref="AddString(uint, string)"/> method.
+        /// The zlib compression level used for the <see cref="AddString(uint, string)"/> and <see cref="AddString(uint, string, int)"/> methods.
         /// </summary>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
         public CompressionLevel CompressionLevel
@@ -76,7 +76,7 @@ namespace Millistream.Streaming
         }
 
         /// <summary>
-        /// Enables or disables the UTF-8 validation for <see cref="AddString(uint, string)"/>. It's enabled by default.
+        /// Enables or disables the UTF-8 validation performed in <see cref="AddString(uint, string)"/> and <see cref="AddString(uint, string, int)"/>. It's enabled by default.
         /// </summary>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
         public bool Utf8Validation
@@ -228,7 +228,26 @@ namespace Millistream.Streaming
                 throw new ArgumentNullException(nameof(value));
 
             ThrowIfDisposed();
-            return _nativeImplementation.mdf_message_add_string(Handle, (uint)tag, value) == 1;
+            return _nativeImplementation.mdf_message_add_string(Handle, tag, value) == 1;
+        }
+
+        /// <summary>
+        /// Adds a UTF-8 string field to the current active message. The string is compressed with zlib using the compression level as set by <see cref="CompressionLevel" /> which is <see cref="CompressionLevel.Z_BEST_SPEED"/> by default.
+        /// </summary>
+        /// <param name="tag">The field tag.</param>
+        /// <param name="value">The UTF-8 string field value.</param>
+        /// <param name="length">The number of characters in <paramref name="value"/> to be added to the message.</param>
+        /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
+        /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
+        /// <remarks>The corresponding native method is mdf_message_add_string2.</remarks>
+        public bool AddString(uint tag, string value, int length)
+        {
+            if (string.IsNullOrEmpty(value))
+                throw new ArgumentNullException(nameof(value));
+
+            ThrowIfDisposed();
+            return _nativeImplementation.mdf_message_add_string2(Handle, tag, value, length) == 1;
         }
 
         /// <summary>
@@ -242,6 +261,19 @@ namespace Millistream.Streaming
         /// <remarks>The corresponding native method is mdf_message_add_string.</remarks>
         public bool AddString(Field tag, string value) =>
             AddString((uint)tag, value);
+
+        /// <summary>
+        /// Adds a UTF-8 string field to the current active message. The string is compressed with zlib using the compression level as set by <see cref="CompressionLevel" /> which is <see cref="CompressionLevel.Z_BEST_SPEED"/> by default.
+        /// </summary>
+        /// <param name="tag">The field tag.</param>
+        /// <param name="value">The UTF-8 string field value.</param>
+        /// <param name="length">The number of characters in <paramref name="value"/> to be added to the message.</param>
+        /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
+        /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
+        /// <remarks>The corresponding native method is mdf_message_add_string2.</remarks>
+        public bool AddString(Field tag, string value, int length) =>
+            AddString((uint)tag, value, length);
 
         /// <summary>
         /// Adds a date field to the current active message. Please note that all dates and times are expressed in UTC. The format of value must be one of "YYYY-MM-DD", "YYYY-MM", "YYYY-H1", "YYYY-H2", "YYYY-T1", "YYYY-T2", "YYYY-T3", "YYYY-Q1", "YYYY-Q2", "YYYY-Q3", "YYYYQ4" or "YYYY-W[1-52]".
