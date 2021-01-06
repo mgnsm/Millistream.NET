@@ -157,6 +157,7 @@ namespace Millistream.Streaming.UnitTests
         {
             Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
             nativeImplementation.Setup(x => x.mdf_message_add_string(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<string>())).Returns(1);
+            nativeImplementation.Setup(x => x.mdf_message_add_string2(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<string>(), It.IsAny<int>())).Returns(1);
 
             const Field Field = Field.MDF_F_REQUESTID;
             const string Value = "...";
@@ -164,6 +165,10 @@ namespace Millistream.Streaming.UnitTests
             Assert.IsTrue(message.AddString(Field, Value));
             Assert.IsTrue(message.AddString((uint)Field, Value));
             nativeImplementation.Verify(x => x.mdf_message_add_string(It.IsAny<IntPtr>(), (uint)Field, Value), Times.Exactly(2));
+
+            Assert.IsTrue(message.AddString(Field, Value, Value.Length));
+            Assert.IsTrue(message.AddString((uint)Field, Value, Value.Length));
+            nativeImplementation.Verify(x => x.mdf_message_add_string2(It.IsAny<IntPtr>(), (uint)Field, Value, Value.Length));
         }
 
 
@@ -460,7 +465,9 @@ namespace Millistream.Streaming.UnitTests
             CatchObjectDisposedException(() => disposedMessage.AddUInt64(Field.MDF_F_AVERAGE, 12345, 2));
 
             CatchObjectDisposedException(() => disposedMessage.AddString(1, "abc"));
+            CatchObjectDisposedException(() => disposedMessage.AddString(1, "abc", 1));
             CatchObjectDisposedException(() => disposedMessage.AddString(Field.MDF_F_REQUESTID, "abc"));
+            CatchObjectDisposedException(() => disposedMessage.AddString(Field.MDF_F_REQUESTID, "abc", 1));
 
             CatchObjectDisposedException(() => disposedMessage.AddDate(1, "2020-12-30"));
             CatchObjectDisposedException(() => disposedMessage.AddDate(Field.MDF_F_DATE, "2020-12-30"));

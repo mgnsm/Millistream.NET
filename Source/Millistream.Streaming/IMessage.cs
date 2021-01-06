@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Millistream.Streaming
 {
@@ -8,7 +9,7 @@ namespace Millistream.Streaming
     public interface IMessage
     {
         /// <summary>
-        /// The zlib compression level used for the <see cref="AddString(uint, string)"/> method.
+        /// The zlib compression level used for the <see cref="AddString(uint, string)"/> and <see cref="AddString(uint, string, int)"/> methods.
         /// </summary>
         CompressionLevel CompressionLevel { get; set; }
 
@@ -21,6 +22,11 @@ namespace Millistream.Streaming
         /// The number of active messages in the message handle.
         /// </summary>
         int ActiveCount { get; }
+
+        /// <summary>
+        /// Enables or disables the UTF-8 validation performed in <see cref="AddString(uint, string)"/> and <see cref="AddString(uint, string, int)"/>. It's enabled by default.
+        /// </summary>
+        bool Utf8Validation { get; set; }
 
         /// <summary>
         /// Adds a new message to the message handle. If the current active message is empty it will be reused to carry this new message.
@@ -103,8 +109,26 @@ namespace Millistream.Streaming
         /// </summary>
         /// <param name="tag">The field tag.</param>
         /// <param name="value">The UTF-8 string field value.</param>
+        /// <param name="length">The number of characters in <paramref name="value"/> to be added to the message.</param>
+        /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
+        bool AddString(uint tag, string value, int length);
+
+        /// <summary>
+        /// Adds a UTF-8 string field to the current active message. The string is compressed with zlib using the compression level as set by <see cref="CompressionLevel" /> which is <see cref="CompressionLevel.Z_BEST_SPEED"/> by default.
+        /// </summary>
+        /// <param name="tag">The field tag.</param>
+        /// <param name="value">The UTF-8 string field value.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         bool AddString(Field tag, string value);
+
+        /// <summary>
+        /// Adds a UTF-8 string field to the current active message. The string is compressed with zlib using the compression level as set by <see cref="CompressionLevel" /> which is <see cref="CompressionLevel.Z_BEST_SPEED"/> by default.
+        /// </summary>
+        /// <param name="tag">The field tag.</param>
+        /// <param name="value">The UTF-8 string field value.</param>
+        /// <param name="length">The number of characters in <paramref name="value"/> to be added to the message.</param>
+        /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
+        bool AddString(Field tag, string value, int length);
 
         /// <summary>
         /// Adds a date field to the current active message. Please note that all dates and times are expressed in UTC. The format of value must be one of "YYYY-MM-DD", "YYYY-MM", "YYYY-H1", "YYYY-H2", "YYYY-T1", "YYYY-T2", "YYYY-T3", "YYYY-Q1", "YYYY-Q2", "YYYY-Q3", "YYYYQ4" or "YYYY-W[1-52]".
@@ -259,5 +283,19 @@ namespace Millistream.Streaming
         /// </summary>
         /// <returns><see langword="true" /> if there are more active messages in the message handle or <see langword="false" /> if the message handle is now empty.</returns>
         bool Delete();
+
+        /// <summary>
+        /// Serializes the message chain in the message handle and produces a base64 encoded string to the address pointed to by <paramref name="result"/>. It's the responsibility of the caller to free the produced unmanaged string.
+        /// </summary>
+        /// <param name="result">An unmanaged pointer to the base64 encoded string if the method returns <see langword="true" />, or <see cref="IntPtr.Zero"/> if the method returns <see langword="false" />.</param>
+        /// <returns><see langword="true" /> if there existed a message chain and if it was successfully base64 encoded, or <see langword="false" /> if there existed no message chain or if the base64 encoding failed.</returns>
+        bool Serialize(out IntPtr result);
+
+        /// <summary>
+        /// Deserializes a base64 encoded message chain and replaces the existing (if any) message chain in the message handle.
+        /// </summary>
+        /// <param name="data">A base64 encoded (serialized) message chain.</param>
+        /// <returns><see langword="true" /> if the message chain was successfully deserialized, or <see langword="false" /> if the deserialization failed (if so the current message chain in the message handler is left untouched).</returns>
+        bool Deserialize(string data);
     }
 }
