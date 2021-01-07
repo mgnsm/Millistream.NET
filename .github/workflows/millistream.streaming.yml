@@ -23,17 +23,24 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Setup dotnet
+    - name: Setup the .NET Core 3.1 SDK
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1.x
+
+    - name: Setup the .NET 5 SDK
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.101
 
     - name: Build on macOS/Linux
       if: ${{ matrix.os != 'windows-latest' }}
       run: |
         dotnet build Source/Millistream.Streaming/Millistream.Streaming.csproj -c Release -f netstandard1.2
         dotnet build Tests/Millistream.Streaming.UnitTests/Millistream.Streaming.UnitTests.csproj -c Release -f netcoreapp3.1
+        dotnet build Tests/Millistream.Streaming.UnitTests/Millistream.Streaming.UnitTests.csproj -c Release -f net5.0
         dotnet build Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release -f netcoreapp3.1
+        dotnet build Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release -f net5.0
 
     - name: Build on Windows
       if: ${{ matrix.os == 'windows-latest' }}
@@ -50,6 +57,7 @@ jobs:
       if: ${{ matrix.os != 'windows-latest' }}
       run: |
         dotnet test Tests/Millistream.Streaming.UnitTests/Millistream.Streaming.UnitTests.csproj -c Release -f netcoreapp3.1 --no-build --no-restore
+        dotnet test Tests/Millistream.Streaming.UnitTests/Millistream.Streaming.UnitTests.csproj -c Release -f net5.0 --no-build --no-restore
 
     - name: Run Unit Tests on Windows
       if: ${{ matrix.os == 'windows-latest' }}
@@ -90,10 +98,11 @@ jobs:
         $doc.RunSettings.TestRunParameters.ChildNodes.Item(2).value = "$env:PASSWORD"
         $doc.Save("UpdatedTestSettings.runsettings")
 
-    - name: Run Integration Tests on macOs/Linux
+    - name: Run Integration Tests on macOS/Linux
       if: ${{ matrix.os != 'windows-latest' }}
       run: |
         dotnet test Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release -f netcoreapp3.1 --no-build --no-restore -s UpdatedTestSettings.runsettings
+        dotnet test Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release -f net5.0 --no-build --no-restore -s UpdatedTestSettings.runsettings
 
     - name: Run Integration Tests on Windows
       if: ${{ matrix.os == 'windows-latest' }}
