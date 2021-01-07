@@ -51,7 +51,13 @@ jobs:
         dotnet build Tests/Millistream.Streaming.UnitTests/Millistream.Streaming.UnitTests.csproj -c Release
         dotnet build Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release
 
-    - name: Run Unit Tests
+    - name: Run Unit Tests on macOS/Linux
+      if: ${{ matrix.os != 'windows-latest' }}
+      run: |
+        dotnet test Tests/Millistream.Streaming.UnitTests/Millistream.Streaming.UnitTests.csproj -c Release -f netcoreapp3.1 --no-build --no-restore
+
+    - name: Run Unit Tests on Windows
+      if: ${{ matrix.os == 'windows-latest' }}
       run: |
         dotnet test Tests/Millistream.Streaming.UnitTests/Millistream.Streaming.UnitTests.csproj -c Release --no-build --no-restore
 
@@ -89,7 +95,13 @@ jobs:
         $doc.RunSettings.TestRunParameters.ChildNodes.Item(2).value = "$env:PASSWORD"
         $doc.Save("UpdatedTestSettings.runsettings")
 
-    - name: Run Integration Tests
+    - name: Run Integration Tests on macOs/Linux
+      if: ${{ matrix.os != 'windows-latest' }}
+      run: |
+        dotnet test Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release -f netcoreapp3.1 --no-build --no-restore -s UpdatedTestSettings.runsettings
+
+    - name: Run Integration Tests on Windows
+      if: ${{ matrix.os == 'windows-latest' }}
       run: |
         dotnet test Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release --no-build --no-restore -s UpdatedTestSettings.runsettings
 

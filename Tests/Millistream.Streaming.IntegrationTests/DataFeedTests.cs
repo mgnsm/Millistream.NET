@@ -105,7 +105,7 @@ namespace Millistream.Streaming.IntegrationTests
             {
                 if (message.MessageReference == MessageReference.MDF_M_REQUESTFINISHED
                     && message.Fields.TryGetValue(Field.MDF_F_REQUESTID, out ReadOnlyMemory<byte> requestId)
-                    && Encoding.UTF8.GetString(requestId.Span) == RequestId)
+                    && Encoding.UTF8.GetString(requestId.Span.ToArray()) == RequestId)
                     autoResetEvent.Set(); //signal when the request has been completed in full
                 else
                     receivedResponseMessages.Add(message);
@@ -153,7 +153,7 @@ namespace Millistream.Streaming.IntegrationTests
                 {
                     case MessageReference.MDF_M_REQUESTFINISHED:
                         if (message.Fields.TryGetValue(Field.MDF_F_REQUESTID, out ReadOnlyMemory<byte> requestId)
-                            && Encoding.UTF8.GetString(requestId.Span) == RequestId)
+                            && Encoding.UTF8.GetString(requestId.Span.ToArray()) == RequestId)
                             autoResetEvent.Set(); //signal when the request has been completed in full
                         break;
                     default:
