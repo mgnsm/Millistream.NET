@@ -193,7 +193,7 @@ namespace Millistream.Streaming.IntegrationTests
                 Assert.AreEqual(UserData, userData);
                 while (mdf.GetNextMessage(out int _, out int _, out ulong _))
                     while (mdf.GetNextField(out Field field, out ReadOnlySpan<byte> value))
-                        if (field == Field.MDF_F_REQUESTID && Encoding.UTF8.GetString(value) == RequestId)
+                        if (field == Field.MDF_F_REQUESTID && Encoding.UTF8.GetString(value.ToArray()) == RequestId)
                             requestFinished = true;
             }
             mdf.DataCallback = OnDataReceived;
@@ -321,7 +321,7 @@ namespace Millistream.Streaming.IntegrationTests
                         {
                             while (mdf.GetNextField(out uint field, out ReadOnlySpan<byte> value))
                             {
-                                if (field == (uint)Field.MDF_F_REQUESTID && Encoding.UTF8.GetString(value) == requestId)
+                                if (field == (uint)Field.MDF_F_REQUESTID && Encoding.UTF8.GetString(value.ToArray()) == requestId)
                                     requestFinished = true;
                             }
 
@@ -485,7 +485,7 @@ namespace Millistream.Streaming.IntegrationTests
                 if (ret == 1)
                     while (mdf.GetNextMessage(out int _, out int _, out ulong _))
                         while (mdf.GetNextField(out Field field, out ReadOnlySpan<byte> value))
-                            if (field == Field.MDF_F_REQUESTID && requestIds.Contains(Encoding.UTF8.GetString(value)))
+                            if (field == Field.MDF_F_REQUESTID && requestIds.Contains(Encoding.UTF8.GetString(value.ToArray())))
                                 numberOfFinishedRequests++;
             } while (numberOfFinishedRequests < requestIds.Count && DateTime.UtcNow.Subtract(time).TotalSeconds < TimeoutInSeconds);
 
