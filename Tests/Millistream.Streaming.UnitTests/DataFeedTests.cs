@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Mdf = Millistream.Streaming.Mdf<object, object>;
+using MarketDataFeed = Millistream.Streaming.MarketDataFeed<object, object>;
 
 namespace Millistream.Streaming.UnitTests
 {
@@ -177,7 +177,7 @@ namespace Millistream.Streaming.UnitTests
         {
             using DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object)
             {
-                ConnectionTimeout = Mdf.MinConnectionTimeout - 1
+                ConnectionTimeout = MarketDataFeed.MinConnectionTimeout - 1
             };
         }
 
@@ -187,7 +187,7 @@ namespace Millistream.Streaming.UnitTests
         {
             using DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object)
             {
-                ConnectionTimeout = Mdf.MaxConnectionTimeout + 1
+                ConnectionTimeout = MarketDataFeed.MaxConnectionTimeout + 1
             };
         }
 
@@ -214,7 +214,7 @@ namespace Millistream.Streaming.UnitTests
         {
             using DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object)
             {
-                HeartbeatInterval = Mdf.MinHeartbeatInterval - 1
+                HeartbeatInterval = MarketDataFeed.MinHeartbeatInterval - 1
             };
         }
 
@@ -224,7 +224,7 @@ namespace Millistream.Streaming.UnitTests
         {
             using DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object)
             {
-                HeartbeatInterval = Mdf.MaxHeartbeatInterval + 1
+                HeartbeatInterval = MarketDataFeed.MaxHeartbeatInterval + 1
             };
         }
 
@@ -237,7 +237,7 @@ namespace Millistream.Streaming.UnitTests
         {
             using DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object)
             {
-                MaximumMissedHeartbeats = Mdf.MinMissedHeartbeats - 1
+                MaximumMissedHeartbeats = MarketDataFeed.MinMissedHeartbeats - 1
             };
         }
 
@@ -247,7 +247,7 @@ namespace Millistream.Streaming.UnitTests
         {
             using DataFeed dataFeed = new DataFeed(new Mock<INativeImplementation>().Object)
             {
-                MaximumMissedHeartbeats = Mdf.MaxMissedHeartbeats + 1
+                MaximumMissedHeartbeats = MarketDataFeed.MaxMissedHeartbeats + 1
             };
         }
 

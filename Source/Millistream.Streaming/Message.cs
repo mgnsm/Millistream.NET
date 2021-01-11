@@ -5,7 +5,7 @@ using System.Linq;
 namespace Millistream.Streaming
 {
     /// <summary>
-    /// Represents a managed message handle that can contain several messages for efficiency.
+    /// Represents a managed message handle (mdf_message_t) that can contain several messages for efficiency.
     /// </summary>
     /// <remarks>Handles are not thread-safe. If multiple threads will share access to a single handle, the accesses has to be serialized using a mutex or other forms of locking mechanisms. The API as such is thread-safe so multiple threads can have local handles without the need for locks.</remarks>
     public sealed class Message : IMessage, IDisposable
