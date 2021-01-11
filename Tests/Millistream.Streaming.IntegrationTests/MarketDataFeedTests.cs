@@ -24,7 +24,7 @@ namespace Millistream.Streaming.IntegrationTests
 
             //FileDescriptor
             Assert.AreEqual(-1, mdf.FileDescriptor);
-            Assert.IsTrue(mdf.Connect(TestContext.GetTestRunParameter("host")));
+            Assert.IsTrue(mdf.Connect(GetTestRunParameter("host")));
             Assert.AreNotEqual(-1, mdf.FileDescriptor);
             mdf.Disconnect();
 
@@ -99,9 +99,9 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.IsTrue(message.AddString(Field.MDF_F_INSREFLIST, "772"));
             Assert.IsFalse(mdf.Send(message));
             //connect
-            Assert.IsTrue(mdf.Connect(TestContext.GetTestRunParameter("host")));
+            Assert.IsTrue(mdf.Connect(GetTestRunParameter("host")));
             //log on
-            Assert.IsTrue(LogOn(mdf, message, TestContext));
+            Assert.IsTrue(LogOn(mdf, message));
             //log off
             Assert.IsTrue(message.Add(0, MessageReference.MDF_M_LOGOFF));
             Assert.IsTrue(mdf.Send(message));
@@ -116,11 +116,11 @@ namespace Millistream.Streaming.IntegrationTests
         {
             using MarketDataFeed mdf = new MarketDataFeed();
             //connect
-            Assert.IsTrue(mdf.Connect(TestContext.GetTestRunParameter("host")));
+            Assert.IsTrue(mdf.Connect(GetTestRunParameter("host")));
 
             using Message message = new Message();
             //log on
-            Assert.IsTrue(LogOn(mdf, message, TestContext));
+            Assert.IsTrue(LogOn(mdf, message));
 
             List<string> requestIds = new List<string>(3)
             {
@@ -179,10 +179,10 @@ namespace Millistream.Streaming.IntegrationTests
 
             using MarketDataFeed mdf = new MarketDataFeed();
             //connect
-            Assert.IsTrue(mdf.Connect(TestContext.GetTestRunParameter("host")));
+            Assert.IsTrue(mdf.Connect(GetTestRunParameter("host")));
             //log on
             using Message message = new Message();
-            Assert.IsTrue(LogOn(mdf, message, TestContext));
+            Assert.IsTrue(LogOn(mdf, message));
             //set some custom user callback data
             mdf.CallbackUserData = UserData;
             Assert.AreEqual(UserData, mdf.CallbackUserData);
@@ -232,7 +232,7 @@ namespace Millistream.Streaming.IntegrationTests
             mdf.StatusCallback = OnStatusChanged;
 
             //connect
-            Assert.IsTrue(mdf.Connect(TestContext.GetTestRunParameter("host")));
+            Assert.IsTrue(mdf.Connect(GetTestRunParameter("host")));
             Assert.AreEqual(4, receivedStatuses.Count);
             Assert.IsTrue(receivedStatuses.Contains(ConnectionStatus.MDF_STATUS_LOOKUP));
             Assert.IsTrue(receivedStatuses.Contains(ConnectionStatus.MDF_STATUS_CONNECTING));
@@ -251,9 +251,9 @@ namespace Millistream.Streaming.IntegrationTests
             using MarketDataFeed mdf = new MarketDataFeed();
             using Message message = new Message();
             //connect
-            Assert.IsTrue(mdf.Connect(TestContext.GetTestRunParameter("host")));
+            Assert.IsTrue(mdf.Connect(GetTestRunParameter("host")));
             //log on
-            Assert.IsTrue(LogOn(mdf, message, TestContext));
+            Assert.IsTrue(LogOn(mdf, message));
             //subscribe to basic data and quotes for instrument 772 (ERIC B)
             string requestId = "rid";
             RequestClass[] requestClasses = new RequestClass[2] { RequestClass.MDF_RC_BASICDATA, RequestClass.MDF_RC_QUOTE };
@@ -285,9 +285,9 @@ namespace Millistream.Streaming.IntegrationTests
             using MarketDataFeed mdf = new MarketDataFeed();
             using Message message = new Message();
             //connect
-            Assert.IsTrue(mdf.Connect(TestContext.GetTestRunParameter("host")));
+            Assert.IsTrue(mdf.Connect(GetTestRunParameter("host")));
             //log on
-            Assert.IsTrue(LogOn(mdf, message, TestContext));
+            Assert.IsTrue(LogOn(mdf, message));
             
             //subscribe to a specific request class (MDF_RC_BASICDATA) for a couple of instruments
             string requestId = "rid";
@@ -387,9 +387,9 @@ namespace Millistream.Streaming.IntegrationTests
             using MarketDataFeed mdf = new MarketDataFeed();
             using Message message = new Message();
             //connect
-            Assert.IsTrue(mdf.Connect(TestContext.GetTestRunParameter("host")));
+            Assert.IsTrue(mdf.Connect(GetTestRunParameter("host")));
             //log on
-            Assert.IsTrue(LogOn(mdf, message, TestContext));
+            Assert.IsTrue(LogOn(mdf, message));
             //send request
             Assert.IsTrue(message.Add(0, MessageReference.MDF_M_REQUEST));
             Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTCLASS, StringConstants.RequestClasses.MDF_RC_INSREF));
@@ -429,11 +429,22 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.IsTrue(succeeded);
         }
 
-        private static bool LogOn(MarketDataFeed mdf, Message message, TestContext testContext)
+        private string GetTestRunParameter(string parameterName)
+        {
+            if (string.IsNullOrEmpty(parameterName))
+                throw new ArgumentNullException(nameof(parameterName));
+
+            string parameterValue = TestContext.Properties[parameterName] as string;
+            if (string.IsNullOrEmpty(parameterValue))
+                Assert.Fail($"No {parameterName} was specified in the .runsettings file.");
+            return parameterValue;
+        }
+
+        private bool LogOn(MarketDataFeed mdf, Message message)
         {
             Assert.IsTrue(message.Add(0, MessageReference.MDF_M_LOGON));
-            Assert.IsTrue(message.AddString(Field.MDF_F_USERNAME, testContext.GetTestRunParameter("username")));
-            Assert.IsTrue(message.AddString(Field.MDF_F_PASSWORD, testContext.GetTestRunParameter("password")));
+            Assert.IsTrue(message.AddString(Field.MDF_F_USERNAME, GetTestRunParameter("username")));
+            Assert.IsTrue(message.AddString(Field.MDF_F_PASSWORD, GetTestRunParameter("password")));
             Assert.IsTrue(mdf.Send(message));
             message.Reset();
             return Consume(mdf, MessageReference.MDF_M_LOGONGREETING);
