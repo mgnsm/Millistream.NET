@@ -11,6 +11,8 @@ namespace Millistream.Streaming.UnitTests
     {
         private delegate void GetNextMessageCallback(IntPtr handle, ref int mref, ref int mclass, ref ulong insref);
         private delegate void GetNextFieldCallback(IntPtr handle, ref uint tag, ref IntPtr value);
+        private delegate void GetInt32PropertyCallback(IntPtr handle, MDF_OPTION option, ref int value);
+        private delegate void GetUInt64PropertyCallback(IntPtr handle, MDF_OPTION option, ref ulong value);
         private delegate void GetInt64PropertyCallback(IntPtr handle, MDF_OPTION option, ref long value);
 
         [TestMethod]
