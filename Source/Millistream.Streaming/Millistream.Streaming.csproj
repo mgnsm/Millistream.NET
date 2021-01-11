@@ -9,7 +9,7 @@
     <Product>Millistream Market Data Feed (MDF)</Product>
     <Title>Millistream Streaming API</Title>
     <PackageTags>fintech;streaming;.net;real-time;C#</PackageTags>
-    <Copyright>Copyright 2018-2020 mgnsm</Copyright>
+    <Copyright>Copyright 2021 mgnsm</Copyright>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
     <PackageReleaseNotes>https://github.com/mgnsm/Millistream.NET/releases</PackageReleaseNotes>
