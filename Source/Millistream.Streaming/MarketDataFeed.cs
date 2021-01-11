@@ -8,7 +8,7 @@ namespace Millistream.Streaming
     /// Represents a managed API handle (mdf_t) that can be connected to the system.
     /// </summary>
     /// <remarks>Handles are not thread-safe. If multiple threads will share access to a single handle, the accesses has to be serialized using a mutex or other forms of locking mechanisms. The API as such is thread-safe so multiple threads can have local handles without the need for locks.</remarks>
-    public sealed class MarketDataFeed<TCallbackUserData, TStatusCallbackUserData> : IDisposable
+    public sealed class MarketDataFeed<TCallbackUserData, TStatusCallbackUserData> : IMarketDataFeed<TCallbackUserData, TStatusCallbackUserData>, IDisposable
     {
         #region Constants
         internal const int MinConnectionTimeout = 1;
@@ -454,6 +454,22 @@ namespace Millistream.Streaming
 
             ThrowIfDisposed();
             return _nativeImplementation.mdf_message_send(_feedHandle, message.Handle) == 1;
+        }
+
+        /// <summary>
+        /// Calls <see cref="Send(Message)"/> to send all the active messages in a managed message handle to the server if <paramref name="message"/> is a <see cref="Message"/>. For any other implementation of <see cref="IMessage" />, the method always returns <see langword="false" />.
+        /// </summary>
+        /// <param name="message">An implementation of the managed message handle.</param>
+        /// <returns><see langword="true" /> if <paramref name="message"/> is a <see cref="Message"/> and there were no errors detected when sending the data, or <see langword="false" /> if an error was detected or if <paramref name="message"/> is not a <see cref="Message"/>.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="message"/> is <see langword="null" />.</exception>
+        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
+        bool IMarketDataFeed<TCallbackUserData, TStatusCallbackUserData>.Send(IMessage message)
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            ThrowIfDisposed();
+            return message is Message messageWithHandle && Send(messageWithHandle);
         }
 
         /// <summary>

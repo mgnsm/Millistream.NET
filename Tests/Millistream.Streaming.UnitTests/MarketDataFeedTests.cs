@@ -387,6 +387,14 @@ namespace Millistream.Streaming.UnitTests
             using MarketDataFeed mdf = new MarketDataFeed(nativeImplementation.Object);
             Assert.IsTrue(mdf.Send(message));
             nativeImplementation.Verify(expression, Times.Once);
+
+            IMarketDataFeed<object, object> iMdf = mdf;
+            Assert.IsTrue(iMdf.Send(message));
+            nativeImplementation.Verify(expression, Times.Exactly(2));
+            IMessage iMessage = message;
+            Assert.IsTrue(iMdf.Send(iMessage));
+            nativeImplementation.Verify(expression, Times.Exactly(3));
+            Assert.IsFalse(iMdf.Send(new Mock<IMessage>().Object));
         }
 
         [TestMethod]
