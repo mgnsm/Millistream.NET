@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using Millistream.Streaming;
+using MarketDataFeed = Millistream.Streaming.MarketDataFeed<object, object>;
 
 namespace ConsoleApp
 {
@@ -9,7 +10,7 @@ namespace ConsoleApp
         static int Main()
         {
             //1. Initialize the managed API and message handles.
-            using (Mdf mdf = new Mdf())
+            using (MarketDataFeed mdf = new MarketDataFeed())
             using (Message message = new Message())
             {
                 //2. Register a connection status callback (optional).
@@ -95,7 +96,7 @@ namespace ConsoleApp
             return 0;
         }
 
-        static bool Consume(Mdf mdf, MessageReference messageReference)
+        static bool Consume(MarketDataFeed mdf, MessageReference messageReference)
         {
             DateTime time = DateTime.UtcNow;
             do

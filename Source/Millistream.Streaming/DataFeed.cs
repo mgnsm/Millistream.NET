@@ -2,7 +2,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Mdf = Millistream.Streaming.Mdf<object, object>;
+using MarketDataFeed = Millistream.Streaming.MarketDataFeed<object, object>;
 
 namespace Millistream.Streaming
 {
@@ -16,7 +16,7 @@ namespace Millistream.Streaming
         private readonly object _lock = new object();
         private readonly ObjectPool<ResponseMessage> _objectPool = new ObjectPool<ResponseMessage>(s_responseMessageFactory);
         private readonly Subject<ResponseMessage> _subject = new Subject<ResponseMessage>();
-        private readonly Mdf _mdf;
+        private readonly MarketDataFeed _mdf;
         private readonly Message _message;
         private CancellationTokenSource _cancellationTokenSource;
         private bool _hasConnected;
@@ -32,7 +32,7 @@ namespace Millistream.Streaming
 
         internal DataFeed(INativeImplementation nativeImplementation)
         {
-            _mdf = new Mdf(nativeImplementation);
+            _mdf = new MarketDataFeed(nativeImplementation);
             _message = new Message(nativeImplementation);
         }
         #endregion
@@ -463,11 +463,11 @@ namespace Millistream.Streaming
             eventHandler?.Invoke(this, new ConnectionStatusChangedEventArgs(host, ip, connectionStatus));
         }
 
-        private void OnDataReceived(object _, Mdf<object, object> handle)
+        private void OnDataReceived(object _, MarketDataFeed<object, object> handle)
         {
             while (_mdf.GetNextMessage(out int messageReference, out int messageClass, out ulong instrumentId))
             {
-                if (Mdf.s_messageReferences.Contains(messageReference))
+                if (MarketDataFeed.s_messageReferences.Contains(messageReference))
                 {
                     ResponseMessage message = _objectPool.Allocate() ?? s_responseMessageFactory();
                     message.InstrumentReference = instrumentId;
@@ -477,7 +477,7 @@ namespace Millistream.Streaming
                     int messageOffset = 0;
                     while (_mdf.GetNextField(out uint fieldTag, out ReadOnlySpan<byte> value))
                     {
-                        if (Mdf.s_fields.Contains(fieldTag))
+                        if (MarketDataFeed.s_fields.Contains(fieldTag))
                         {
                             Field field = (Field)fieldTag;
                             int length = value.Length;

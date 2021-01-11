@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace Millistream.Streaming
 {
     /// <summary>
-    /// Represents a managed message handle that can contain several messages for efficiency.
+    /// Represents a managed message handle (mdf_message_t) that can contain several messages for efficiency.
     /// </summary>
     public interface IMessage
     {
