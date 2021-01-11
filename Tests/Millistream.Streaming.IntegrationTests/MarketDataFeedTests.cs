@@ -5,19 +5,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using Mdf = Millistream.Streaming.Mdf<object, object>;
+using MarketDataFeed = Millistream.Streaming.MarketDataFeed<object, object>;
 
 namespace Millistream.Streaming.IntegrationTests
 {
     [TestClass]
-    public class MdfTests
+    public class MarketDataFeedTests
     {
         public TestContext TestContext { get; set; }
 
         [TestMethod]
         public void GetAndSetPropertiesTest()
         {
-            using Mdf mdf = new Mdf();
+            using MarketDataFeed mdf = new MarketDataFeed();
 
             Assert.AreEqual(0UL, mdf.ReceivedBytes);
             Assert.AreEqual(0UL, mdf.SentBytes);
@@ -91,7 +91,7 @@ namespace Millistream.Streaming.IntegrationTests
         [TestMethod]
         public void ConnectAndLogOnTest()
         {
-            using Mdf mdf = new Mdf();
+            using MarketDataFeed mdf = new MarketDataFeed();
             using Message message = new Message();
             Assert.IsTrue(message.Add(0, MessageReference.MDF_M_REQUEST));
             Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTCLASS, StringConstants.RequestClasses.MDF_RC_BASICDATA));
@@ -114,7 +114,7 @@ namespace Millistream.Streaming.IntegrationTests
         [TestMethod]
         public void SendMultipleMessagesTest()
         {
-            using Mdf mdf = new Mdf();
+            using MarketDataFeed mdf = new MarketDataFeed();
             //connect
             Assert.IsTrue(mdf.Connect(TestContext.GetTestRunParameter("host")));
 
@@ -177,7 +177,7 @@ namespace Millistream.Streaming.IntegrationTests
             const string UserData = "sample data...";
             const string RequestId = "rid";
 
-            using Mdf mdf = new Mdf();
+            using MarketDataFeed mdf = new MarketDataFeed();
             //connect
             Assert.IsTrue(mdf.Connect(TestContext.GetTestRunParameter("host")));
             //log on
@@ -188,7 +188,7 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.AreEqual(UserData, mdf.CallbackUserData);
             //register a callback
             bool requestFinished = false;
-            void OnDataReceived(object userData, Mdf<object, object> mdf)
+            void OnDataReceived(object userData, MarketDataFeed<object, object> mdf)
             {
                 Assert.AreEqual(UserData, userData);
                 while (mdf.GetNextMessage(out int _, out int _, out ulong _))
@@ -219,7 +219,7 @@ namespace Millistream.Streaming.IntegrationTests
         public void StatusCallbackTest()
         {
             HashSet<ConnectionStatus> receivedStatuses = new HashSet<ConnectionStatus>();
-            using Mdf<object, HashSet<ConnectionStatus>> mdf = new Mdf<object, HashSet<ConnectionStatus>>()
+            using MarketDataFeed<object, HashSet<ConnectionStatus>> mdf = new MarketDataFeed<object, HashSet<ConnectionStatus>>()
             {
                 StatusCallbackUserData = receivedStatuses
             };
@@ -248,7 +248,7 @@ namespace Millistream.Streaming.IntegrationTests
         [TestMethod]
         public void SubscribeAndUnsubscribeTest()
         {
-            using Mdf mdf = new Mdf();
+            using MarketDataFeed mdf = new MarketDataFeed();
             using Message message = new Message();
             //connect
             Assert.IsTrue(mdf.Connect(TestContext.GetTestRunParameter("host")));
@@ -282,7 +282,7 @@ namespace Millistream.Streaming.IntegrationTests
         [TestMethod]
         public void WildcardSubscriptionsTest()
         {
-            using Mdf mdf = new Mdf();
+            using MarketDataFeed mdf = new MarketDataFeed();
             using Message message = new Message();
             //connect
             Assert.IsTrue(mdf.Connect(TestContext.GetTestRunParameter("host")));
@@ -384,7 +384,7 @@ namespace Millistream.Streaming.IntegrationTests
         [TestMethod]
         public void CreateInstrumentsTest()
         {
-            using Mdf mdf = new Mdf();
+            using MarketDataFeed mdf = new MarketDataFeed();
             using Message message = new Message();
             //connect
             Assert.IsTrue(mdf.Connect(TestContext.GetTestRunParameter("host")));
@@ -429,7 +429,7 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.IsTrue(succeeded);
         }
 
-        private static bool LogOn(Mdf mdf, Message message, TestContext testContext)
+        private static bool LogOn(MarketDataFeed mdf, Message message, TestContext testContext)
         {
             Assert.IsTrue(message.Add(0, MessageReference.MDF_M_LOGON));
             Assert.IsTrue(message.AddString(Field.MDF_F_USERNAME, testContext.GetTestRunParameter("username")));
@@ -439,7 +439,7 @@ namespace Millistream.Streaming.IntegrationTests
             return Consume(mdf, MessageReference.MDF_M_LOGONGREETING);
         }
 
-        private static bool Consume(Mdf mdf, MessageReference messageReference)
+        private static bool Consume(MarketDataFeed mdf, MessageReference messageReference)
         {
             if (mdf == null)
                 throw new ArgumentNullException(nameof(mdf));
@@ -465,7 +465,7 @@ namespace Millistream.Streaming.IntegrationTests
             return false;
         }
 
-        private static bool Consume(Mdf mdf, IReadOnlyCollection<string> requestIds)
+        private static bool Consume(MarketDataFeed mdf, IReadOnlyCollection<string> requestIds)
         {
             if (mdf == null)
                 throw new ArgumentNullException(nameof(mdf));

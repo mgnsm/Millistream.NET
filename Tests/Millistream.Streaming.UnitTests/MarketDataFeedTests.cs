@@ -2,12 +2,12 @@
 using Moq;
 using System;
 using System.Linq.Expressions;
-using Mdf = Millistream.Streaming.Mdf<object, object>;
+using MarketDataFeed = Millistream.Streaming.MarketDataFeed<object, object>;
 
 namespace Millistream.Streaming.UnitTests
 {
     [TestClass]
-    public class MdfTests
+    public class MarketDataFeedTests
     {
         private delegate void GetNextMessageCallback(IntPtr handle, ref int mref, ref int mclass, ref ulong insref);
         private delegate void GetNextFieldCallback(IntPtr handle, ref uint tag, ref IntPtr value);
@@ -23,7 +23,7 @@ namespace Millistream.Streaming.UnitTests
                 .Returns(1)
                 .Callback(new GetInt32PropertyCallback((IntPtr handler, MDF_OPTION option_, ref int value) => value = FileDescriptor));
 
-            using Mdf mdf = new Mdf(nativeImplementation.Object);
+            using MarketDataFeed mdf = new MarketDataFeed(nativeImplementation.Object);
             Assert.AreEqual(FileDescriptor, mdf.FileDescriptor);
         }
 
@@ -37,7 +37,7 @@ namespace Millistream.Streaming.UnitTests
                 .Returns(1)
                 .Callback(new GetInt32PropertyCallback((IntPtr handler, MDF_OPTION option_, ref int value) => value = (int)ErrorCode));
 
-            using Mdf mdf = new Mdf(nativeImplementation.Object);
+            using MarketDataFeed mdf = new MarketDataFeed(nativeImplementation.Object);
             Assert.AreEqual(ErrorCode, mdf.ErrorCode);
         }
 
@@ -55,9 +55,9 @@ namespace Millistream.Streaming.UnitTests
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ToSmallConnectionTimeoutTest()
         {
-            using Mdf mdf = new Mdf(new Mock<INativeImplementation>().Object)
+            using MarketDataFeed mdf = new MarketDataFeed(new Mock<INativeImplementation>().Object)
             {
-                ConnectionTimeout = Mdf.MinConnectionTimeout - 1
+                ConnectionTimeout = MarketDataFeed.MinConnectionTimeout - 1
             };
         }
 
@@ -65,9 +65,9 @@ namespace Millistream.Streaming.UnitTests
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ToLargeConnectionTimeoutTest()
         {
-            using Mdf mdf = new Mdf(new Mock<INativeImplementation>().Object)
+            using MarketDataFeed mdf = new MarketDataFeed(new Mock<INativeImplementation>().Object)
             {
-                ConnectionTimeout = Mdf.MaxConnectionTimeout + 1
+                ConnectionTimeout = MarketDataFeed.MaxConnectionTimeout + 1
             };
         }
 
@@ -79,9 +79,9 @@ namespace Millistream.Streaming.UnitTests
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ToSmallHeartbeatIntervalTest()
         {
-            using Mdf mdf = new Mdf(new Mock<INativeImplementation>().Object)
+            using MarketDataFeed mdf = new MarketDataFeed(new Mock<INativeImplementation>().Object)
             {
-                HeartbeatInterval = Mdf.MinHeartbeatInterval - 1
+                HeartbeatInterval = MarketDataFeed.MinHeartbeatInterval - 1
             };
         }
 
@@ -89,9 +89,9 @@ namespace Millistream.Streaming.UnitTests
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ToLargeHeartbeatIntervalTest()
         {
-            using Mdf mdf = new Mdf(new Mock<INativeImplementation>().Object)
+            using MarketDataFeed mdf = new MarketDataFeed(new Mock<INativeImplementation>().Object)
             {
-                HeartbeatInterval = Mdf.MaxHeartbeatInterval + 1
+                HeartbeatInterval = MarketDataFeed.MaxHeartbeatInterval + 1
             };
         }
 
@@ -103,9 +103,9 @@ namespace Millistream.Streaming.UnitTests
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ToSmallMaximumMissedHeartbeatsTest()
         {
-            using Mdf mdf = new Mdf(new Mock<INativeImplementation>().Object)
+            using MarketDataFeed mdf = new MarketDataFeed(new Mock<INativeImplementation>().Object)
             {
-                MaximumMissedHeartbeats = Mdf.MinMissedHeartbeats - 1
+                MaximumMissedHeartbeats = MarketDataFeed.MinMissedHeartbeats - 1
             };
         }
 
@@ -113,9 +113,9 @@ namespace Millistream.Streaming.UnitTests
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void ToLargeMaximumMissedHeartbeatsTest()
         {
-            using Mdf mdf = new Mdf(new Mock<INativeImplementation>().Object)
+            using MarketDataFeed mdf = new MarketDataFeed(new Mock<INativeImplementation>().Object)
             {
-                MaximumMissedHeartbeats = Mdf.MaxMissedHeartbeats + 1
+                MaximumMissedHeartbeats = MarketDataFeed.MaxMissedHeartbeats + 1
             };
         }
 
@@ -134,7 +134,7 @@ namespace Millistream.Streaming.UnitTests
                 .Returns(1)
                 .Verifiable();
 
-            using Mdf mdf = new Mdf(nativeImplementation.Object);
+            using MarketDataFeed mdf = new MarketDataFeed(nativeImplementation.Object);
             //assert that the expected values are returned from the getter
             Assert.AreEqual(true, mdf.NoDelay);
             returnValue = 0;
@@ -160,7 +160,7 @@ namespace Millistream.Streaming.UnitTests
                 .Returns(1)
                 .Verifiable();
 
-            using Mdf mdf = new Mdf(nativeImplementation.Object);
+            using MarketDataFeed mdf = new MarketDataFeed(nativeImplementation.Object);
             //assert that the expected values are returned from the getter
             Assert.AreEqual(true, mdf.NoEncryption);
             returnValue = 0;
@@ -181,7 +181,7 @@ namespace Millistream.Streaming.UnitTests
                 .Returns(1)
                 .Callback(new GetInt32PropertyCallback((IntPtr handler, MDF_OPTION option, ref int value) => value = Difference));
 
-            using Mdf mdf = new Mdf(nativeImplementation.Object);
+            using MarketDataFeed mdf = new MarketDataFeed(nativeImplementation.Object);
             Assert.AreEqual(Difference, mdf.TimeDifference);
         }
 
@@ -193,7 +193,7 @@ namespace Millistream.Streaming.UnitTests
             nativeImplementation.Setup(x => x.mdf_set_property(It.IsAny<IntPtr>(), MDF_OPTION.MDF_OPT_BIND_ADDRESS, BindingAddress)).Returns(1).Verifiable();
             nativeImplementation.Setup(x => x.mdf_get_property(It.IsAny<IntPtr>(), MDF_OPTION.MDF_OPT_BIND_ADDRESS, ref It.Ref<IntPtr>.IsAny)).Returns(1).Verifiable();
 
-            using Mdf mdf = new Mdf(nativeImplementation.Object)
+            using MarketDataFeed mdf = new MarketDataFeed(nativeImplementation.Object)
             {
                 BindAddress = BindingAddress
             };
@@ -213,7 +213,7 @@ namespace Millistream.Streaming.UnitTests
                 .Returns(1)
                 .Callback(new GetInt64PropertyCallback((IntPtr handler, MDF_OPTION option, ref long value) => value = Difference));
 
-            using Mdf mdf = new Mdf(nativeImplementation.Object);
+            using MarketDataFeed mdf = new MarketDataFeed(nativeImplementation.Object);
             Assert.AreEqual(Difference, mdf.TimeDifferenceNs);
         }
 
@@ -222,9 +222,9 @@ namespace Millistream.Streaming.UnitTests
         {
             Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
             nativeImplementation.Setup(x => x.mdf_set_property(It.IsAny<IntPtr>(), MDF_OPTION.MDF_OPT_DATA_CALLBACK_FUNCTION, It.IsAny<IntPtr>())).Returns(1).Verifiable();
-            using Mdf mdf = new Mdf(nativeImplementation.Object);
+            using MarketDataFeed mdf = new MarketDataFeed(nativeImplementation.Object);
             Assert.IsNull(mdf.DataCallback);
-            mdf.DataCallback = new Action<object, Mdf<object, object>>((userData, mdf) => { });
+            mdf.DataCallback = new Action<object, MarketDataFeed<object, object>>((userData, mdf) => { });
             Assert.IsNotNull(mdf.DataCallback);
             nativeImplementation.Verify();
             mdf.DataCallback = null;
@@ -237,7 +237,7 @@ namespace Millistream.Streaming.UnitTests
         {
             Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
             nativeImplementation.Setup(x => x.mdf_set_property(It.IsAny<IntPtr>(), MDF_OPTION.MDF_OPT_STATUS_CALLBACK_FUNCTION, It.IsAny<IntPtr>())).Returns(1).Verifiable();
-            using Mdf mdf = new Mdf(nativeImplementation.Object);
+            using MarketDataFeed mdf = new MarketDataFeed(nativeImplementation.Object);
             Assert.IsNull(mdf.StatusCallback);
             mdf.StatusCallback = new Action<object, ConnectionStatus, string, string>((userData, status, host, ip) => { });
             Assert.IsNotNull(mdf.StatusCallback);
@@ -258,7 +258,7 @@ namespace Millistream.Streaming.UnitTests
             Expression<Func<INativeImplementation, int>> expression = x => x.mdf_consume(feedHandle, Timeout);
             nativeImplementation.Setup(expression).Returns(ReturnValue);
 
-            using Mdf mdf = new Mdf(nativeImplementation.Object);
+            using MarketDataFeed mdf = new MarketDataFeed(nativeImplementation.Object);
             Assert.AreEqual(ReturnValue, mdf.Consume(Timeout));
             nativeImplementation.Verify(expression, Times.Once);
         }
@@ -282,7 +282,7 @@ namespace Millistream.Streaming.UnitTests
                 .Returns(1)
                 .Verifiable();
 
-            using Mdf mdf = new Mdf(nativeImplementation.Object);
+            using MarketDataFeed mdf = new MarketDataFeed(nativeImplementation.Object);
             Assert.IsTrue(mdf.GetNextMessage(out int returnedMref, out int returnedMclass, out ulong returnedInsref));
             Assert.AreEqual((int)MessageReference, returnedMref);
             Assert.AreEqual((int)MessageClass, returnedMclass);
@@ -332,7 +332,7 @@ namespace Millistream.Streaming.UnitTests
                 .Callback(new GetNextFieldCallback((IntPtr _, ref uint tag, ref IntPtr value) => tag = (uint)Tag))
                 .Returns(1);
 
-            using Mdf mdf = new Mdf(nativeImplementation.Object);
+            using MarketDataFeed mdf = new MarketDataFeed(nativeImplementation.Object);
             Assert.IsTrue(mdf.GetNextField(out uint tag, out ReadOnlySpan<byte> _));
             Assert.AreEqual((uint)Tag, tag);
             Assert.IsTrue(mdf.GetNextField(out Field field, out ReadOnlySpan<byte> _));
@@ -350,7 +350,7 @@ namespace Millistream.Streaming.UnitTests
             Expression<Func<INativeImplementation, int>> expression = x => x.mdf_connect(feedHandle, Servers);
             nativeImplementation.Setup(expression).Returns(1);
 
-            using Mdf mdf = new Mdf(nativeImplementation.Object);
+            using MarketDataFeed mdf = new MarketDataFeed(nativeImplementation.Object);
             Assert.IsTrue(mdf.Connect(Servers));
             nativeImplementation.Verify(expression, Times.Once);
         }
@@ -364,7 +364,7 @@ namespace Millistream.Streaming.UnitTests
             Expression<Action<INativeImplementation>> expression = x => x.mdf_disconnect(feedHandle);
             nativeImplementation.Setup(expression);
 
-            using Mdf mdf = new Mdf(nativeImplementation.Object);
+            using MarketDataFeed mdf = new MarketDataFeed(nativeImplementation.Object);
             mdf.Disconnect();
             mdf.Disconnect();
             mdf.Disconnect();
@@ -384,7 +384,7 @@ namespace Millistream.Streaming.UnitTests
             Expression<Func<INativeImplementation, int>> expression = x => x.mdf_message_send(feedHandle, messageHandle);
             nativeImplementation.Setup(expression).Returns(1);
 
-            using Mdf mdf = new Mdf(nativeImplementation.Object);
+            using MarketDataFeed mdf = new MarketDataFeed(nativeImplementation.Object);
             Assert.IsTrue(mdf.Send(message));
             nativeImplementation.Verify(expression, Times.Once);
         }
@@ -479,7 +479,7 @@ namespace Millistream.Streaming.UnitTests
 
         [TestMethod]
         [ExpectedException(typeof(ObjectDisposedException))]
-        public void CannotSetDataCallbackAfterDisposeTest() => GetDisposedMdf().DataCallback = new Action<object, Mdf<object, object>>((userData, mdf) => { });
+        public void CannotSetDataCallbackAfterDisposeTest() => GetDisposedMdf().DataCallback = new Action<object, MarketDataFeed<object, object>>((userData, mdf) => { });
 
         [TestMethod]
         [ExpectedException(typeof(ObjectDisposedException))]
@@ -534,7 +534,7 @@ namespace Millistream.Streaming.UnitTests
                 .Callback(new GetNextMessageCallback((IntPtr _, ref int mref, ref int mclass, ref ulong insref) => mref = -1))
                 .Returns(1);
 
-            using Mdf mdf = new Mdf(nativeImplementation.Object);
+            using MarketDataFeed mdf = new MarketDataFeed(nativeImplementation.Object);
             mdf.GetNextMessage(out MessageReference _, out MessageClasses _, out ulong _);
         }
 
@@ -551,7 +551,7 @@ namespace Millistream.Streaming.UnitTests
                 .Callback(new GetNextFieldCallback((IntPtr _, ref uint tag, ref IntPtr value) => tag = uint.MaxValue))
                 .Returns(1);
 
-            using Mdf mdf = new Mdf(nativeImplementation.Object);
+            using MarketDataFeed mdf = new MarketDataFeed(nativeImplementation.Object);
             mdf.GetNextField(out Field _, out ReadOnlySpan<byte> _);
         }
 
@@ -571,7 +571,7 @@ namespace Millistream.Streaming.UnitTests
             GetDisposedMdf().Send(message);
         }
 
-        private static void GetAndSetProperty(MDF_OPTION option, Func<Mdf, int> getter, Action<Mdf> setter)
+        private static void GetAndSetProperty(MDF_OPTION option, Func<MarketDataFeed, int> getter, Action<MarketDataFeed> setter)
         {
             const int Value = 5;
             Mock<INativeImplementation> nativeImplementationMock = new Mock<INativeImplementation>();
@@ -582,7 +582,7 @@ namespace Millistream.Streaming.UnitTests
             SetProperty(nativeImplementationMock, Value, option, getter, setter);
         }
 
-        private static void GetAndSetUInt64Property(MDF_OPTION option, Func<Mdf, ulong> getter, Action<Mdf> setter)
+        private static void GetAndSetUInt64Property(MDF_OPTION option, Func<MarketDataFeed, ulong> getter, Action<MarketDataFeed> setter)
         {
             const ulong Bytes = 100;
             Mock<INativeImplementation> nativeImplementationMock = new Mock<INativeImplementation>();
@@ -593,14 +593,14 @@ namespace Millistream.Streaming.UnitTests
             SetProperty(nativeImplementationMock, Bytes, option, getter, setter);
         }
 
-        private static void SetProperty<T>(Mock<INativeImplementation> nativeImplementationMock, T Value, MDF_OPTION option, Func<Mdf, T> getter, Action<Mdf> setter)
+        private static void SetProperty<T>(Mock<INativeImplementation> nativeImplementationMock, T Value, MDF_OPTION option, Func<MarketDataFeed, T> getter, Action<MarketDataFeed> setter)
         {
             nativeImplementationMock
                 .Setup(x => x.mdf_set_property(It.IsAny<IntPtr>(), option, It.IsAny<IntPtr>()))
                 .Returns(1)
                 .Verifiable();
 
-            using Mdf mdf = new Mdf(nativeImplementationMock.Object);
+            using MarketDataFeed mdf = new MarketDataFeed(nativeImplementationMock.Object);
             //assert that the expected value is returned from the getter
             Assert.AreEqual(Value, getter(mdf));
             //set the property
@@ -609,9 +609,9 @@ namespace Millistream.Streaming.UnitTests
             nativeImplementationMock.Verify();
         }
 
-        private static Mdf GetDisposedMdf()
+        private static MarketDataFeed GetDisposedMdf()
         {
-            Mdf mdf = new Mdf(new Mock<INativeImplementation>().Object);
+            MarketDataFeed mdf = new MarketDataFeed(new Mock<INativeImplementation>().Object);
             mdf.Dispose();
             return mdf;
         }
