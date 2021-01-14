@@ -59,5 +59,33 @@
             /// </summary>
             public const string MDF_RT_FULL = "3";
         }
+
+        /// <summary>
+        /// Corporate actions types.
+        /// </summary>
+        public static class CorporateActions
+        {
+            public const string MDF_CA_DIVIDEND = "0";
+            public const string MDF_CA_SPLIT = "1";
+            public const string MDF_CA_RIGHTSISSUE = "2";
+            public const string MDF_CA_BONUSISSUE = "3";
+            public const string MDF_CA_DIRECTEDISSUE = "4";
+            public const string MDF_CA_SHAREREDEMPTION = "5";
+            public const string MDF_CA_SPINOFF = "6";
+            public const string MDF_CA_STOCKDIVIDEND = "7";
+            public const string MDF_CA_STOCKDIVIDENDEX = "8";
+            public const string MDF_CA_UNKNOWN = "9";
+            public const string MDF_CA_IPO = "10";
+            public const string MDF_CA_CURRENCYCONVERSION = "11";
+            public const string MDF_CA_NOMINALVALUE = "12";
+            public const string MDF_CA_CHANGEINUNDERLYING = "13";
+            public const string MDF_CA_CHANGEOFBASICDATA = "14";
+            public const string MDF_CA_CALENDAR = "15";
+            public const string MDF_CA_INSIDERTRADING = "16";
+            public const string MDF_CA_SPLITANDREDEMPTION = "17";
+            public const string MDF_CA_EXCHANGECLOSED = "18";
+            public const string MDF_CA_MAJORHOLDERS = "19";
+            public const string MDF_CA_SHARELOAN = "20";
+        }
     }
 }
