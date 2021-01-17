@@ -715,6 +715,7 @@
         MDF_F_IVBID = 708,
         MDF_F_IVASK = 709,
         MDF_F_DAYCOUNTCONVENTION = 710,
-        MDF_F_EXPIRATIONTYPE = 711
+        MDF_F_EXPIRATIONTYPE = 711,
+        MDF_F_TENOR = 712
     }
 }
