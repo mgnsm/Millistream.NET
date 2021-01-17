@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Millistream.Streaming
 {
@@ -249,29 +248,6 @@ namespace Millistream.Streaming
         /// <param name="value">The list field value.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         bool AddList(Field tag, string value);
-
-        /// <summary>
-        /// Adds a list field of instrument references to the current active message.
-        /// </summary>
-        /// <param name="tag">The field tag.</param>
-        /// <param name="instrumentReferences">The list of instrument references.</param>
-        /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        bool AddList(uint tag, IEnumerable<ulong> instrumentReferences);
-
-        /// <summary>
-        /// Adds a list field of instrument references to the current active message.
-        /// </summary>
-        /// <param name="tag">The field tag.</param>
-        /// <param name="instrumentReferences">The list of instrument references.</param>
-        /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        bool AddList(Field tag, IEnumerable<ulong> instrumentReferences);
-
-        /// <summary>
-        /// Adds a list of request classes to the <see cref="Field.MDF_F_REQUESTCLASS"/> field of the current active message.
-        /// </summary>
-        /// <param name="requestClasses">The list of request classes.</param>
-        /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        bool AddList(IEnumerable<RequestClass> requestClasses);
 
         /// <summary>
         /// Resets the message handle (sets the number of active messages to zero) so it can be reused. The memory allocated for the current messages in the handle is retained for performance reasons and will be reused when you add new messages to the handle.

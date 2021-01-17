@@ -1,7 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
-using System.Collections.Generic;
 
 namespace Millistream.Streaming.UnitTests
 {
@@ -239,18 +238,6 @@ namespace Millistream.Streaming.UnitTests
             Assert.IsTrue(message.AddList(Field, Value));
             Assert.IsTrue(message.AddList((uint)Field, Value));
             nativeImplementation.Verify(x => x.mdf_message_add_list(It.IsAny<IntPtr>(), (uint)Field, Value), Times.Exactly(2));
-
-            ulong[] instrumentReferences = new ulong[4] { 1, 2, 33, 4 };
-            Assert.IsTrue(message.AddList(Field, instrumentReferences));
-            Assert.IsTrue(message.AddList((uint)Field, instrumentReferences));
-            nativeImplementation.Verify(x => x.mdf_message_add_list(It.IsAny<IntPtr>(), (uint)Field, "1 2 33 4"), Times.Exactly(2));
-
-            RequestClass[] requestClasses = new RequestClass[2] { RequestClass.MDF_RC_BASICDATA, RequestClass.MDF_RC_QUOTE };
-            Assert.IsTrue(message.AddList(requestClasses));
-            nativeImplementation.Verify(x => x.mdf_message_add_list(It.IsAny<IntPtr>(), (uint)Field.MDF_F_REQUESTCLASS, "4 1"));
-
-            requestClasses = new RequestClass[0];
-            Assert.IsTrue(message.AddList(requestClasses));
         }
 
         [TestMethod]
@@ -386,22 +373,12 @@ namespace Millistream.Streaming.UnitTests
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void AddNullListTest() =>
-            new Message(new Mock<INativeImplementation>().Object).AddList(Field.MDF_F_INSREFLIST, default(string));
+            new Message(new Mock<INativeImplementation>().Object).AddList(Field.MDF_F_INSREFLIST, default);
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void AddEmptyListTest() =>
             new Message(new Mock<INativeImplementation>().Object).AddList(Field.MDF_F_INSREFLIST, string.Empty);
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void AddNullInstrumentReferenceListTest() =>
-            new Message(new Mock<INativeImplementation>().Object).AddList(Field.MDF_F_INSREFLIST, default(IEnumerable<ulong>));
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void AddNullReferenceClassesListTest() =>
-            new Message(new Mock<INativeImplementation>().Object).AddList(null);
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
@@ -485,9 +462,6 @@ namespace Millistream.Streaming.UnitTests
 
             CatchObjectDisposedException(() => disposedMessage.AddList(1, "1"));
             CatchObjectDisposedException(() => disposedMessage.AddList(Field.MDF_F_INSREFLIST, "1"));
-            CatchObjectDisposedException(() => disposedMessage.AddList(1, new ulong[1] { 1 }));
-            CatchObjectDisposedException(() => disposedMessage.AddList(Field.MDF_F_INSREFLIST, new ulong[1] { 1 }));
-            CatchObjectDisposedException(() => disposedMessage.AddList(new RequestClass[1] { RequestClass.MDF_RC_BASICDATA }));
 
             CatchObjectDisposedException(() => disposedMessage.Reset());
 

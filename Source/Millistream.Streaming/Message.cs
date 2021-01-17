@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Millistream.Streaming
 {
@@ -10,7 +8,6 @@ namespace Millistream.Streaming
     /// <remarks>Handles are not thread-safe. If multiple threads will share access to a single handle, the accesses has to be serialized using a mutex or other forms of locking mechanisms. The API as such is thread-safe so multiple threads can have local handles without the need for locks.</remarks>
     public sealed class Message : IMessage, IDisposable
     {
-        private const string ListSeparator = " ";
         private readonly INativeImplementation _nativeImplementation;
         private CompressionLevel _compressionLevel = CompressionLevel.Z_BEST_SPEED;
         private bool _utf8Validation = true;
@@ -463,58 +460,6 @@ namespace Millistream.Streaming
         /// <remarks>The corresponding native method is mdf_message_add_list.</remarks>
         public bool AddList(Field tag, string value) =>
             AddList((uint)tag, value);
-
-        /// <summary>
-        /// Adds a list field of instrument references to the current active message.
-        /// </summary>
-        /// <param name="tag">The field tag.</param>
-        /// <param name="insrefs">The sequence of instrument references.</param>
-        /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="insrefs"/> is <see langword="null" />.</exception>
-        /// <exception cref="ArgumentException"><paramref name="insrefs"/> contains more than 1.000.000 elements.</exception>
-        /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_message_add_list.</remarks>
-        public bool AddList(uint tag, IEnumerable<ulong> insrefs)
-        {
-            if (insrefs == null)
-                throw new ArgumentNullException(nameof(insrefs));
-
-            if (insrefs.Count() > 1_000_000)
-                throw new ArgumentException("There is a current soft limit of 1,000,000 instrument references per list.", nameof(insrefs));
-
-            ThrowIfDisposed();
-            return _nativeImplementation.mdf_message_add_list(Handle, tag, string.Join(ListSeparator, insrefs)) == 1;
-        }
-
-        /// <summary>
-        /// Adds a list field of instrument references to the current active message.
-        /// </summary>
-        /// <param name="tag">The field tag.</param>
-        /// <param name="insrefs">The list of instrument references.</param>
-        /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="insrefs"/> is <see langword="null" />.</exception>
-        /// <exception cref="ArgumentException"><paramref name="insrefs"/> contains more than 1.000.000 elements.</exception>
-        /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_message_add_list.</remarks>
-        public bool AddList(Field tag, IEnumerable<ulong> insrefs) =>
-            AddList((uint)tag, insrefs);
-
-        /// <summary>
-        /// Adds a list of request classes to the <see cref="Field.MDF_F_REQUESTCLASS"/> field of the current active message.
-        /// </summary>
-        /// <param name="requestClasses">The list of request classes.</param>
-        /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="requestClasses"/> is <see langword="null" />.</exception>
-        /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_message_add_list.</remarks>
-        public bool AddList(IEnumerable<RequestClass> requestClasses)
-        {
-            if (requestClasses == null)
-                throw new ArgumentNullException(nameof(requestClasses));
-
-            ThrowIfDisposed();
-            return _nativeImplementation.mdf_message_add_list(Handle, (uint)Field.MDF_F_REQUESTCLASS, string.Join(ListSeparator, requestClasses.Select(x => ((uint)x).ToString()))) == 1;
-        }
 
         /// <summary>
         /// Resets the message handle (sets the number of active messages to zero) so it can be reused. The memory allocated for the current messages in the handle is retained for performance reasons and will be reused when you add new messages to the handle.
