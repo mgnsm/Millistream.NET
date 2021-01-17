@@ -9,115 +9,115 @@ namespace Millistream.Streaming
         {
             private const string DllName = "libmdf.0.dylib";
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern IntPtr mdf_create();
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern void mdf_destroy(IntPtr handle);
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_get_next_message(IntPtr handle, ref int message, ref int message_class, ref ulong instrument);
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_get_next_field(IntPtr handle, ref uint tag, ref IntPtr value);
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_get_property(IntPtr handle, MDF_OPTION option, ref IntPtr value);
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_get_property(IntPtr handle, MDF_OPTION option, ref int value);
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_get_property(IntPtr handle, MDF_OPTION option, ref ulong value);
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_get_property(IntPtr handle, MDF_OPTION option, ref long value);
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_set_property(IntPtr handle, MDF_OPTION option, IntPtr value);
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_set_property(IntPtr handle, MDF_OPTION option, string value);
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_connect(IntPtr handle, string server);
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern void mdf_disconnect(IntPtr handle);
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_consume(IntPtr handle, int timeout);
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern IntPtr mdf_message_create();
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_message_add(IntPtr message, ulong instrument_reference, int message_reference);
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_message_del(IntPtr message);
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern void mdf_message_reset(IntPtr message);
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern void mdf_message_destroy(IntPtr message);
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_message_add_list(IntPtr message, uint tag, string value);
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_message_add_numeric(IntPtr message, uint tag, string value);
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_message_add_uint(IntPtr message, uint tag, ulong value, int decimals);
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_message_add_int(IntPtr message, uint tag, long value, int decimals);
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_message_add_string(IntPtr message, uint tag, string value);
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_message_add_string2(IntPtr message, uint tag, string value, int len);
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_message_add_date(IntPtr message, uint tag, string value);
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_message_add_date2(IntPtr message, uint tag, int year, int mon, int day);
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_message_add_time(IntPtr message, uint tag, string value);
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_message_add_time2(IntPtr message, uint tag, int hour, int min, int sec, int msec);
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_message_add_time3(IntPtr message, uint tag, int hour, int min, int sec, int nsec);
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_message_get_num(IntPtr message);
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_message_get_num_active(IntPtr message);
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_message_send(IntPtr handle, IntPtr message);
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_message_set_compression_level(IntPtr message, int level);
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_message_move(IntPtr src, IntPtr dst, ulong insref_src, ulong insref_dst);
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_message_serialize(IntPtr message, ref IntPtr result);
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_message_deserialize(IntPtr message, string data);
 
-            [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_message_set_utf8_validation(IntPtr message, int enable);
         }
 
