@@ -256,9 +256,9 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.IsTrue(LogOn(mdf, message));
             //subscribe to basic data and quotes for instrument 772 (ERIC B)
             string requestId = "rid";
-            RequestClass[] requestClasses = new RequestClass[2] { RequestClass.MDF_RC_BASICDATA, RequestClass.MDF_RC_QUOTE };
+            const string RequestClasses = "4 1";
             Assert.IsTrue(message.Add(0, MessageReference.MDF_M_REQUEST));
-            Assert.IsTrue(message.AddList(requestClasses));
+            Assert.IsTrue(message.AddList(Field.MDF_F_REQUESTCLASS, RequestClasses));
             Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_FULL));
             const string InsRef = "772";
             Assert.IsTrue(message.AddList(Field.MDF_F_INSREFLIST, InsRef));
@@ -270,7 +270,7 @@ namespace Millistream.Streaming.IntegrationTests
             //unsubscribe
             requestId = "rid2";
             Assert.IsTrue(message.Add(0, MessageReference.MDF_M_UNSUBSCRIBE));
-            Assert.IsTrue(message.AddList(requestClasses));
+            Assert.IsTrue(message.AddList(Field.MDF_F_REQUESTCLASS, RequestClasses));
             Assert.IsTrue(message.AddList(Field.MDF_F_INSREFLIST, InsRef));
             Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTID, requestId));
             Assert.IsTrue(mdf.Send(message));
@@ -291,12 +291,12 @@ namespace Millistream.Streaming.IntegrationTests
             
             //subscribe to a specific request class (MDF_RC_BASICDATA) for a couple of instruments
             string requestId = "rid";
-            RequestClass[] requestClasses = new RequestClass[1] { RequestClass.MDF_RC_BASICDATA };
+            const string RequestClass = "4";
             Assert.IsTrue(message.Add(0, MessageReference.MDF_M_REQUEST));
-            Assert.IsTrue(message.AddList(requestClasses));
+            Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTCLASS, RequestClass));
             Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE));
             Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTID, requestId));
-            ulong[] instrumentReferences = new ulong[4] { 354, 772, 928, 1168 };
+            string instrumentReferences = "354 772 928 1168";
             Assert.IsTrue(message.AddList(Field.MDF_F_INSREFLIST, instrumentReferences));
             Assert.IsTrue(mdf.Send(message));
             message.Reset();
@@ -346,13 +346,13 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.IsTrue(receivedMessageTypes.Count == 1);
             Assert.IsTrue(receivedInstrumentReferences.Count > 1);
 
-            void UnsubscribeAndClear(RequestClass[] requestClasses, ulong[] instrumentReferences)
+            void UnsubscribeAndClear(string requestClass, string instrumentReferences)
             {
                 string requestId = Guid.NewGuid().ToString();
                 Assert.IsTrue(message.Add(0, MessageReference.MDF_M_UNSUBSCRIBE));
-                if (requestClasses != null)
-                    Assert.IsTrue(message.AddList(requestClasses));
-                if (instrumentReferences != null)
+                if (!string.IsNullOrEmpty(requestClass))
+                    Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTCLASS, requestClass));
+                if (!string.IsNullOrEmpty(instrumentReferences))
                     Assert.IsTrue(message.AddList(Field.MDF_F_INSREFLIST, instrumentReferences));
                 Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTID, requestId));
                 Assert.IsTrue(mdf.Send(message));
@@ -363,15 +363,15 @@ namespace Millistream.Streaming.IntegrationTests
                 Assert.AreEqual(0, receivedMessageTypes.Count);
                 Assert.AreEqual(0, receivedInstrumentReferences.Count);
             }
-            UnsubscribeAndClear(requestClasses, instrumentReferences);
+            UnsubscribeAndClear(RequestClass, instrumentReferences);
 
             //subscribe to all messages for a particular instrument
             requestId = "rid2";
-            instrumentReferences = new ulong[1] { 772 };
+            instrumentReferences = "772";
             Assert.IsTrue(message.Add(0, MessageReference.MDF_M_REQUEST));
             Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTCLASS, StringConstants.RequestClasses.All));
             Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE));
-            Assert.IsTrue(message.AddList(Field.MDF_F_INSREFLIST, new ulong[1] { 772 }));
+            Assert.IsTrue(message.AddList(Field.MDF_F_INSREFLIST, instrumentReferences));
             Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTID, requestId));
             Assert.IsTrue(mdf.Send(message));
             message.Reset();

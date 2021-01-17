@@ -58,18 +58,16 @@ namespace ConsoleApp
 
                 //7. Request some data.
                 message.Add(0, MessageReference.MDF_M_REQUEST);
-                message.AddList(new RequestClass[2] // <- What kind of data to request.
-                {
-                    RequestClass.MDF_RC_BASICDATA, // <- Basic data ...
-                    RequestClass.MDF_RC_QUOTE // <- ...and quotes in this case.
-                });
+                message.AddList(Field.MDF_F_REQUESTCLASS, // <- What kind of data to request.
+                    "4 " + // <- Basic data (RequestClass.MDF_RC_BASICDATA) ...
+                    "1"); // < -...and quotes (RequestClass.MDF_RC_QUOTE) in this case.
                 message.AddNumeric(
                     Field.MDF_F_REQUESTTYPE, // <- The type of request.
                     StringConstants.RequestTypes.MDF_RT_FULL // <- Full (image+streaming) in this case.
                 );
                 message.AddList(
                     Field.MDF_F_INSREFLIST, // <- What instrument identifier(s) the request is for.
-                    new ulong[1] { 772 }); // <- 772 is the unique identifier for Ericsson B.
+                    "772"); // <- 772 is the unique identifier for Ericsson B.
                 mdf.Send(message);
                 message.Reset();
 
