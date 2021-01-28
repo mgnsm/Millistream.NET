@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 namespace Millistream.Streaming
 {
@@ -225,7 +226,18 @@ namespace Millistream.Streaming
                 throw new ArgumentNullException(nameof(value));
 
             ThrowIfDisposed();
-            return _nativeImplementation.mdf_message_add_string(Handle, tag, value) == 1;
+
+            unsafe
+            {
+                fixed (char* c = value)
+                {
+                    int length = Encoding.UTF8.GetMaxByteCount(value.Length);
+                    byte* b = stackalloc byte[length + 1];
+                    int bytesWritten = Encoding.UTF8.GetBytes(c, value.Length, b, length);
+                    b[bytesWritten] = 0;
+                    return _nativeImplementation.mdf_message_add_string(Handle, tag, (IntPtr)b) == 1;
+                }
+            }
         }
 
         /// <summary>
@@ -244,7 +256,20 @@ namespace Millistream.Streaming
                 throw new ArgumentNullException(nameof(value));
 
             ThrowIfDisposed();
-            return _nativeImplementation.mdf_message_add_string2(Handle, tag, value, length) == 1;
+
+            if (length < 0)
+                return false;
+
+            unsafe
+            {
+                fixed (char* c = value)
+                {
+                    int byteCount = Encoding.UTF8.GetByteCount(c, length);
+                    byte* b = stackalloc byte[byteCount + 1];
+                    Encoding.UTF8.GetBytes(c, length, b, byteCount);
+                    return _nativeImplementation.mdf_message_add_string2(Handle, tag, (IntPtr)b, byteCount) == 1;
+                }
+            }
         }
 
         /// <summary>

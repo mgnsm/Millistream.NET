@@ -2,6 +2,7 @@
 
 namespace Millistream.Streaming
 {
+#pragma warning disable IDE1006
     internal interface INativeImplementation
     {
         IntPtr mdf_create();
@@ -26,8 +27,8 @@ namespace Millistream.Streaming
         int mdf_message_add_numeric(IntPtr message, uint tag, string value);
         int mdf_message_add_uint(IntPtr message, uint tag, ulong value, int decimals);
         int mdf_message_add_int(IntPtr message, uint tag, long value, int decimals);
-        int mdf_message_add_string(IntPtr message, uint tag, string value);
-        int mdf_message_add_string2(IntPtr message, uint tag, string value, int len);
+        int mdf_message_add_string(IntPtr message, uint tag, IntPtr value);
+        int mdf_message_add_string2(IntPtr message, uint tag, IntPtr value, int len);
         int mdf_message_add_date(IntPtr message, uint tag, string value);
         int mdf_message_add_date2(IntPtr message, uint tag, int year, int mon, int day);
         int mdf_message_add_time(IntPtr message, uint tag, string value);
@@ -42,4 +43,5 @@ namespace Millistream.Streaming
         int mdf_message_deserialize(IntPtr message, string data);
         int mdf_message_set_utf8_validation(IntPtr message, int enable);
     }
+#pragma warning restore IDE1006
 }
