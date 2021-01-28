@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.2;net45</TargetFrameworks>
+    <TargetFrameworks>net45;netstandard1.4</TargetFrameworks>
     <Authors>mgnsm</Authors>
     <Description>An unofficial .NET wrapper for Millistream's low-latency, high-throughput and high-availability C/C++ streaming API that can be used to subscribe to streaming real-time or delayed financial data.</Description>
     <PackageProjectUrl>https://github.com/mgnsm/Millistream.NET</PackageProjectUrl>

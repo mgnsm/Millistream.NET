@@ -45,7 +45,7 @@ jobs:
     - name: Build on macOS/Linux
       if: ${{ matrix.os != 'windows-latest' }}
       run: |
-        dotnet build Source/Millistream.Streaming/Millistream.Streaming.csproj -c Release -f netstandard1.2
+        dotnet build Source/Millistream.Streaming/Millistream.Streaming.csproj -c Release -f netstandard1.4
         dotnet build Tests/Millistream.Streaming.UnitTests/Millistream.Streaming.UnitTests.csproj -c Release -f netcoreapp3.1
         dotnet build Tests/Millistream.Streaming.UnitTests/Millistream.Streaming.UnitTests.csproj -c Release -f net5.0
         dotnet build Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release -f netcoreapp3.1

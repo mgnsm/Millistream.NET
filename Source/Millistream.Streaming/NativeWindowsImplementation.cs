@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Millistream.Streaming
 {
+#pragma warning disable IDE1006
     internal class NativeWindowsImplementation : INativeImplementation
     {
         private static class NativeWindowsMethods
@@ -76,10 +77,10 @@ namespace Millistream.Streaming
             public static extern int mdf_message_add_int(IntPtr message, uint tag, long value, int decimals);
 
             [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
-            public static extern int mdf_message_add_string(IntPtr message, uint tag, string value);
+            public static extern int mdf_message_add_string(IntPtr message, uint tag, IntPtr value);
 
             [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
-            public static extern int mdf_message_add_string2(IntPtr message, uint tag, string value, int len);
+            public static extern int mdf_message_add_string2(IntPtr message, uint tag, IntPtr value, int len);
 
             [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_message_add_date(IntPtr message, uint tag, string value);
@@ -138,8 +139,8 @@ namespace Millistream.Streaming
         public int mdf_message_add_int(IntPtr message, uint tag, long value, int decimals) => NativeWindowsMethods.mdf_message_add_int(message, tag, value, decimals);
         public int mdf_message_add_list(IntPtr message, uint tag, string value) => NativeWindowsMethods.mdf_message_add_list(message, tag, value);
         public int mdf_message_add_numeric(IntPtr message, uint tag, string value) => NativeWindowsMethods.mdf_message_add_numeric(message, tag, value);
-        public int mdf_message_add_string(IntPtr message, uint tag, string value) => NativeWindowsMethods.mdf_message_add_string(message, tag, value);
-        public int mdf_message_add_string2(IntPtr message, uint tag, string value, int len) => NativeWindowsMethods.mdf_message_add_string2(message, tag, value, len);
+        public int mdf_message_add_string(IntPtr message, uint tag, IntPtr value) => NativeWindowsMethods.mdf_message_add_string(message, tag, value);
+        public int mdf_message_add_string2(IntPtr message, uint tag, IntPtr value, int len) => NativeWindowsMethods.mdf_message_add_string2(message, tag, value, len);
         public int mdf_message_add_time(IntPtr message, uint tag, string value) => NativeWindowsMethods.mdf_message_add_time(message, tag, value);
         public int mdf_message_add_time2(IntPtr message, uint tag, int hour, int min, int sec, int msec) => NativeWindowsMethods.mdf_message_add_time2(message, tag, hour, min, sec, msec);
         public int mdf_message_add_time3(IntPtr message, uint tag, int hour, int min, int sec, int nsec) => NativeWindowsMethods.mdf_message_add_time3(message, tag, hour, min, sec, nsec);
@@ -159,4 +160,5 @@ namespace Millistream.Streaming
         public int mdf_message_deserialize(IntPtr message, string data) => NativeWindowsMethods.mdf_message_deserialize(message, data);
         public int mdf_message_set_utf8_validation(IntPtr message, int enable) => NativeWindowsMethods.mdf_message_set_utf8_validation(message, enable);
     }
+#pragma warning restore IDE1006
 }
