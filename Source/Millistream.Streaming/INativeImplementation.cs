@@ -24,7 +24,7 @@ namespace Millistream.Streaming
         void mdf_message_reset(IntPtr message);
         void mdf_message_destroy(IntPtr message);
         int mdf_message_add_list(IntPtr message, uint tag, string value);
-        int mdf_message_add_numeric(IntPtr message, uint tag, string value);
+        int mdf_message_add_numeric(IntPtr message, uint tag, IntPtr value);
         int mdf_message_add_uint(IntPtr message, uint tag, ulong value, int decimals);
         int mdf_message_add_int(IntPtr message, uint tag, long value, int decimals);
         int mdf_message_add_string(IntPtr message, uint tag, IntPtr value);

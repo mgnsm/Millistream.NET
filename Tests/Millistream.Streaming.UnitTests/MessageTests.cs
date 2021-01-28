@@ -1,6 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
+using System.Runtime.InteropServices;
+using System.Text;
 
 namespace Millistream.Streaming.UnitTests
 {
@@ -81,15 +83,23 @@ namespace Millistream.Streaming.UnitTests
         [TestMethod]
         public void AddNumericTest()
         {
-            Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
-            nativeImplementation.Setup(x => x.mdf_message_add_numeric(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<string>())).Returns(1);
-
             const Field Field = Field.MDF_F_REQUESTTYPE;
             const string Value = "1.1";
+
+            Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
+            nativeImplementation.Setup(x => x.mdf_message_add_numeric(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<IntPtr>()))
+                .Callback((IntPtr message, uint tag, IntPtr value) => 
+                {
+                    byte[] bytes = new byte[Value.Length];
+                    Marshal.Copy(value, bytes, 0, Value.Length);
+                    Assert.AreEqual(Value, Encoding.ASCII.GetString(bytes));
+                })
+                .Returns(1);
+
             using Message message = new Message(nativeImplementation.Object);
             Assert.IsTrue(message.AddNumeric(Field, Value));
             Assert.IsTrue(message.AddNumeric((uint)Field, Value));
-            nativeImplementation.Verify(x => x.mdf_message_add_numeric(It.IsAny<IntPtr>(), (uint)Field, Value), Times.Exactly(2));
+            nativeImplementation.Verify(x => x.mdf_message_add_numeric(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(2));
         }
 
         [TestMethod]
