@@ -88,12 +88,7 @@ namespace Millistream.Streaming.UnitTests
 
             Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
             nativeImplementation.Setup(x => x.mdf_message_add_numeric(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<IntPtr>()))
-                .Callback((IntPtr message, uint tag, IntPtr value) => 
-                {
-                    byte[] bytes = new byte[Value.Length];
-                    Marshal.Copy(value, bytes, 0, Value.Length);
-                    Assert.AreEqual(Value, Encoding.ASCII.GetString(bytes));
-                })
+                .Callback((IntPtr message, uint tag, IntPtr value) => Compare(Value, value))
                 .Returns(1);
 
             using Message message = new Message(nativeImplementation.Object);
@@ -185,39 +180,45 @@ namespace Millistream.Streaming.UnitTests
         [TestMethod]
         public void AddDateTest()
         {
-            Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
-            nativeImplementation.Setup(x => x.mdf_message_add_date(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<string>())).Returns(1);
-            nativeImplementation.Setup(x => x.mdf_message_add_date2(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>())).Returns(1);
-
             const Field Field = Field.MDF_F_REQUESTID;
             const string Value = "2020-12-06";
+
+            Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
+            nativeImplementation.Setup(x => x.mdf_message_add_date(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<IntPtr>()))
+                .Callback((IntPtr message, uint tag, IntPtr value) => Compare(Value, value))
+                .Returns(1);
+            nativeImplementation.Setup(x => x.mdf_message_add_date2(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>())).Returns(1);
+
             using Message message = new Message(nativeImplementation.Object);
             Assert.IsTrue(message.AddDate(Field, Value));
             Assert.IsTrue(message.AddDate((uint)Field, Value));
-            nativeImplementation.Verify(x => x.mdf_message_add_date(It.IsAny<IntPtr>(), (uint)Field, Value), Times.Exactly(2));
+            nativeImplementation.Verify(x => x.mdf_message_add_date(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(2));
 
             const int Year = 2020;
             const int Month = 12;
             const int Day = 6;
             Assert.IsTrue(message.AddDate(Field, Year, Month, Day));
             Assert.IsTrue(message.AddDate((uint)Field, Year, Month, Day));
-            nativeImplementation.Verify(x => x.mdf_message_add_date2(It.IsAny<IntPtr>(), (uint)Field, Year, Month, Day), Times.Exactly(2));
+            nativeImplementation.Verify(x => x.mdf_message_add_date2(message.Handle, (uint)Field, Year, Month, Day), Times.Exactly(2));
         }
 
         [TestMethod]
         public void AddTimeTest()
         {
+            const Field Field = Field.MDF_F_TIME;
+            const string Value = "11:11:11";
+
             Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
-            nativeImplementation.Setup(x => x.mdf_message_add_time(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<string>())).Returns(1);
+            nativeImplementation.Setup(x => x.mdf_message_add_time(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<IntPtr>()))
+                .Callback((IntPtr message, uint tag, IntPtr value) => Compare(Value, value))
+                .Returns(1);
             nativeImplementation.Setup(x => x.mdf_message_add_time2(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>())).Returns(1);
             nativeImplementation.Setup(x => x.mdf_message_add_time3(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>())).Returns(1);
 
-            const Field Field = Field.MDF_F_TIME;
-            const string Value = "11:11:11";
             using Message message = new Message(nativeImplementation.Object);
             Assert.IsTrue(message.AddTime(Field, Value));
             Assert.IsTrue(message.AddTime((uint)Field, Value));
-            nativeImplementation.Verify(x => x.mdf_message_add_time(It.IsAny<IntPtr>(), (uint)Field, Value), Times.Exactly(2));
+            nativeImplementation.Verify(x => x.mdf_message_add_time(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(2));
 
             int hour = 12;
             int minute = 13;
@@ -225,7 +226,7 @@ namespace Millistream.Streaming.UnitTests
             const int Millisecond = 999;
             Assert.IsTrue(message.AddTime2(Field, hour, minute, second, Millisecond));
             Assert.IsTrue(message.AddTime2((uint)Field, hour, minute, second, Millisecond));
-            nativeImplementation.Verify(x => x.mdf_message_add_time2(It.IsAny<IntPtr>(), (uint)Field, hour, minute, second, Millisecond), Times.Exactly(2));
+            nativeImplementation.Verify(x => x.mdf_message_add_time2(message.Handle, (uint)Field, hour, minute, second, Millisecond), Times.Exactly(2));
 
             hour = 12;
             minute = 13;
@@ -233,21 +234,24 @@ namespace Millistream.Streaming.UnitTests
             const int Nanosecond = 999;
             Assert.IsTrue(message.AddTime3(Field, hour, minute, second, Nanosecond));
             Assert.IsTrue(message.AddTime3((uint)Field, hour, minute, second, Nanosecond));
-            nativeImplementation.Verify(x => x.mdf_message_add_time3(It.IsAny<IntPtr>(), (uint)Field, hour, minute, second, Nanosecond), Times.Exactly(2));
+            nativeImplementation.Verify(x => x.mdf_message_add_time3(message.Handle, (uint)Field, hour, minute, second, Nanosecond), Times.Exactly(2));
         }
 
         [TestMethod]
         public void AddListTest()
         {
-            Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
-            nativeImplementation.Setup(x => x.mdf_message_add_list(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<string>())).Returns(1);
-
             const Field Field = Field.MDF_F_INSREFLIST;
             const string Value = "1 4";
+
+            Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
+            nativeImplementation.Setup(x => x.mdf_message_add_list(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<IntPtr>()))
+                .Callback((IntPtr message, uint tag, IntPtr value) => Compare(Value, value))
+                .Returns(1);
+
             using Message message = new Message(nativeImplementation.Object);
             Assert.IsTrue(message.AddList(Field, Value));
             Assert.IsTrue(message.AddList((uint)Field, Value));
-            nativeImplementation.Verify(x => x.mdf_message_add_list(It.IsAny<IntPtr>(), (uint)Field, Value), Times.Exactly(2));
+            nativeImplementation.Verify(x => x.mdf_message_add_list(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -481,6 +485,13 @@ namespace Millistream.Streaming.UnitTests
 
             CatchObjectDisposedException(() => disposedMessage.Deserialize("ABC"));
 
+        }
+
+        private static void Compare(string expectedValue, IntPtr actualValue)
+        {
+            byte[] bytes = new byte[expectedValue.Length];
+            Marshal.Copy(actualValue, bytes, 0, expectedValue.Length);
+            Assert.AreEqual(expectedValue, Encoding.ASCII.GetString(bytes));
         }
 
         private static Message GetDisposedMessage()
