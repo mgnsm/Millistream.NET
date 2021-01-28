@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Millistream.Streaming
@@ -134,7 +135,14 @@ namespace Millistream.Streaming
                 throw new ArgumentNullException(nameof(value));
 
             ThrowIfDisposed();
-            return _nativeImplementation.mdf_message_add_numeric(Handle, tag, value) == 1;
+
+            unsafe
+            {
+                byte* bytes = stackalloc byte[value.Length + 1];
+                if (!TryGetAsciiBytes(value, bytes))
+                    return false;
+                return _nativeImplementation.mdf_message_add_numeric(Handle, tag, (IntPtr)bytes) == 1;
+            }
         }
 
         /// <summary>
@@ -582,6 +590,19 @@ namespace Millistream.Streaming
         {
             if (_isDisposed)
                 throw new ObjectDisposedException(typeof(Message).FullName);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private unsafe static bool TryGetAsciiBytes(string value, byte* bytes)
+        {
+            for (int i = 0; i < value.Length; ++i)
+            {
+                char c = value[i];
+                if (c > 127)
+                    return false;
+                bytes[i] = (byte)c;
+            }
+            return true;
         }
     }
 }
