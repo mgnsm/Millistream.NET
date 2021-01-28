@@ -320,7 +320,14 @@ namespace Millistream.Streaming
                 throw new ArgumentNullException(nameof(value));
 
             ThrowIfDisposed();
-            return _nativeImplementation.mdf_message_add_date(Handle, tag, value) == 1;
+
+            unsafe
+            {
+                byte* bytes = stackalloc byte[value.Length + 1];
+                if (!TryGetAsciiBytes(value, bytes))
+                    return false;
+                return _nativeImplementation.mdf_message_add_date(Handle, tag, (IntPtr)bytes) == 1;
+            }
         }
 
         /// <summary>
@@ -379,7 +386,14 @@ namespace Millistream.Streaming
                 throw new ArgumentNullException(nameof(value));
 
             ThrowIfDisposed();
-            return _nativeImplementation.mdf_message_add_time(Handle, tag, value) == 1;
+
+            unsafe
+            {
+                byte* bytes = stackalloc byte[value.Length + 1];
+                if (!TryGetAsciiBytes(value, bytes))
+                    return false;
+                return _nativeImplementation.mdf_message_add_time(Handle, tag, (IntPtr)bytes) == 1;
+            }
         }
 
         /// <summary>
@@ -475,7 +489,14 @@ namespace Millistream.Streaming
                 throw new ArgumentNullException(nameof(value));
 
             ThrowIfDisposed();
-            return _nativeImplementation.mdf_message_add_list(Handle, tag, value) == 1;
+
+            unsafe
+            {
+                byte* bytes = stackalloc byte[value.Length + 1];
+                if (!TryGetAsciiBytes(value, bytes))
+                    return false;
+                return _nativeImplementation.mdf_message_add_list(Handle, tag, (IntPtr)bytes) == 1;
+            }
         }
 
         /// <summary>

@@ -23,15 +23,15 @@ namespace Millistream.Streaming
         int mdf_message_del(IntPtr message);
         void mdf_message_reset(IntPtr message);
         void mdf_message_destroy(IntPtr message);
-        int mdf_message_add_list(IntPtr message, uint tag, string value);
+        int mdf_message_add_list(IntPtr message, uint tag, IntPtr value);
         int mdf_message_add_numeric(IntPtr message, uint tag, IntPtr value);
         int mdf_message_add_uint(IntPtr message, uint tag, ulong value, int decimals);
         int mdf_message_add_int(IntPtr message, uint tag, long value, int decimals);
         int mdf_message_add_string(IntPtr message, uint tag, IntPtr value);
         int mdf_message_add_string2(IntPtr message, uint tag, IntPtr value, int len);
-        int mdf_message_add_date(IntPtr message, uint tag, string value);
+        int mdf_message_add_date(IntPtr message, uint tag, IntPtr value);
         int mdf_message_add_date2(IntPtr message, uint tag, int year, int mon, int day);
-        int mdf_message_add_time(IntPtr message, uint tag, string value);
+        int mdf_message_add_time(IntPtr message, uint tag, IntPtr value);
         int mdf_message_add_time2(IntPtr message, uint tag, int hour, int min, int sec, int msec);
         int mdf_message_add_time3(IntPtr message, uint tag, int hour, int min, int sec, int nsec);
         int mdf_message_get_num(IntPtr message);
