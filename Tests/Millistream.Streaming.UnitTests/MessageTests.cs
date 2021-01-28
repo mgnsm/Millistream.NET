@@ -155,19 +155,20 @@ namespace Millistream.Streaming.UnitTests
         public void AddStringTest()
         {
             Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
-            nativeImplementation.Setup(x => x.mdf_message_add_string(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<string>())).Returns(1);
-            nativeImplementation.Setup(x => x.mdf_message_add_string2(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<string>(), It.IsAny<int>())).Returns(1);
+            nativeImplementation.Setup(x => x.mdf_message_add_string(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<IntPtr>())).Returns(1);
+            nativeImplementation.Setup(x => x.mdf_message_add_string2(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<IntPtr>(), It.IsAny<int>())).Returns(1);
 
             const Field Field = Field.MDF_F_REQUESTID;
             const string Value = "...";
             using Message message = new Message(nativeImplementation.Object);
             Assert.IsTrue(message.AddString(Field, Value));
             Assert.IsTrue(message.AddString((uint)Field, Value));
-            nativeImplementation.Verify(x => x.mdf_message_add_string(It.IsAny<IntPtr>(), (uint)Field, Value), Times.Exactly(2));
 
             Assert.IsTrue(message.AddString(Field, Value, Value.Length));
             Assert.IsTrue(message.AddString((uint)Field, Value, Value.Length));
-            nativeImplementation.Verify(x => x.mdf_message_add_string2(It.IsAny<IntPtr>(), (uint)Field, Value, Value.Length));
+
+            nativeImplementation.Verify(x => x.mdf_message_add_string(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(2));
+            nativeImplementation.Verify(x => x.mdf_message_add_string2(message.Handle, (uint)Field, It.IsAny<IntPtr>(), Value.Length));
         }
 
 
@@ -230,7 +231,6 @@ namespace Millistream.Streaming.UnitTests
         {
             Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
             nativeImplementation.Setup(x => x.mdf_message_add_list(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<string>())).Returns(1);
-            nativeImplementation.Setup(x => x.mdf_message_add_string(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<string>())).Returns(1);
 
             const Field Field = Field.MDF_F_INSREFLIST;
             const string Value = "1 4";
