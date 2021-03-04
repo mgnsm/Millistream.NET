@@ -302,6 +302,10 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.IsTrue(message2.Deserialize(s));
             Assert.AreEqual(2, message2.ActiveCount);
             Assert.IsTrue(message.Deserialize(s));
+            message2.Reset();
+            Assert.AreEqual(0, message2.ActiveCount);
+            Assert.IsTrue(message2.Deserialize(result));
+            Assert.AreEqual(2, message2.ActiveCount);
         }
     }
 }

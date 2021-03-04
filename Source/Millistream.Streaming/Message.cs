@@ -579,6 +579,25 @@ namespace Millistream.Streaming
                 throw new ArgumentNullException(nameof(data));
 
             ThrowIfDisposed();
+            unsafe
+            {
+                byte* bytes = stackalloc byte[data.Length + 1];
+                if (!TryGetAsciiBytes(data, bytes))
+                    return false;
+                return _nativeImplementation.mdf_message_deserialize(Handle, (IntPtr)bytes) == 1;
+            }
+        }
+
+        /// <summary>
+        /// Deserializes a base64 encoded message chain and replaces the existing (if any) message chain in the message handle.
+        /// </summary>
+        /// <param name="data">An unmanaged pointer to a base64 encoded (serialized) message chain.</param>
+        /// <returns><see langword="true" /> if the message chain was successfully deserialized, or <see langword="false" /> if the deserialization failed (if so the current message chain in the message handler is left untouched).</returns>
+        /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
+        /// <remarks>The corresponding native method is mdf_message_deserialize.</remarks>
+        public bool Deserialize(IntPtr data)
+        {
+            ThrowIfDisposed();
             return _nativeImplementation.mdf_message_deserialize(Handle, data) == 1;
         }
 

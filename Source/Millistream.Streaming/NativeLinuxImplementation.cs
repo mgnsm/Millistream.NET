@@ -38,10 +38,7 @@ namespace Millistream.Streaming
             public static extern int mdf_set_property(IntPtr handle, MDF_OPTION option, IntPtr value);
 
             [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
-            public static extern int mdf_set_property(IntPtr handle, MDF_OPTION option, string value);
-
-            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
-            public static extern int mdf_connect(IntPtr handle, string server);
+            public static extern int mdf_connect(IntPtr handle, IntPtr server);
 
             [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern void mdf_disconnect(IntPtr handle);
@@ -116,13 +113,13 @@ namespace Millistream.Streaming
             public static extern int mdf_message_serialize(IntPtr message, ref IntPtr result);
 
             [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
-            public static extern int mdf_message_deserialize(IntPtr message, string data);
+            public static extern int mdf_message_deserialize(IntPtr message, IntPtr data);
 
             [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_message_set_utf8_validation(IntPtr message, int enable);
         }
 
-        public int mdf_connect(IntPtr handle, string server) => NativeLinuxMethods.mdf_connect(handle, server);
+        public int mdf_connect(IntPtr handle, IntPtr server) => NativeLinuxMethods.mdf_connect(handle, server);
         public int mdf_consume(IntPtr handle, int timeout) => NativeLinuxMethods.mdf_consume(handle, timeout);
         public IntPtr mdf_create() => NativeLinuxMethods.mdf_create();
         public void mdf_destroy(IntPtr handle) => NativeLinuxMethods.mdf_destroy(handle);
@@ -153,11 +150,10 @@ namespace Millistream.Streaming
         public void mdf_message_reset(IntPtr message) => NativeLinuxMethods.mdf_message_reset(message);
         public int mdf_message_send(IntPtr handle, IntPtr message) => NativeLinuxMethods.mdf_message_send(handle, message);
         public int mdf_set_property(IntPtr handle, MDF_OPTION option, IntPtr value) => NativeLinuxMethods.mdf_set_property(handle, option, value);
-        public int mdf_set_property(IntPtr handle, MDF_OPTION option, string value) => NativeLinuxMethods.mdf_set_property(handle, option, value);
         public int mdf_message_set_compression_level(IntPtr message, int level) => NativeLinuxMethods.mdf_message_set_compression_level(message, level);
         public int mdf_message_move(IntPtr src, IntPtr dst, ulong insref_src, ulong insref_dst) => NativeLinuxMethods.mdf_message_move(src, dst, insref_src, insref_dst);
         public int mdf_message_serialize(IntPtr message, ref IntPtr result) => NativeLinuxMethods.mdf_message_serialize(message, ref result);
-        public int mdf_message_deserialize(IntPtr message, string data) => NativeLinuxMethods.mdf_message_deserialize(message, data);
+        public int mdf_message_deserialize(IntPtr message, IntPtr data) => NativeLinuxMethods.mdf_message_deserialize(message, data);
         public int mdf_message_set_utf8_validation(IntPtr message, int enable) => NativeLinuxMethods.mdf_message_set_utf8_validation(message, enable);
     }
 #pragma warning restore IDE1006
