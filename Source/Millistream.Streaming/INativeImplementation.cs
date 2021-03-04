@@ -14,8 +14,7 @@ namespace Millistream.Streaming
         int mdf_get_property(IntPtr handle, MDF_OPTION option, ref ulong value);
         int mdf_get_property(IntPtr handle, MDF_OPTION option, ref long value);
         int mdf_set_property(IntPtr handle, MDF_OPTION option, IntPtr value);
-        int mdf_set_property(IntPtr handle, MDF_OPTION option, string value);
-        int mdf_connect(IntPtr handle, string server);
+        int mdf_connect(IntPtr handle, IntPtr server);
         void mdf_disconnect(IntPtr handle);
         int mdf_consume(IntPtr handle, int timeout);
         IntPtr mdf_message_create();
@@ -40,7 +39,7 @@ namespace Millistream.Streaming
         int mdf_message_set_compression_level(IntPtr message, int level);
         int mdf_message_move(IntPtr src, IntPtr dst, ulong insref_src, ulong insref_dst);
         int mdf_message_serialize(IntPtr message, ref IntPtr result);
-        int mdf_message_deserialize(IntPtr message, string data);
+        int mdf_message_deserialize(IntPtr message, IntPtr data);
         int mdf_message_set_utf8_validation(IntPtr message, int enable);
     }
 #pragma warning restore IDE1006

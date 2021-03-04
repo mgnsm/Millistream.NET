@@ -79,9 +79,14 @@ namespace Millistream.Streaming.IntegrationTests
 
             //BindAddress
             Assert.IsNull(mdf.BindAddress);
-            const string BindAddress = "123";
-            mdf.BindAddress = BindAddress;
-            Assert.AreEqual(BindAddress, mdf.BindAddress);
+            string bindAddress = "123";
+            mdf.BindAddress = bindAddress;
+            Assert.AreEqual(bindAddress, mdf.BindAddress);
+            mdf.BindAddress = null;
+            Assert.IsNull(mdf.BindAddress);
+            bindAddress = "åäö.12";
+            mdf.BindAddress = bindAddress;
+            Assert.AreEqual(bindAddress, mdf.BindAddress);
 
             //TimeDifferenceNs (requires version 1.0.24 of the native library which currently only comes as a pre-built binary on Linux)
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))

@@ -2,6 +2,8 @@
 using Moq;
 using System;
 using System.Linq.Expressions;
+using System.Runtime.InteropServices;
+using System.Text;
 using MarketDataFeed = Millistream.Streaming.MarketDataFeed<object, object>;
 
 namespace Millistream.Streaming.UnitTests
@@ -192,8 +194,13 @@ namespace Millistream.Streaming.UnitTests
         {
             const string BindingAddress = "123";
             Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
-            nativeImplementation.Setup(x => x.mdf_set_property(It.IsAny<IntPtr>(), MDF_OPTION.MDF_OPT_BIND_ADDRESS, BindingAddress)).Returns(1).Verifiable();
-            nativeImplementation.Setup(x => x.mdf_get_property(It.IsAny<IntPtr>(), MDF_OPTION.MDF_OPT_BIND_ADDRESS, ref It.Ref<IntPtr>.IsAny)).Returns(1).Verifiable();
+            nativeImplementation.Setup(x => x.mdf_set_property(It.IsAny<IntPtr>(), MDF_OPTION.MDF_OPT_BIND_ADDRESS, It.IsAny<IntPtr>()))
+                .Callback((IntPtr handle, MDF_OPTION option, IntPtr value) => Compare(BindingAddress, value))
+                .Returns(1)
+                .Verifiable();
+            nativeImplementation.Setup(x => x.mdf_get_property(It.IsAny<IntPtr>(), MDF_OPTION.MDF_OPT_BIND_ADDRESS, ref It.Ref<IntPtr>.IsAny))
+                .Returns(1)
+                .Verifiable();
 
             using MarketDataFeed mdf = new MarketDataFeed(nativeImplementation.Object)
             {
@@ -349,8 +356,10 @@ namespace Millistream.Streaming.UnitTests
             IntPtr feedHandle = new IntPtr(123);
             const string Servers = "host.server.com:9100";
             nativeImplementation.Setup(x => x.mdf_create()).Returns(feedHandle);
-            Expression<Func<INativeImplementation, int>> expression = x => x.mdf_connect(feedHandle, Servers);
-            nativeImplementation.Setup(expression).Returns(1);
+            Expression<Func<INativeImplementation, int>> expression = x => x.mdf_connect(feedHandle, It.IsAny<IntPtr>());
+            nativeImplementation.Setup(expression)
+                .Callback((IntPtr handle, IntPtr server) => Compare(Servers, server))
+                .Returns(1);
 
             using MarketDataFeed mdf = new MarketDataFeed(nativeImplementation.Object);
             Assert.IsTrue(mdf.Connect(Servers));
@@ -624,6 +633,13 @@ namespace Millistream.Streaming.UnitTests
             MarketDataFeed mdf = new MarketDataFeed(new Mock<INativeImplementation>().Object);
             mdf.Dispose();
             return mdf;
+        }
+
+        private static void Compare(string expectedValue, IntPtr actualValue)
+        {
+            byte[] bytes = new byte[expectedValue.Length];
+            Marshal.Copy(actualValue, bytes, 0, expectedValue.Length);
+            Assert.AreEqual(expectedValue, Encoding.UTF8.GetString(bytes));
         }
     }
 }
