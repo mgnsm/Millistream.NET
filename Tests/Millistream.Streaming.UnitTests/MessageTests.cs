@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
+using System.Linq.Expressions;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -326,14 +327,21 @@ namespace Millistream.Streaming.UnitTests
             IntPtr messageHandle = new IntPtr(123);
             nativeImplementation.Setup(x => x.mdf_message_create()).Returns(messageHandle);
             const string Data = "ABC";
-            nativeImplementation.Setup(x => x.mdf_message_deserialize(messageHandle, Data)).Returns(1).Verifiable();
+            Expression<Func<INativeImplementation, int>> expression = x => x.mdf_message_deserialize(messageHandle, It.IsAny<IntPtr>());
+            nativeImplementation.Setup(expression)
+                .Returns(1)
+                .Callback((IntPtr message, IntPtr data) => Compare(Data, data))
+                .Verifiable();
             using Message message = new Message(nativeImplementation.Object);
             Assert.IsTrue(message.Deserialize(Data));
-            nativeImplementation.Verify();
+            IntPtr p = Marshal.StringToHGlobalAnsi(Data);
+            Assert.IsTrue(message.Deserialize(p));
+            nativeImplementation.Verify(expression, Times.Exactly(2));
 
-            nativeImplementation.Setup(x => x.mdf_message_deserialize(messageHandle, Data)).Returns(0).Verifiable();
+            nativeImplementation.Setup(expression).Returns(0);
             Assert.IsFalse(message.Deserialize(Data));
-            nativeImplementation.Verify();
+            Assert.IsFalse(message.Deserialize(p));
+            nativeImplementation.Verify(expression, Times.Exactly(4));
         }
 
         [TestMethod]
@@ -484,7 +492,7 @@ namespace Millistream.Streaming.UnitTests
             CatchObjectDisposedException(() => disposedMessage.Serialize(out IntPtr _));
 
             CatchObjectDisposedException(() => disposedMessage.Deserialize("ABC"));
-
+            CatchObjectDisposedException(() => disposedMessage.Deserialize(new IntPtr(123)));
         }
 
         private static void Compare(string expectedValue, IntPtr actualValue)

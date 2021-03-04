@@ -38,10 +38,7 @@ namespace Millistream.Streaming
             public static extern int mdf_set_property(IntPtr handle, MDF_OPTION option, IntPtr value);
 
             [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
-            public static extern int mdf_set_property(IntPtr handle, MDF_OPTION option, string value);
-
-            [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
-            public static extern int mdf_connect(IntPtr handle, string server);
+            public static extern int mdf_connect(IntPtr handle, IntPtr server);
 
             [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern void mdf_disconnect(IntPtr handle);
@@ -116,13 +113,13 @@ namespace Millistream.Streaming
             public static extern int mdf_message_serialize(IntPtr message, ref IntPtr result);
 
             [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
-            public static extern int mdf_message_deserialize(IntPtr message, string data);
+            public static extern int mdf_message_deserialize(IntPtr message, IntPtr data);
 
             [DllImport(DllName, ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
             public static extern int mdf_message_set_utf8_validation(IntPtr message, int enable);
         }
 
-        public int mdf_connect(IntPtr handle, string server) => NativeWindowsMethods.mdf_connect(handle, server);
+        public int mdf_connect(IntPtr handle, IntPtr server) => NativeWindowsMethods.mdf_connect(handle, server);
         public int mdf_consume(IntPtr handle, int timeout) => NativeWindowsMethods.mdf_consume(handle, timeout);
         public IntPtr mdf_create() => NativeWindowsMethods.mdf_create();
         public void mdf_destroy(IntPtr handle) => NativeWindowsMethods.mdf_destroy(handle);
@@ -153,11 +150,10 @@ namespace Millistream.Streaming
         public void mdf_message_reset(IntPtr message) => NativeWindowsMethods.mdf_message_reset(message);
         public int mdf_message_send(IntPtr handle, IntPtr message) => NativeWindowsMethods.mdf_message_send(handle, message);
         public int mdf_set_property(IntPtr handle, MDF_OPTION option, IntPtr value) => NativeWindowsMethods.mdf_set_property(handle, option, value);
-        public int mdf_set_property(IntPtr handle, MDF_OPTION option, string value) => NativeWindowsMethods.mdf_set_property(handle, option, value);
         public int mdf_message_set_compression_level(IntPtr message, int level) => NativeWindowsMethods.mdf_message_set_compression_level(message, level);
         public int mdf_message_move(IntPtr src, IntPtr dst, ulong insref_src, ulong insref_dst) => NativeWindowsMethods.mdf_message_move(src, dst, insref_src, insref_dst);
         public int mdf_message_serialize(IntPtr message, ref IntPtr result) => NativeWindowsMethods.mdf_message_serialize(message, ref result);
-        public int mdf_message_deserialize(IntPtr message, string data) => NativeWindowsMethods.mdf_message_deserialize(message, data);
+        public int mdf_message_deserialize(IntPtr message, IntPtr data) => NativeWindowsMethods.mdf_message_deserialize(message, data);
         public int mdf_message_set_utf8_validation(IntPtr message, int enable) => NativeWindowsMethods.mdf_message_set_utf8_validation(message, enable);
     }
 #pragma warning restore IDE1006

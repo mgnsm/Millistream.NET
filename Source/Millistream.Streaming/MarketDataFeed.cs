@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Immutable;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace Millistream.Streaming
 {
@@ -254,12 +255,46 @@ namespace Millistream.Streaming
                 IntPtr value = default;
                 if (_nativeImplementation.mdf_get_property(_feedHandle, MDF_OPTION.MDF_OPT_BIND_ADDRESS, ref value) != 1)
                     throw new InvalidOperationException();
-                return Marshal.PtrToStringAnsi(value);
+
+                if (value == IntPtr.Zero)
+                    return null;
+
+                unsafe
+                {
+                    byte* p = (byte*)value;
+                    int byteCount = 0;
+                    while (*(p + byteCount++) != 0) ;
+                    int charCount = Encoding.UTF8.GetCharCount(p, byteCount);
+                    char* c = stackalloc char[charCount];
+                    Encoding.UTF8.GetChars(p, byteCount, c, charCount);
+                    return new string(c);
+                }
             }
             set
             {
                 ThrowIfDisposed();
-                if (_nativeImplementation.mdf_set_property(_feedHandle, MDF_OPTION.MDF_OPT_BIND_ADDRESS, value) != 1)
+
+                int ret = 0;
+                if (value != null)
+                {
+                    unsafe
+                    {
+                        fixed (char* c = value)
+                        {
+                            int length = Encoding.UTF8.GetMaxByteCount(value.Length);
+                            byte* b = stackalloc byte[length + 1];
+                            int bytesWritten = Encoding.UTF8.GetBytes(c, value.Length, b, length);
+                            b[bytesWritten] = 0;
+                            ret = _nativeImplementation.mdf_set_property(_feedHandle, MDF_OPTION.MDF_OPT_BIND_ADDRESS, (IntPtr)b);
+                        }
+                    }
+                }
+                else
+                {
+                    ret = _nativeImplementation.mdf_set_property(_feedHandle, MDF_OPTION.MDF_OPT_BIND_ADDRESS, IntPtr.Zero);
+                }
+
+                if (ret != 1)
                     throw new InvalidOperationException();
             }
         }
@@ -425,7 +460,17 @@ namespace Millistream.Streaming
                 throw new ArgumentNullException(nameof(servers));
 
             ThrowIfDisposed();
-            return _nativeImplementation.mdf_connect(_feedHandle, servers) == 1;
+            unsafe
+            {
+                fixed (char* c = servers)
+                {
+                    int length = Encoding.UTF8.GetMaxByteCount(servers.Length);
+                    byte* b = stackalloc byte[length + 1];
+                    int bytesWritten = Encoding.UTF8.GetBytes(c, servers.Length, b, length);
+                    b[bytesWritten] = 0;
+                    return _nativeImplementation.mdf_connect(_feedHandle, (IntPtr)b) == 1;
+                }
+            }
         }
 
         /// <summary>
