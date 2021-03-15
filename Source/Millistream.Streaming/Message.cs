@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Millistream.Streaming.Interop;
+using System;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -18,8 +19,9 @@ namespace Millistream.Streaming
         /// <summary>
         /// Creates an instance of the <see cref="Message"/> class.
         /// </summary>
-        /// <remarks>The corresponding native method is mdf_message_create.</remarks>
-        public Message() : this(NativeImplementation.Get()) { }
+        /// <exception cref="DllNotFoundException">The native dependency is missing.</exception>
+        /// <remarks>The corresponding native function is mdf_message_create.</remarks>
+        public Message() : this(NativeImplementation.Instance) { }
 
         internal Message(INativeImplementation nativeImplementation)
         {
@@ -32,6 +34,7 @@ namespace Millistream.Streaming
         /// <summary>
         /// The zlib compression level used for the <see cref="AddString(uint, string)"/> and <see cref="AddString(uint, string, int)"/> methods.
         /// </summary>
+        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't support setting the zlib compression level.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
         public CompressionLevel CompressionLevel
         {
@@ -102,7 +105,7 @@ namespace Millistream.Streaming
         /// <param name="mref">The type of the message to create.</param>
         /// <returns><see langword="true" /> if a new message was added to the message handle (or an empty message was reused) or <see langword="false" /> if there was an error.</returns>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_message_add.</remarks>
+        /// <remarks>The corresponding native function is mdf_message_add.</remarks>
         public bool Add(ulong insref, int mref)
         {
             ThrowIfDisposed();
@@ -116,7 +119,7 @@ namespace Millistream.Streaming
         /// <param name="mref">The type of the message to create.</param>
         /// <returns><see langword="true" /> if a new message was added to the message handle (or an empty message was reused) or <see langword="false" /> if there was an error.</returns>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_message_add.</remarks>
+        /// <remarks>The corresponding native function is mdf_message_add.</remarks>
         public bool Add(ulong insref, MessageReference mref) =>
             Add(insref, (int)mref);
 
@@ -128,7 +131,7 @@ namespace Millistream.Streaming
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false"/> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_message_add_numeric.</remarks>
+        /// <remarks>The corresponding native function is mdf_message_add_numeric.</remarks>
         public bool AddNumeric(uint tag, string value)
         {
             if (string.IsNullOrEmpty(value))
@@ -153,7 +156,7 @@ namespace Millistream.Streaming
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false"/> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_message_add_numeric.</remarks>
+        /// <remarks>The corresponding native function is mdf_message_add_numeric.</remarks>
         public bool AddNumeric(Field tag, string value) =>
             AddNumeric((uint)tag, value);
 
@@ -165,8 +168,9 @@ namespace Millistream.Streaming
         /// <param name="decimals">The number of decimals.</param>
         /// <returns><see langword = "true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         /// <exception cref="ArgumentException"><paramref name="decimals"/> is not between 0 and 19.</exception>
+        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_add_int function.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_message_add_int.</remarks>
+        /// <remarks>The corresponding native function is mdf_message_add_int.</remarks>
         public bool AddInt64(uint tag, long value, int decimals)
         {
             if (decimals < 0 || decimals > 19)
@@ -183,8 +187,9 @@ namespace Millistream.Streaming
         /// <param name="decimals">The number of decimals.</param>
         /// <returns><see langword = "true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         /// <exception cref="ArgumentException"><paramref name="decimals"/> is not between 0 and 19.</exception>
+        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_add_int function.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_message_add_int.</remarks>
+        /// <remarks>The corresponding native function is mdf_message_add_int.</remarks>
         public bool AddInt64(Field tag, long value, int decimals) =>
             AddInt64((uint)tag, value, decimals);
 
@@ -196,8 +201,9 @@ namespace Millistream.Streaming
         /// <param name="decimals">The number of decimals.</param>
         /// <returns><see langword = "true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         /// <exception cref="ArgumentException"><paramref name="decimals"/> is not between 0 and 19.</exception>
+        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_add_uint function.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_message_add_uint.</remarks>
+        /// <remarks>The corresponding native function is mdf_message_add_uint.</remarks>
         public bool AddUInt64(uint tag, ulong value, int decimals)
         {
             if (decimals < 0 || decimals > 19)
@@ -214,8 +220,9 @@ namespace Millistream.Streaming
         /// <param name="decimals">The number of decimals.</param>
         /// <returns><see langword = "true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         /// <exception cref="ArgumentException"><paramref name="decimals"/> is not between 0 and 19.</exception>
+        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_add_uint function.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_message_add_uint.</remarks>
+        /// <remarks>The corresponding native function is mdf_message_add_uint.</remarks>
         public bool AddUInt64(Field tag, ulong value, int decimals) =>
             AddUInt64((uint)tag, value, decimals);
 
@@ -227,7 +234,7 @@ namespace Millistream.Streaming
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_message_add_string.</remarks>
+        /// <remarks>The corresponding native function is mdf_message_add_string.</remarks>
         public bool AddString(uint tag, string value)
         {
             if (string.IsNullOrEmpty(value))
@@ -256,8 +263,9 @@ namespace Millistream.Streaming
         /// <param name="length">The number of characters in <paramref name="value"/> to be added to the message.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
+        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_add_string2 function.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_message_add_string2.</remarks>
+        /// <remarks>The corresponding native function is mdf_message_add_string2.</remarks>
         public bool AddString(uint tag, string value, int length)
         {
             if (string.IsNullOrEmpty(value))
@@ -288,7 +296,7 @@ namespace Millistream.Streaming
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_message_add_string.</remarks>
+        /// <remarks>The corresponding native function is mdf_message_add_string.</remarks>
         public bool AddString(Field tag, string value) =>
             AddString((uint)tag, value);
 
@@ -300,8 +308,9 @@ namespace Millistream.Streaming
         /// <param name="length">The number of characters in <paramref name="value"/> to be added to the message.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
+        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_add_string2 function.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_message_add_string2.</remarks>
+        /// <remarks>The corresponding native function is mdf_message_add_string2.</remarks>
         public bool AddString(Field tag, string value, int length) =>
             AddString((uint)tag, value, length);
 
@@ -313,7 +322,7 @@ namespace Millistream.Streaming
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_message_add_date.</remarks>
+        /// <remarks>The corresponding native function is mdf_message_add_date.</remarks>
         public bool AddDate(uint tag, string value)
         {
             if (string.IsNullOrEmpty(value))
@@ -338,7 +347,7 @@ namespace Millistream.Streaming
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_message_add_date.</remarks>
+        /// <remarks>The corresponding native function is mdf_message_add_date.</remarks>
         public bool AddDate(Field tag, string value) =>
             AddDate((uint)tag, value);
 
@@ -350,8 +359,9 @@ namespace Millistream.Streaming
         /// <param name="month">The month of the date field value.</param>
         /// <param name="day">The day of the date field value.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
+        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_add_date2 function.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_message_add_date2.</remarks>
+        /// <remarks>The corresponding native function is mdf_message_add_date2.</remarks>
         public bool AddDate(uint tag, int year, int month, int day)
         {
             ThrowIfDisposed();
@@ -366,8 +376,9 @@ namespace Millistream.Streaming
         /// <param name="month">The month of the date field value.</param>
         /// <param name="day">The day of the date field value.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
+        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_add_date2 function.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_message_add_date2.</remarks>
+        /// <remarks>The corresponding native function is mdf_message_add_date2.</remarks>
         public bool AddDate(Field tag, int year, int month, int day) =>
             AddDate((uint)tag, year, month, day);
 
@@ -379,7 +390,7 @@ namespace Millistream.Streaming
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_message_add_time.</remarks>
+        /// <remarks>The corresponding native function is mdf_message_add_time.</remarks>
         public bool AddTime(uint tag, string value)
         {
             if (string.IsNullOrEmpty(value))
@@ -404,7 +415,7 @@ namespace Millistream.Streaming
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_message_add_time.</remarks>
+        /// <remarks>The corresponding native function is mdf_message_add_time.</remarks>
         public bool AddTime(Field tag, string value) =>
             AddTime((uint)tag, value);
 
@@ -417,8 +428,9 @@ namespace Millistream.Streaming
         /// <param name="second">The second.</param>
         /// <param name="millisecond">The millisecond.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
+        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_add_time2 function.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_message_add_time2.</remarks>
+        /// <remarks>The corresponding native function is mdf_message_add_time2.</remarks>
         public bool AddTime2(uint tag, int hour, int minute, int second, int millisecond)
         {
             ThrowIfDisposed();
@@ -434,8 +446,9 @@ namespace Millistream.Streaming
         /// <param name="second">The second.</param>
         /// <param name="millisecond">The millisecond.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
+        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_add_time2 function.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_message_add_time2.</remarks>
+        /// <remarks>The corresponding native function is mdf_message_add_time2.</remarks>
         public bool AddTime2(Field tag, int hour, int minute, int second, int millisecond) =>
             AddTime2((uint)tag, hour, minute, second, millisecond);
 
@@ -448,8 +461,9 @@ namespace Millistream.Streaming
         /// <param name="second">The second.</param>
         /// <param name="nanosecond">The nanosecond.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
+        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_add_time3 function.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_message_add_time3.</remarks>
+        /// <remarks>The corresponding native function is mdf_message_add_time3.</remarks>
         public bool AddTime3(uint tag, int hour, int minute, int second, int nanosecond)
         {
             ThrowIfDisposed();
@@ -465,8 +479,9 @@ namespace Millistream.Streaming
         /// <param name="second">The second.</param>
         /// <param name="nanosecond">The nanosecond.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
+        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_add_time3 function.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_message_add_time3.</remarks>
+        /// <remarks>The corresponding native function is mdf_message_add_time3.</remarks>
         public bool AddTime3(Field tag, int hour, int minute, int second, int nanosecond) =>
             AddTime3((uint)tag, hour, minute, second, nanosecond);
 
@@ -482,7 +497,7 @@ namespace Millistream.Streaming
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_message_add_list.</remarks>
+        /// <remarks>The corresponding native function is mdf_message_add_list.</remarks>
         public bool AddList(uint tag, string value)
         {
             if (string.IsNullOrEmpty(value))
@@ -511,7 +526,7 @@ namespace Millistream.Streaming
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_message_add_list.</remarks>
+        /// <remarks>The corresponding native function is mdf_message_add_list.</remarks>
         public bool AddList(Field tag, string value) =>
             AddList((uint)tag, value);
 
@@ -519,7 +534,7 @@ namespace Millistream.Streaming
         /// Resets the message handle (sets the number of active messages to zero) so it can be reused. The memory allocated for the current messages in the handle is retained for performance reasons and will be reused when you add new messages to the handle.
         /// </summary>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_message_reset.</remarks>
+        /// <remarks>The corresponding native function is mdf_message_reset.</remarks>
         public void Reset()
         {
             ThrowIfDisposed();
@@ -531,7 +546,7 @@ namespace Millistream.Streaming
         /// </summary>
         /// <returns><see langword="true" /> if there are more active messages in the message handle or <see langword="false" /> if the message handle is now empty.</returns>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_message_del.</remarks>
+        /// <remarks>The corresponding native function is mdf_message_del.</remarks>
         public bool Delete()
         {
             ThrowIfDisposed();
@@ -547,17 +562,19 @@ namespace Millistream.Streaming
         /// <param name="destinationInsRef">The new instrument reference of the moved or modified messages.</param>
         /// <returns><see langword="true" /> if the operation was successfull, or <see langword="false" /> if it failed.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null" />.</exception>
-        /// <remarks>The corresponding native method is mdf_message_move.</remarks>
+        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_move function.</exception>
+        /// <remarks>The corresponding native function is mdf_message_move.</remarks>
         public static bool Move(Message source, Message destination, ulong sourceInsref, ulong destinationInsRef) =>
-            Move(source, destination, sourceInsref, destinationInsRef, NativeImplementation.Get());
+            Move(source, destination, sourceInsref, destinationInsRef, NativeImplementation.Instance);
 
         /// <summary>
         /// Serializes the message chain in the message handle and produces a base64 encoded string to the address pointed to by <paramref name="result"/>. It's the responsibility of the caller to free the produced unmanaged string.
         /// </summary>
         /// <param name="result">An unmanaged pointer to the base64 encoded string if the method returns <see langword="true" />, or <see cref="IntPtr.Zero"/> if the method returns <see langword="false" />.</param>
         /// <returns><see langword="true" /> if there existed a message chain and if it was successfully base64 encoded, or <see langword="false" /> if there existed no message chain or if the base64 encoding failed.</returns>
+        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_serialize function.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_message_serialize.</remarks>
+        /// <remarks>The corresponding native function is mdf_message_serialize.</remarks>
         public bool Serialize(out IntPtr result)
         {
             ThrowIfDisposed();
@@ -571,8 +588,9 @@ namespace Millistream.Streaming
         /// <param name="data">A base64 encoded (serialized) message chain.</param>
         /// <returns><see langword="true" /> if the message chain was successfully deserialized, or <see langword="false" /> if the deserialization failed (if so the current message chain in the message handler is left untouched).</returns>
         /// <exception cref="ArgumentNullException"><paramref name="data"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
+        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_deserialize function.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_message_deserialize.</remarks>
+        /// <remarks>The corresponding native function is mdf_message_deserialize.</remarks>
         public bool Deserialize(string data)
         {
             if (string.IsNullOrEmpty(data))
@@ -593,8 +611,9 @@ namespace Millistream.Streaming
         /// </summary>
         /// <param name="data">An unmanaged pointer to a base64 encoded (serialized) message chain.</param>
         /// <returns><see langword="true" /> if the message chain was successfully deserialized, or <see langword="false" /> if the deserialization failed (if so the current message chain in the message handler is left untouched).</returns>
+        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_deserialize function.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_message_deserialize.</remarks>
+        /// <remarks>The corresponding native function is mdf_message_deserialize.</remarks>
         public bool Deserialize(IntPtr data)
         {
             ThrowIfDisposed();
@@ -604,7 +623,7 @@ namespace Millistream.Streaming
         /// <summary>
         /// Destroys the message handle and frees all allocated memory.
         /// </summary>
-        /// <remarks>The corresponding native method is mdf_message_destroy.</remarks>
+        /// <remarks>The corresponding native function is mdf_message_destroy.</remarks>
         public void Dispose()
         {
             if (!_isDisposed)

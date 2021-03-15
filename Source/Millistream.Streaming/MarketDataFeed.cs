@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Millistream.Streaming.Interop;
+using System;
 using System.Collections.Immutable;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -36,8 +37,9 @@ namespace Millistream.Streaming
         /// <summary>
         /// Creates an instance of the <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> class.
         /// </summary>
-        /// <remarks>The corresponding native method is mdf_create.</remarks>
-        public MarketDataFeed() : this(NativeImplementation.Get()) { }
+        /// <exception cref="DllNotFoundException">The native dependency is missing.</exception>
+        /// <remarks>The corresponding native function is mdf_create.</remarks>
+        public MarketDataFeed() : this(NativeImplementation.Instance) { }
 
         internal MarketDataFeed(INativeImplementation nativeImplementation)
         {
@@ -324,7 +326,7 @@ namespace Millistream.Streaming
         /// <param name="timeout">The wait period in seconds if positive. If negative, the value is treated as the number of microseconds to wait instead of the number of seconds.</param>
         /// <returns>1 if data has been consumed that needs to be handled by <see cref="GetNextMessage(out int, out int, out ulong)" /> and no callback function has been registered. The function returns 0 on timeout or if a callback function is registered and there was data. On errors, -1 will be returned (and the connection will be dropped).</returns>
         /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_consume.</remarks>
+        /// <remarks>The corresponding native function is mdf_consume.</remarks>
         public int Consume(int timeout)
         {
             ThrowIfDisposed();
@@ -339,7 +341,7 @@ namespace Millistream.Streaming
         /// <param name="insref">The fetched instrument reference, which is the unique id of an instrument.</param>
         /// <returns><see langword="true" /> if a message was returned (and the <paramref name="mref"/>, <paramref name="mclass"/> and <paramref name="insref"/> fields will be filled) or <see langword="false" /> if there are no more messages in the current consumed data (or an error occured).</returns>
         /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_get_next_message.</remarks>
+        /// <remarks>The corresponding native function is mdf_get_next_message.</remarks>
         public bool GetNextMessage(out int mref, out int mclass, out ulong insref)
         {
             mref = default;
@@ -358,7 +360,7 @@ namespace Millistream.Streaming
         /// <returns><see langword="true" /> if a message was returned (and the <paramref name="messageReference"/>, <paramref name="messageClasses"/> and <paramref name="insref"/> fields will be filled) or <see langword="false" /> if there are no more messages in the current consumed data (or an error occured).</returns>
         /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         /// <exception cref="InvalidOperationException">An unknown/undefined message reference was fetched.</exception>
-        /// <remarks>The corresponding native method is mdf_get_next_message.</remarks>
+        /// <remarks>The corresponding native function is mdf_get_next_message.</remarks>
         public bool GetNextMessage(out MessageReference messageReference, out MessageClasses messageClasses, out ulong insref)
         {
             bool ret = GetNextMessage(out int mref, out int mclass, out insref);
@@ -385,7 +387,7 @@ namespace Millistream.Streaming
         /// <param name="value">A memory span that contains the bytes of the UTF-8 string representation of the field value.</param>
         /// <returns><see langword="true" /> if a field was returned, or <see langword="false" /> if there are no more fields in the current message.</returns>
         /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_get_next_field.</remarks>
+        /// <remarks>The corresponding native function is mdf_get_next_field.</remarks>
         public bool GetNextField(out uint tag, out ReadOnlySpan<byte> value)
         {
             ThrowIfDisposed();
@@ -426,7 +428,7 @@ namespace Millistream.Streaming
         /// <returns><see langword="true" /> if a field was returned, or <see langword="false" /> if there are no more fields in the current message.</returns>
         /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         /// <exception cref="InvalidOperationException">An unknown/undefined field tag was fetched.</exception>
-        /// <remarks>The corresponding native method is mdf_get_next_field.</remarks>
+        /// <remarks>The corresponding native function is mdf_get_next_field.</remarks>
         public bool GetNextField(out Field field, out ReadOnlySpan<byte> value)
         {
             bool ret = GetNextField(out uint tag, out value);
@@ -453,7 +455,7 @@ namespace Millistream.Streaming
         /// <returns><see langword="true" /> if a connection has been set up or <see langword="false" /> if a connection attempt failed with every server on the list.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="servers"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_connect.</remarks>
+        /// <remarks>The corresponding native function is mdf_connect.</remarks>
         public bool Connect(string servers)
         {
             if (string.IsNullOrEmpty(servers))
@@ -477,7 +479,7 @@ namespace Millistream.Streaming
         /// Disconnect a connected API handle. Safe to call even if the handle is already disconnected.
         /// </summary>
         /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_disconnect.</remarks>
+        /// <remarks>The corresponding native function is mdf_disconnect.</remarks>
         public void Disconnect()
         {
             ThrowIfDisposed();
@@ -491,7 +493,7 @@ namespace Millistream.Streaming
         /// <returns><see langword="true" /> if there were no errors detected when sending the data, or <see langword="false" /> if an error was detected (such as not connected to any server). Due to the nature of TCP/IP, a successful return code does not guarantee that the server has received the messages.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="message"/> is <see langword="null" />.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
-        /// <remarks>The corresponding native method is mdf_message_send.</remarks>
+        /// <remarks>The corresponding native function is mdf_message_send.</remarks>
         public bool Send(Message message)
         {
             if (message == null)
@@ -520,7 +522,7 @@ namespace Millistream.Streaming
         /// <summary>
         /// Releases any resources used by the <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance.
         /// </summary>
-        /// <remarks>The corresponding native method is mdf_destroy.</remarks>
+        /// <remarks>The corresponding native function is mdf_destroy.</remarks>
         public void Dispose()
         {
             if (!_isDisposed)
