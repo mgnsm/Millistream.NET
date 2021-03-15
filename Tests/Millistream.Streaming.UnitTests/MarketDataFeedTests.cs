@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Millistream.Streaming.Interop;
 using Moq;
 using System;
 using System.Linq.Expressions;
