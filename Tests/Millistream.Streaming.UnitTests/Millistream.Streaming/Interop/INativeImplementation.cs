@@ -2,19 +2,19 @@
 
 namespace Millistream.Streaming.Interop
 {
-#pragma warning disable IDE1006
-    internal interface INativeImplementation
+    public interface INativeImplementation
     {
+#pragma warning disable IDE1006
         IntPtr mdf_create();
         void mdf_destroy(IntPtr handle);
         int mdf_consume(IntPtr handle, int timeout);
         int mdf_get_next_message(IntPtr handle, ref int mref, ref int mclass, ref ulong insref);
         int mdf_get_next_field(IntPtr handle, ref uint tag, ref IntPtr value);
-        int mdf_get_property(IntPtr handle, MDF_OPTION option, ref IntPtr value);
-        int mdf_get_property(IntPtr handle, MDF_OPTION option, ref int value);
-        int mdf_get_property(IntPtr handle, MDF_OPTION option, ref ulong value);
-        int mdf_get_property(IntPtr handle, MDF_OPTION option, ref long value);
-        int mdf_set_property(IntPtr handle, MDF_OPTION option, IntPtr value);
+        int mdf_get_property(IntPtr handle, int option, ref IntPtr value);
+        int mdf_get_property(IntPtr handle, int option, ref int value);
+        int mdf_get_property(IntPtr handle, int option, ref ulong value);
+        int mdf_get_property(IntPtr handle, int option, ref long value);
+        int mdf_set_property(IntPtr handle, int option, IntPtr value);
         int mdf_connect(IntPtr handle, IntPtr server);
         void mdf_disconnect(IntPtr handle);
         IntPtr mdf_message_create();
@@ -41,6 +41,6 @@ namespace Millistream.Streaming.Interop
         int mdf_message_serialize(IntPtr message, ref IntPtr result);
         int mdf_message_deserialize(IntPtr message, IntPtr data);
         int mdf_message_set_utf8_validation(IntPtr message, int enable);
-    }
 #pragma warning restore IDE1006
+    }
 }

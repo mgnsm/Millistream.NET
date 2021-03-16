@@ -2,9 +2,16 @@
 
   <PropertyGroup>
     <TargetFrameworks>net45;netcoreapp3.1;net5.0</TargetFrameworks>
-    <LangVersion>8.0</LangVersion>
+    <LangVersion>9.0</LangVersion>
     <IsPackable>false</IsPackable>
+	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\Source\Millistream.Streaming\*.cs"
+			 Exclude="..\..\Source\Millistream.Streaming\AssemblyInfo.cs"
+			 LinkBase="Millistream.Streaming" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.3" />
@@ -13,8 +20,14 @@
     <PackageReference Include="MSTest.TestFramework" Version="2.1.2" />
   </ItemGroup>
 
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+     <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
+  </ItemGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\Millistream.Streaming\Millistream.Streaming.csproj" />
+    <PackageReference Include="System.Buffers" Version="4.5.1" />
+	<PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
+	<PackageReference Include="System.Memory" Version="4.5.4" />
   </ItemGroup>
 
 </Project>

@@ -11,15 +11,17 @@ namespace Millistream.Streaming.UnitTests
     [TestClass]
     public sealed class MessageTests
     {
+        private readonly Mock<INativeImplementation> _nativeImplementation = new();
         private delegate void mdf_message_serialize_callback(IntPtr messageHandle, ref IntPtr result);
+
+        public MessageTests() => NativeImplementation.Implementation = _nativeImplementation.Object;
 
         [TestMethod]
         public void GetAndSetCompressionLevelTest()
         {
-            Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
-            nativeImplementation.Setup(x => x.mdf_message_set_compression_level(It.IsAny<IntPtr>(), It.IsAny<int>())).Returns(1);
+            _nativeImplementation.Setup(x => x.mdf_message_set_compression_level(It.IsAny<IntPtr>(), It.IsAny<int>())).Returns(1);
 
-            using Message message = new Message(nativeImplementation.Object);
+            using Message message = new();
             //assert that the default value is Z_BEST_SPEED
             Assert.AreEqual(CompressionLevel.Z_BEST_SPEED, message.CompressionLevel);
 
@@ -27,7 +29,7 @@ namespace Millistream.Streaming.UnitTests
             foreach (CompressionLevel compressionLevel in Enum.GetValues(typeof(CompressionLevel)))
             {
                 message.CompressionLevel = compressionLevel;
-                nativeImplementation.Verify(x => x.mdf_message_set_compression_level(It.IsAny<IntPtr>(), (int)compressionLevel));
+                _nativeImplementation.Verify(x => x.mdf_message_set_compression_level(It.IsAny<IntPtr>(), (int)compressionLevel));
                 Assert.AreEqual(compressionLevel, message.CompressionLevel);
             }
         }
@@ -35,51 +37,47 @@ namespace Millistream.Streaming.UnitTests
         [TestMethod]
         public void GetCountTest()
         {
-            Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
             const int Num = 11;
-            nativeImplementation.Setup(x => x.mdf_message_get_num(It.IsAny<IntPtr>())).Returns(Num);
-            using Message message = new Message(nativeImplementation.Object);
+            _nativeImplementation.Setup(x => x.mdf_message_get_num(It.IsAny<IntPtr>())).Returns(Num);
+            using Message message = new();
             Assert.AreEqual(Num, message.Count);
         }
 
         [TestMethod]
         public void GetCountActiveTest()
         {
-            Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
             const int NumActive = 5;
-            nativeImplementation.Setup(x => x.mdf_message_get_num_active(It.IsAny<IntPtr>())).Returns(NumActive);
-            using Message message = new Message(nativeImplementation.Object);
+            _nativeImplementation.Setup(x => x.mdf_message_get_num_active(It.IsAny<IntPtr>())).Returns(NumActive);
+            using Message message = new();
             Assert.AreEqual(NumActive, message.ActiveCount);
         }
 
         [TestMethod]
         public void GetAndSetUtf8ValidationTest()
         {
-            Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
-            nativeImplementation.Setup(x => x.mdf_message_set_utf8_validation(It.IsAny<IntPtr>(), 0)).Returns(1).Verifiable();
-            using Message message = new Message(nativeImplementation.Object);
+            _nativeImplementation.Setup(x => x.mdf_message_set_utf8_validation(It.IsAny<IntPtr>(), 0)).Returns(1).Verifiable();
+            using Message message = new();
             Assert.AreEqual(true, message.Utf8Validation);
             message.Utf8Validation = false;
             Assert.AreEqual(false, message.Utf8Validation);
-            nativeImplementation.Verify();
-            nativeImplementation.Setup(x => x.mdf_message_set_utf8_validation(It.IsAny<IntPtr>(), 1)).Returns(1).Verifiable();
+            _nativeImplementation.Verify();
+            _nativeImplementation.Setup(x => x.mdf_message_set_utf8_validation(It.IsAny<IntPtr>(), 1)).Returns(1).Verifiable();
             message.Utf8Validation = true;
             Assert.AreEqual(true, message.Utf8Validation);
-            nativeImplementation.Verify();
+            _nativeImplementation.Verify();
         }
 
         [TestMethod]
         public void AddTest()
         {
-            Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
-            nativeImplementation.Setup(x => x.mdf_message_add(It.IsAny<IntPtr>(), It.IsAny<ulong>(), It.IsAny<int>())).Returns(1);
+            _nativeImplementation.Setup(x => x.mdf_message_add(It.IsAny<IntPtr>(), It.IsAny<ulong>(), It.IsAny<int>())).Returns(1);
 
             const ulong instrumentReference = 10;
             MessageReference messageReference = MessageReference.MDF_M_REQUEST;
-            using Message message = new Message(nativeImplementation.Object);
+            using Message message = new();
             Assert.IsTrue(message.Add(instrumentReference, messageReference));
             Assert.IsTrue(message.Add(instrumentReference, (int)messageReference));
-            nativeImplementation.Verify(x => x.mdf_message_add(It.IsAny<IntPtr>(), instrumentReference, (int)messageReference), Times.Exactly(2));
+            _nativeImplementation.Verify(x => x.mdf_message_add(It.IsAny<IntPtr>(), instrumentReference, (int)messageReference), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -88,43 +86,41 @@ namespace Millistream.Streaming.UnitTests
             const Field Field = Field.MDF_F_REQUESTTYPE;
             const string Value = "1.1";
 
-            Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
-            nativeImplementation.Setup(x => x.mdf_message_add_numeric(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<IntPtr>()))
+            _nativeImplementation.Setup(x => x.mdf_message_add_numeric(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<IntPtr>()))
                 .Callback((IntPtr message, uint tag, IntPtr value) => Compare(Value, value))
                 .Returns(1);
 
-            using Message message = new Message(nativeImplementation.Object);
+            using Message message = new();
             Assert.IsTrue(message.AddNumeric(Field, Value));
             Assert.IsTrue(message.AddNumeric((uint)Field, Value));
-            nativeImplementation.Verify(x => x.mdf_message_add_numeric(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(2));
+            _nativeImplementation.Verify(x => x.mdf_message_add_numeric(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(2));
         }
 
         [TestMethod]
         public void AddInt64AndUInt64Test()
         {
-            Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
-            nativeImplementation.Setup(x => x.mdf_message_add_int(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<long>(), It.IsAny<int>())).Returns(1);
-            nativeImplementation.Setup(x => x.mdf_message_add_uint(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<ulong>(), It.IsAny<int>())).Returns(1);
+            _nativeImplementation.Setup(x => x.mdf_message_add_int(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<long>(), It.IsAny<int>())).Returns(1);
+            _nativeImplementation.Setup(x => x.mdf_message_add_uint(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<ulong>(), It.IsAny<int>())).Returns(1);
 
             const Field Field = Field.MDF_F_LASTPRICE;
             const long SignedValue = 12345;
             const ulong UnsignedValue = 67890;
             int decimals = 2;
-            using Message message = new Message(nativeImplementation.Object);
+            using Message message = new();
             Assert.IsTrue(message.AddInt64(Field, SignedValue, decimals));
             Assert.IsTrue(message.AddInt64((uint)Field, SignedValue, decimals));
             Assert.IsTrue(message.AddUInt64(Field, UnsignedValue, decimals));
             Assert.IsTrue(message.AddUInt64((uint)Field, UnsignedValue, decimals));
-            nativeImplementation.Verify(x => x.mdf_message_add_int(It.IsAny<IntPtr>(), (uint)Field, SignedValue, decimals), Times.Exactly(2));
-            nativeImplementation.Verify(x => x.mdf_message_add_uint(It.IsAny<IntPtr>(), (uint)Field, UnsignedValue, decimals), Times.Exactly(2));
+            _nativeImplementation.Verify(x => x.mdf_message_add_int(It.IsAny<IntPtr>(), (uint)Field, SignedValue, decimals), Times.Exactly(2));
+            _nativeImplementation.Verify(x => x.mdf_message_add_uint(It.IsAny<IntPtr>(), (uint)Field, UnsignedValue, decimals), Times.Exactly(2));
 
             decimals = 0;
             Assert.IsTrue(message.AddInt64(Field, SignedValue, decimals));
             Assert.IsTrue(message.AddInt64((uint)Field, SignedValue, decimals));
             Assert.IsTrue(message.AddUInt64(Field, UnsignedValue, decimals));
             Assert.IsTrue(message.AddUInt64((uint)Field, UnsignedValue, decimals));
-            nativeImplementation.Verify(x => x.mdf_message_add_int(It.IsAny<IntPtr>(), (uint)Field, SignedValue, decimals), Times.Exactly(2));
-            nativeImplementation.Verify(x => x.mdf_message_add_uint(It.IsAny<IntPtr>(), (uint)Field, UnsignedValue, decimals), Times.Exactly(2));
+            _nativeImplementation.Verify(x => x.mdf_message_add_int(It.IsAny<IntPtr>(), (uint)Field, SignedValue, decimals), Times.Exactly(2));
+            _nativeImplementation.Verify(x => x.mdf_message_add_uint(It.IsAny<IntPtr>(), (uint)Field, UnsignedValue, decimals), Times.Exactly(2));
 
 
             decimals = 19;
@@ -132,8 +128,8 @@ namespace Millistream.Streaming.UnitTests
             Assert.IsTrue(message.AddInt64((uint)Field, SignedValue, decimals));
             Assert.IsTrue(message.AddUInt64(Field, UnsignedValue, decimals));
             Assert.IsTrue(message.AddUInt64((uint)Field, UnsignedValue, decimals));
-            nativeImplementation.Verify(x => x.mdf_message_add_int(It.IsAny<IntPtr>(), (uint)Field, SignedValue, decimals), Times.Exactly(2));
-            nativeImplementation.Verify(x => x.mdf_message_add_uint(It.IsAny<IntPtr>(), (uint)Field, UnsignedValue, decimals), Times.Exactly(2));
+            _nativeImplementation.Verify(x => x.mdf_message_add_int(It.IsAny<IntPtr>(), (uint)Field, SignedValue, decimals), Times.Exactly(2));
+            _nativeImplementation.Verify(x => x.mdf_message_add_uint(It.IsAny<IntPtr>(), (uint)Field, UnsignedValue, decimals), Times.Exactly(2));
 
             TestWithAnInvalidNumberOfDecimals(Field, SignedValue, -1, message.AddInt64);
             TestWithAnInvalidNumberOfDecimals((uint)Field, SignedValue, -1, message.AddInt64);
@@ -161,21 +157,20 @@ namespace Millistream.Streaming.UnitTests
         [TestMethod]
         public void AddStringTest()
         {
-            Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
-            nativeImplementation.Setup(x => x.mdf_message_add_string(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<IntPtr>())).Returns(1);
-            nativeImplementation.Setup(x => x.mdf_message_add_string2(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<IntPtr>(), It.IsAny<int>())).Returns(1);
+            _nativeImplementation.Setup(x => x.mdf_message_add_string(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<IntPtr>())).Returns(1);
+            _nativeImplementation.Setup(x => x.mdf_message_add_string2(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<IntPtr>(), It.IsAny<int>())).Returns(1);
 
             const Field Field = Field.MDF_F_REQUESTID;
             const string Value = "...";
-            using Message message = new Message(nativeImplementation.Object);
+            using Message message = new();
             Assert.IsTrue(message.AddString(Field, Value));
             Assert.IsTrue(message.AddString((uint)Field, Value));
 
             Assert.IsTrue(message.AddString(Field, Value, Value.Length));
             Assert.IsTrue(message.AddString((uint)Field, Value, Value.Length));
 
-            nativeImplementation.Verify(x => x.mdf_message_add_string(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(2));
-            nativeImplementation.Verify(x => x.mdf_message_add_string2(message.Handle, (uint)Field, It.IsAny<IntPtr>(), Value.Length));
+            _nativeImplementation.Verify(x => x.mdf_message_add_string(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(2));
+            _nativeImplementation.Verify(x => x.mdf_message_add_string2(message.Handle, (uint)Field, It.IsAny<IntPtr>(), Value.Length));
         }
 
 
@@ -185,23 +180,22 @@ namespace Millistream.Streaming.UnitTests
             const Field Field = Field.MDF_F_REQUESTID;
             const string Value = "2020-12-06";
 
-            Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
-            nativeImplementation.Setup(x => x.mdf_message_add_date(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<IntPtr>()))
+            _nativeImplementation.Setup(x => x.mdf_message_add_date(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<IntPtr>()))
                 .Callback((IntPtr message, uint tag, IntPtr value) => Compare(Value, value))
                 .Returns(1);
-            nativeImplementation.Setup(x => x.mdf_message_add_date2(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>())).Returns(1);
+            _nativeImplementation.Setup(x => x.mdf_message_add_date2(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>())).Returns(1);
 
-            using Message message = new Message(nativeImplementation.Object);
+            using Message message = new();
             Assert.IsTrue(message.AddDate(Field, Value));
             Assert.IsTrue(message.AddDate((uint)Field, Value));
-            nativeImplementation.Verify(x => x.mdf_message_add_date(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(2));
+            _nativeImplementation.Verify(x => x.mdf_message_add_date(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(2));
 
             const int Year = 2020;
             const int Month = 12;
             const int Day = 6;
             Assert.IsTrue(message.AddDate(Field, Year, Month, Day));
             Assert.IsTrue(message.AddDate((uint)Field, Year, Month, Day));
-            nativeImplementation.Verify(x => x.mdf_message_add_date2(message.Handle, (uint)Field, Year, Month, Day), Times.Exactly(2));
+            _nativeImplementation.Verify(x => x.mdf_message_add_date2(message.Handle, (uint)Field, Year, Month, Day), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -210,17 +204,16 @@ namespace Millistream.Streaming.UnitTests
             const Field Field = Field.MDF_F_TIME;
             const string Value = "11:11:11";
 
-            Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
-            nativeImplementation.Setup(x => x.mdf_message_add_time(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<IntPtr>()))
+            _nativeImplementation.Setup(x => x.mdf_message_add_time(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<IntPtr>()))
                 .Callback((IntPtr message, uint tag, IntPtr value) => Compare(Value, value))
                 .Returns(1);
-            nativeImplementation.Setup(x => x.mdf_message_add_time2(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>())).Returns(1);
-            nativeImplementation.Setup(x => x.mdf_message_add_time3(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>())).Returns(1);
+            _nativeImplementation.Setup(x => x.mdf_message_add_time2(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>())).Returns(1);
+            _nativeImplementation.Setup(x => x.mdf_message_add_time3(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>())).Returns(1);
 
-            using Message message = new Message(nativeImplementation.Object);
+            using Message message = new();
             Assert.IsTrue(message.AddTime(Field, Value));
             Assert.IsTrue(message.AddTime((uint)Field, Value));
-            nativeImplementation.Verify(x => x.mdf_message_add_time(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(2));
+            _nativeImplementation.Verify(x => x.mdf_message_add_time(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(2));
 
             int hour = 12;
             int minute = 13;
@@ -228,7 +221,7 @@ namespace Millistream.Streaming.UnitTests
             const int Millisecond = 999;
             Assert.IsTrue(message.AddTime2(Field, hour, minute, second, Millisecond));
             Assert.IsTrue(message.AddTime2((uint)Field, hour, minute, second, Millisecond));
-            nativeImplementation.Verify(x => x.mdf_message_add_time2(message.Handle, (uint)Field, hour, minute, second, Millisecond), Times.Exactly(2));
+            _nativeImplementation.Verify(x => x.mdf_message_add_time2(message.Handle, (uint)Field, hour, minute, second, Millisecond), Times.Exactly(2));
 
             hour = 12;
             minute = 13;
@@ -236,7 +229,7 @@ namespace Millistream.Streaming.UnitTests
             const int Nanosecond = 999;
             Assert.IsTrue(message.AddTime3(Field, hour, minute, second, Nanosecond));
             Assert.IsTrue(message.AddTime3((uint)Field, hour, minute, second, Nanosecond));
-            nativeImplementation.Verify(x => x.mdf_message_add_time3(message.Handle, (uint)Field, hour, minute, second, Nanosecond), Times.Exactly(2));
+            _nativeImplementation.Verify(x => x.mdf_message_add_time3(message.Handle, (uint)Field, hour, minute, second, Nanosecond), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -245,34 +238,31 @@ namespace Millistream.Streaming.UnitTests
             const Field Field = Field.MDF_F_INSREFLIST;
             const string Value = "1 4";
 
-            Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
-            nativeImplementation.Setup(x => x.mdf_message_add_list(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<IntPtr>()))
+            _nativeImplementation.Setup(x => x.mdf_message_add_list(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<IntPtr>()))
                 .Callback((IntPtr message, uint tag, IntPtr value) => Compare(Value, value))
                 .Returns(1);
 
-            using Message message = new Message(nativeImplementation.Object);
+            using Message message = new();
             Assert.IsTrue(message.AddList(Field, Value));
             Assert.IsTrue(message.AddList((uint)Field, Value));
-            nativeImplementation.Verify(x => x.mdf_message_add_list(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(2));
+            _nativeImplementation.Verify(x => x.mdf_message_add_list(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(2));
         }
 
         [TestMethod]
         public void ResetTest()
         {
-            Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
-            using Message message = new Message(nativeImplementation.Object);
+            using Message message = new();
             message.Reset();
-            nativeImplementation.Verify(x => x.mdf_message_reset(It.IsAny<IntPtr>()));
+            _nativeImplementation.Verify(x => x.mdf_message_reset(It.IsAny<IntPtr>()));
         }
 
         [TestMethod]
         public void DeleteTest()
         {
-            Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
-            nativeImplementation.Setup(x => x.mdf_message_del(It.IsAny<IntPtr>())).Returns(1);
-            using Message message = new Message(nativeImplementation.Object);
+            _nativeImplementation.Setup(x => x.mdf_message_del(It.IsAny<IntPtr>())).Returns(1);
+            using Message message = new();
             Assert.IsTrue(message.Delete());
-            nativeImplementation.Verify(x => x.mdf_message_del(It.IsAny<IntPtr>()));
+            _nativeImplementation.Verify(x => x.mdf_message_del(It.IsAny<IntPtr>()));
         }
 
         [TestMethod]
@@ -281,147 +271,137 @@ namespace Millistream.Streaming.UnitTests
             const ulong SourceInsref = 1;
             const ulong DestinationInsref = 2;
 
-            Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
-            nativeImplementation.Setup(x => x.mdf_message_create()).Returns(new IntPtr(123));
-            using Message source = new Message(nativeImplementation.Object);
+            _nativeImplementation.Setup(x => x.mdf_message_create()).Returns(new IntPtr(123));
+            using Message source = new();
 
-            Mock<INativeImplementation> nativeImplementation2 = new Mock<INativeImplementation>();
-            nativeImplementation2.Setup(x => x.mdf_message_create()).Returns(new IntPtr(456));
-            using Message destination = new Message(nativeImplementation2.Object);
+            _nativeImplementation.Setup(x => x.mdf_message_create()).Returns(new IntPtr(456));
+            using Message destination = new();
 
-            nativeImplementation.Setup(x => x.mdf_message_move(source.Handle, destination.Handle, SourceInsref, DestinationInsref)).Returns(1).Verifiable();
+            _nativeImplementation.Setup(x => x.mdf_message_move(source.Handle, destination.Handle, SourceInsref, DestinationInsref)).Returns(1).Verifiable();
 
-            Assert.IsTrue(Message.Move(source, destination, SourceInsref, DestinationInsref, nativeImplementation.Object));
-            nativeImplementation.Verify();
+            Assert.IsTrue(Message.Move(source, destination, SourceInsref, DestinationInsref));
+            _nativeImplementation.Verify();
 
-            nativeImplementation.Setup(x => x.mdf_message_move(source.Handle, destination.Handle, SourceInsref, DestinationInsref)).Returns(0).Verifiable();
-            Assert.IsFalse(Message.Move(source, destination, SourceInsref, DestinationInsref, nativeImplementation.Object));
-            nativeImplementation.Verify();
+            _nativeImplementation.Setup(x => x.mdf_message_move(source.Handle, destination.Handle, SourceInsref, DestinationInsref)).Returns(0).Verifiable();
+            Assert.IsFalse(Message.Move(source, destination, SourceInsref, DestinationInsref));
+            _nativeImplementation.Verify();
         }
 
         [TestMethod]
         public void SerializeTest()
         {
-            Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
-            IntPtr messageHandle = new IntPtr(123);
-            nativeImplementation.Setup(x => x.mdf_message_create()).Returns(messageHandle);
-            IntPtr stringPointer = new IntPtr(456);
-            nativeImplementation.Setup(x => x.mdf_message_serialize(messageHandle, ref It.Ref<IntPtr>.IsAny))
+            IntPtr messageHandle = new(123);
+            _nativeImplementation.Setup(x => x.mdf_message_create()).Returns(messageHandle);
+            IntPtr stringPointer = new(456);
+            _nativeImplementation.Setup(x => x.mdf_message_serialize(messageHandle, ref It.Ref<IntPtr>.IsAny))
                 .Returns(1)
                 .Callback(new mdf_message_serialize_callback((IntPtr messageHandle, ref IntPtr result) => result = stringPointer))
                 .Verifiable();
-            using Message message = new Message(nativeImplementation.Object);
+            using Message message = new();
             Assert.IsTrue(message.Serialize(out IntPtr result));
             Assert.AreEqual(stringPointer, result);
-            nativeImplementation.Verify();
+            _nativeImplementation.Verify();
 
-            nativeImplementation.Setup(x => x.mdf_message_serialize(messageHandle, ref It.Ref<IntPtr>.IsAny)).Returns(0).Verifiable();
+            _nativeImplementation.Setup(x => x.mdf_message_serialize(messageHandle, ref It.Ref<IntPtr>.IsAny)).Returns(0).Verifiable();
             Assert.IsFalse(message.Serialize(out result));
             Assert.AreEqual(IntPtr.Zero, result);
-            nativeImplementation.Verify();
+            _nativeImplementation.Verify();
         }
 
         [TestMethod]
         public void DeserializeTest()
         {
-            Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
-            IntPtr messageHandle = new IntPtr(123);
-            nativeImplementation.Setup(x => x.mdf_message_create()).Returns(messageHandle);
+            IntPtr messageHandle = new(123);
+            _nativeImplementation.Setup(x => x.mdf_message_create()).Returns(messageHandle);
             const string Data = "ABC";
             Expression<Func<INativeImplementation, int>> expression = x => x.mdf_message_deserialize(messageHandle, It.IsAny<IntPtr>());
-            nativeImplementation.Setup(expression)
+            _nativeImplementation.Setup(expression)
                 .Returns(1)
                 .Callback((IntPtr message, IntPtr data) => Compare(Data, data))
                 .Verifiable();
-            using Message message = new Message(nativeImplementation.Object);
+            using Message message = new();
             Assert.IsTrue(message.Deserialize(Data));
             IntPtr p = Marshal.StringToHGlobalAnsi(Data);
             Assert.IsTrue(message.Deserialize(p));
-            nativeImplementation.Verify(expression, Times.Exactly(2));
+            _nativeImplementation.Verify(expression, Times.Exactly(2));
 
-            nativeImplementation.Setup(expression).Returns(0);
+            _nativeImplementation.Setup(expression).Returns(0);
             Assert.IsFalse(message.Deserialize(Data));
             Assert.IsFalse(message.Deserialize(p));
-            nativeImplementation.Verify(expression, Times.Exactly(4));
+            _nativeImplementation.Verify(expression, Times.Exactly(4));
         }
 
         [TestMethod]
         public void DisposeTest()
         {
-            Mock<INativeImplementation> nativeImplementation = new Mock<INativeImplementation>();
-            using (Message message = new Message(nativeImplementation.Object)) { }
-            nativeImplementation.Verify(x => x.mdf_message_destroy(It.IsAny<IntPtr>()));
+            using (Message message = new()) { }
+            _nativeImplementation.Verify(x => x.mdf_message_destroy(It.IsAny<IntPtr>()));
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void AddNullNumericTest() =>
-            new Message(new Mock<INativeImplementation>().Object).AddNumeric(Field.MDF_F_LASTPRICE, null);
+            new Message().AddNumeric(Field.MDF_F_LASTPRICE, null);
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void AddEmptyNumericTest() =>
-            new Message(new Mock<INativeImplementation>().Object).AddNumeric(Field.MDF_F_LASTPRICE, string.Empty);
+            new Message().AddNumeric(Field.MDF_F_LASTPRICE, string.Empty);
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void AddNullStringTest() =>
-            new Message(new Mock<INativeImplementation>().Object).AddString(Field.MDF_F_REQUESTID, null);
+            new Message().AddString(Field.MDF_F_REQUESTID, null);
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void AddEmptyStringTest() =>
-            new Message(new Mock<INativeImplementation>().Object).AddString(Field.MDF_F_REQUESTID, string.Empty);
+            new Message().AddString(Field.MDF_F_REQUESTID, string.Empty);
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void AddNullDateTest() =>
-            new Message(new Mock<INativeImplementation>().Object).AddDate(Field.MDF_F_DATE, null);
+            new Message().AddDate(Field.MDF_F_DATE, null);
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void AddEmptyDateTest() =>
-            new Message(new Mock<INativeImplementation>().Object).AddDate(Field.MDF_F_DATE, string.Empty);
+            new Message().AddDate(Field.MDF_F_DATE, string.Empty);
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void AddNullTimeTest() =>
-            new Message(new Mock<INativeImplementation>().Object).AddTime(Field.MDF_F_TIME, null);
+            new Message().AddTime(Field.MDF_F_TIME, null);
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void AddEmptyTimeTest() =>
-            new Message(new Mock<INativeImplementation>().Object).AddTime(Field.MDF_F_TIME, string.Empty);
+            new Message().AddTime(Field.MDF_F_TIME, string.Empty);
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void AddNullListTest() =>
-            new Message(new Mock<INativeImplementation>().Object).AddList(Field.MDF_F_INSREFLIST, default);
+            new Message().AddList(Field.MDF_F_INSREFLIST, default);
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void AddEmptyListTest() =>
-            new Message(new Mock<INativeImplementation>().Object).AddList(Field.MDF_F_INSREFLIST, string.Empty);
+            new Message().AddList(Field.MDF_F_INSREFLIST, string.Empty);
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void MoveNullReferenceTest() =>
-            Message.Move(null, new Message(new Mock<INativeImplementation>().Object), 1, 2);
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void MoveWithoutNativeImplementationTest() =>
-            Message.Move(new Message(new Mock<INativeImplementation>().Object), new Message(new Mock<INativeImplementation>().Object), 1, 2, null);
+            Message.Move(null, new(), 1, 2);
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void DeserializeNullReferenceTest() =>
-            new Message(new Mock<INativeImplementation>().Object).Deserialize(null);
+            new Message().Deserialize(null);
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void DeserializeEmptyStringTest() =>
-            new Message(new Mock<INativeImplementation>().Object).Deserialize(string.Empty);
+            new Message().Deserialize(string.Empty);
 
         [TestMethod]
         [ExpectedException(typeof(ObjectDisposedException))]
@@ -505,7 +485,7 @@ namespace Millistream.Streaming.UnitTests
 
         private static Message GetDisposedMessage()
         {
-            Message message = new Message(new Mock<INativeImplementation>().Object);
+            Message message = new();
             message.Dispose();
             return message;
         }
