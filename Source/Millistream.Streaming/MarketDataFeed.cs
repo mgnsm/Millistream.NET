@@ -10,7 +10,7 @@ namespace Millistream.Streaming
     /// Represents a managed API handle (mdf_t) that can be connected to the system.
     /// </summary>
     /// <remarks>Handles are not thread-safe. If multiple threads will share access to a single handle, the accesses has to be serialized using a mutex or other forms of locking mechanisms. The API as such is thread-safe so multiple threads can have local handles without the need for locks.</remarks>
-    public sealed class MarketDataFeed<TCallbackUserData, TStatusCallbackUserData> : IMarketDataFeed<TCallbackUserData, TStatusCallbackUserData>, IDisposable
+    public unsafe sealed class MarketDataFeed<TCallbackUserData, TStatusCallbackUserData> : IMarketDataFeed<TCallbackUserData, TStatusCallbackUserData>, IDisposable
     {
         #region Constants
         internal const int MinConnectionTimeout = 1;
@@ -24,7 +24,6 @@ namespace Millistream.Streaming
         #region Fields
         internal static readonly ImmutableHashSet<int> s_messageReferences = ImmutableHashSet.Create((int[])Enum.GetValues(typeof(MessageReference)));
         internal static readonly ImmutableHashSet<uint> s_fields = ImmutableHashSet.Create((uint[])Enum.GetValues(typeof(Field)));
-        private readonly INativeImplementation _nativeImplementation;
         private readonly IntPtr _feedHandle;
         private readonly mdf_status_callback _nativeStatusCallback;
         private readonly mdf_data_callback _nativeDataCallback;
@@ -39,12 +38,9 @@ namespace Millistream.Streaming
         /// </summary>
         /// <exception cref="DllNotFoundException">The native dependency is missing.</exception>
         /// <remarks>The corresponding native function is mdf_create.</remarks>
-        public MarketDataFeed() : this(NativeImplementation.Instance) { }
-
-        internal MarketDataFeed(INativeImplementation nativeImplementation)
+        public MarketDataFeed()
         {
-            _nativeImplementation = nativeImplementation ?? throw new ArgumentNullException(nameof(nativeImplementation));
-            _feedHandle = _nativeImplementation.mdf_create();
+            _feedHandle = NativeImplementation.mdf_create();
             _nativeStatusCallback = OnStatusChanged;
             _nativeDataCallback = OnDataReceived;
             _nativeStatusCallbackPointer = Marshal.GetFunctionPointerForDelegate(_nativeStatusCallback);
@@ -112,7 +108,7 @@ namespace Millistream.Streaming
             {
                 ThrowIfDisposed();
                 _dataCallback = value;
-                if (_nativeImplementation.mdf_set_property(_feedHandle, MDF_OPTION.MDF_OPT_DATA_CALLBACK_FUNCTION,
+                if (NativeImplementation.mdf_set_property(_feedHandle, MDF_OPTION.MDF_OPT_DATA_CALLBACK_FUNCTION,
                     value != null ? _nativeDataCallbackPointer : IntPtr.Zero) != 1)
                     throw new InvalidOperationException();
             }
@@ -154,7 +150,7 @@ namespace Millistream.Streaming
             {
                 ThrowIfDisposed();
                 _statusCallback = value;
-                if (_nativeImplementation.mdf_set_property(_feedHandle, MDF_OPTION.MDF_OPT_STATUS_CALLBACK_FUNCTION,
+                if (NativeImplementation.mdf_set_property(_feedHandle, MDF_OPTION.MDF_OPT_STATUS_CALLBACK_FUNCTION,
                     value != null ? _nativeStatusCallbackPointer : IntPtr.Zero) != 1)
                     throw new InvalidOperationException();
             }
@@ -255,7 +251,7 @@ namespace Millistream.Streaming
             {
                 ThrowIfDisposed();
                 IntPtr value = default;
-                if (_nativeImplementation.mdf_get_property(_feedHandle, MDF_OPTION.MDF_OPT_BIND_ADDRESS, ref value) != 1)
+                if (NativeImplementation.mdf_get_property(_feedHandle, MDF_OPTION.MDF_OPT_BIND_ADDRESS, ref value) != 1)
                     throw new InvalidOperationException();
 
                 if (value == IntPtr.Zero)
@@ -287,13 +283,13 @@ namespace Millistream.Streaming
                             byte* b = stackalloc byte[length + 1];
                             int bytesWritten = Encoding.UTF8.GetBytes(c, value.Length, b, length);
                             b[bytesWritten] = 0;
-                            ret = _nativeImplementation.mdf_set_property(_feedHandle, MDF_OPTION.MDF_OPT_BIND_ADDRESS, (IntPtr)b);
+                            ret = NativeImplementation.mdf_set_property(_feedHandle, MDF_OPTION.MDF_OPT_BIND_ADDRESS, (IntPtr)b);
                         }
                     }
                 }
                 else
                 {
-                    ret = _nativeImplementation.mdf_set_property(_feedHandle, MDF_OPTION.MDF_OPT_BIND_ADDRESS, IntPtr.Zero);
+                    ret = NativeImplementation.mdf_set_property(_feedHandle, MDF_OPTION.MDF_OPT_BIND_ADDRESS, IntPtr.Zero);
                 }
 
                 if (ret != 1)
@@ -312,7 +308,7 @@ namespace Millistream.Streaming
             {
                 ThrowIfDisposed();
                 long value = default;
-                if (_nativeImplementation.mdf_get_property(_feedHandle, MDF_OPTION.MDF_OPT_TIME_DIFFERENCE_NS, ref value) != 1)
+                if (NativeImplementation.mdf_get_long_property(_feedHandle, MDF_OPTION.MDF_OPT_TIME_DIFFERENCE_NS, ref value) != 1)
                     throw new InvalidOperationException();
                 return value;
             }
@@ -330,7 +326,7 @@ namespace Millistream.Streaming
         public int Consume(int timeout)
         {
             ThrowIfDisposed();
-            return _nativeImplementation.mdf_consume(_feedHandle, timeout);
+            return NativeImplementation.mdf_consume(_feedHandle, timeout);
         }
 
         /// <summary>
@@ -348,7 +344,7 @@ namespace Millistream.Streaming
             mclass = default;
             insref = default;
             ThrowIfDisposed();
-            return _nativeImplementation.mdf_get_next_message(_feedHandle, ref mref, ref mclass, ref insref) == 1;
+            return NativeImplementation.mdf_get_next_message(_feedHandle, ref mref, ref mclass, ref insref) == 1;
         }
 
         /// <summary>
@@ -395,7 +391,7 @@ namespace Millistream.Streaming
             tag = default;
             IntPtr pointer = default;
 
-            int ret = _nativeImplementation.mdf_get_next_field(_feedHandle, ref tag, ref pointer);
+            int ret = NativeImplementation.mdf_get_next_field(_feedHandle, ref tag, ref pointer);
             if (ret != 1)
             {
                 value = default;
@@ -470,7 +466,7 @@ namespace Millistream.Streaming
                     byte* b = stackalloc byte[length + 1];
                     int bytesWritten = Encoding.UTF8.GetBytes(c, servers.Length, b, length);
                     b[bytesWritten] = 0;
-                    return _nativeImplementation.mdf_connect(_feedHandle, (IntPtr)b) == 1;
+                    return NativeImplementation.mdf_connect(_feedHandle, (IntPtr)b) == 1;
                 }
             }
         }
@@ -483,7 +479,7 @@ namespace Millistream.Streaming
         public void Disconnect()
         {
             ThrowIfDisposed();
-            _nativeImplementation.mdf_disconnect(_feedHandle);
+            NativeImplementation.mdf_disconnect(_feedHandle);
         }
 
         /// <summary>
@@ -500,7 +496,7 @@ namespace Millistream.Streaming
                 throw new ArgumentNullException(nameof(message));
 
             ThrowIfDisposed();
-            return _nativeImplementation.mdf_message_send(_feedHandle, message.Handle) == 1;
+            return NativeImplementation.mdf_message_send(_feedHandle, message.Handle) == 1;
         }
 
         /// <summary>
@@ -527,7 +523,7 @@ namespace Millistream.Streaming
         {
             if (!_isDisposed)
             {
-                _nativeImplementation.mdf_destroy(_feedHandle);
+                NativeImplementation.mdf_destroy(_feedHandle);
                 _isDisposed = true;
                 GC.SuppressFinalize(this);
             }
@@ -542,7 +538,7 @@ namespace Millistream.Streaming
         {
             ThrowIfDisposed();
             int value = default;
-            if (_nativeImplementation.mdf_get_property(_feedHandle, option, ref value) != 1)
+            if (NativeImplementation.mdf_get_int_property(_feedHandle, option, ref value) != 1)
                 throw new InvalidOperationException();
             return value;
         }
@@ -551,7 +547,7 @@ namespace Millistream.Streaming
         {
             ThrowIfDisposed();
             ulong value = default;
-            if (_nativeImplementation.mdf_get_property(_feedHandle, option, ref value) != 1)
+            if (NativeImplementation.mdf_get_ulong_property(_feedHandle, option, ref value) != 1)
                 throw new InvalidOperationException();
             return value;
         }
@@ -562,7 +558,7 @@ namespace Millistream.Streaming
             unsafe
             {
                 int* p = &value;
-                if (_nativeImplementation.mdf_set_property(_feedHandle, option, (IntPtr)p) != 1)
+                if (NativeImplementation.mdf_set_property(_feedHandle, option, (IntPtr)p) != 1)
                     throw new InvalidOperationException();
             }
         }
@@ -573,7 +569,7 @@ namespace Millistream.Streaming
             unsafe
             {
                 ulong* p = &value;
-                if (_nativeImplementation.mdf_set_property(_feedHandle, option, (IntPtr)p) != 1)
+                if (NativeImplementation.mdf_set_property(_feedHandle, option, (IntPtr)p) != 1)
                     throw new InvalidOperationException();
             }
         }
