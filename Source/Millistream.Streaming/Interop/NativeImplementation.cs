@@ -3,63 +3,63 @@ using System.Runtime.InteropServices;
 
 namespace Millistream.Streaming.Interop
 {
-    unsafe internal static class NativeImplementation
+    unsafe internal sealed class NativeImplementation
     {
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr> mdf_create;
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr, void> mdf_destroy;
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr, int, int> mdf_consume;
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr, ref int, ref int, ref ulong, int> mdf_get_next_message;
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr, ref uint, ref IntPtr, int> mdf_get_next_field;
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr, MDF_OPTION, ref IntPtr, int> mdf_get_property;
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr, MDF_OPTION, ref int, int> mdf_get_int_property;
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr, MDF_OPTION, ref ulong, int> mdf_get_ulong_property;
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr, MDF_OPTION, ref long, int> mdf_get_long_property;
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr, MDF_OPTION, IntPtr, int> mdf_set_property;
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr, IntPtr, int> mdf_connect;
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr, void> mdf_disconnect;
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr> mdf_message_create;
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr, void> mdf_message_destroy;
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr, int, int> mdf_message_set_compression_level;
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr, void> mdf_message_reset;
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr, int> mdf_message_del;
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr, ulong, int, int> mdf_message_add;
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr, uint, IntPtr, int> mdf_message_add_numeric;
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr, uint, long, int, int> mdf_message_add_int;
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr, uint, ulong, int, int> mdf_message_add_uint;
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr, uint, IntPtr, int> mdf_message_add_string;
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr, uint, IntPtr, int, int> mdf_message_add_string2;
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr, uint, IntPtr, int> mdf_message_add_date;
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr, uint, int, int, int, int> mdf_message_add_date2;
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr, uint, IntPtr, int> mdf_message_add_time;
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr, uint, int, int, int, int, int> mdf_message_add_time2;
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr, uint, int, int, int, int, int> mdf_message_add_time3;
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr, uint, IntPtr, int> mdf_message_add_list;
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr, IntPtr, int> mdf_message_send;
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr, int> mdf_message_get_num;
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr, int> mdf_message_get_num_active;      
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr, IntPtr, ulong, ulong, int> mdf_message_move;
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr, ref IntPtr, int> mdf_message_serialize;
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr, IntPtr, int> mdf_message_deserialize;
-        internal static readonly delegate* unmanaged[Cdecl]<IntPtr, int, int> mdf_message_set_utf8_validation;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr> mdf_create;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, void> mdf_destroy;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, int, int> mdf_consume;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, ref int, ref int, ref ulong, int> mdf_get_next_message;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, ref uint, ref IntPtr, int> mdf_get_next_field;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, MDF_OPTION, ref IntPtr, int> mdf_get_property;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, MDF_OPTION, ref int, int> mdf_get_int_property;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, MDF_OPTION, ref ulong, int> mdf_get_ulong_property;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, MDF_OPTION, ref long, int> mdf_get_long_property;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, MDF_OPTION, IntPtr, int> mdf_set_property;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, IntPtr, int> mdf_connect;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, void> mdf_disconnect;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr> mdf_message_create;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, void> mdf_message_destroy;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, int, int> mdf_message_set_compression_level;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, void> mdf_message_reset;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, int> mdf_message_del;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, ulong, int, int> mdf_message_add;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, uint, IntPtr, int> mdf_message_add_numeric;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, uint, long, int, int> mdf_message_add_int;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, uint, ulong, int, int> mdf_message_add_uint;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, uint, IntPtr, int> mdf_message_add_string;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, uint, IntPtr, int, int> mdf_message_add_string2;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, uint, IntPtr, int> mdf_message_add_date;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, uint, int, int, int, int> mdf_message_add_date2;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, uint, IntPtr, int> mdf_message_add_time;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, uint, int, int, int, int, int> mdf_message_add_time2;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, uint, int, int, int, int, int> mdf_message_add_time3;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, uint, IntPtr, int> mdf_message_add_list;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, IntPtr, int> mdf_message_send;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, int> mdf_message_get_num;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, int> mdf_message_get_num_active;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, IntPtr, ulong, ulong, int> mdf_message_move;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, ref IntPtr, int> mdf_message_serialize;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, IntPtr, int> mdf_message_deserialize;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, int, int> mdf_message_set_utf8_validation;
 
-        static NativeImplementation()
+        internal NativeImplementation(string libraryPath)
         {
             NativeLibrary nativeLibrary;
             IntPtr lib;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 nativeLibrary = new NativeUnixLibrary();
-                lib = nativeLibrary.Load("libmdf.so.0");
+                lib = nativeLibrary.Load(libraryPath ?? "libmdf.so.0");
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 nativeLibrary = new NativeWindowsLibrary();
-                lib = nativeLibrary.Load("libmdf-0.dll");
+                lib = nativeLibrary.Load(libraryPath ?? "libmdf-0.dll");
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 nativeLibrary = new NativeUnixLibrary();
-                lib = nativeLibrary.Load("libmdf.0.dylib");
+                lib = nativeLibrary.Load(libraryPath ?? "libmdf.0.dylib");
             }
             else
                 throw new PlatformNotSupportedException();
@@ -90,7 +90,7 @@ namespace Millistream.Streaming.Interop
             mdf_message_send = (delegate* unmanaged[Cdecl]<IntPtr, IntPtr, int>)nativeLibrary.GetExport(lib, nameof(mdf_message_send));
             mdf_message_get_num = (delegate* unmanaged[Cdecl]<IntPtr, int>)nativeLibrary.GetExport(lib, nameof(mdf_message_get_num));
             mdf_message_get_num_active = (delegate* unmanaged[Cdecl]<IntPtr, int>)nativeLibrary.GetExport(lib, nameof(mdf_message_get_num_active));
-            
+
             if (nativeLibrary.TryGetExport(lib, nameof(mdf_message_set_compression_level), out IntPtr address))
                 mdf_message_set_compression_level = (delegate* unmanaged[Cdecl]<IntPtr, int, int>)address;
             if (nativeLibrary.TryGetExport(lib, nameof(mdf_message_add_int), out address))
@@ -114,5 +114,7 @@ namespace Millistream.Streaming.Interop
             if (nativeLibrary.TryGetExport(lib, nameof(mdf_message_set_utf8_validation), out address))
                 mdf_message_set_utf8_validation = (delegate* unmanaged[Cdecl]<IntPtr, int, int>)address;
         }
+
+        internal static NativeImplementation Default { get; } = new(null);
     }
 }

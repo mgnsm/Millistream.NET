@@ -17,6 +17,24 @@ namespace Millistream.Streaming.UnitTests
         public MessageTests() => NativeImplementation.Implementation = _nativeImplementation.Object;
 
         [TestMethod]
+        public void CreateMessageTest()
+        {
+            int expectedInstanceCount = NativeImplementation.InstanceCount == 0 ? 1 : NativeImplementation.InstanceCount;
+            using Message message = new();
+            using Message message2 = new();
+            using Message message3 = new();
+            using Message message4 = new();
+            using Message message5 = new();
+            Assert.AreEqual(expectedInstanceCount, NativeImplementation.InstanceCount);
+
+            using Message message6 = new("lib");
+            using Message message7 = new("lib");
+            using Message message8 = new("lib2");
+            using Message message9 = new();
+            Assert.AreEqual(expectedInstanceCount + 3, NativeImplementation.InstanceCount);
+        }
+
+        [TestMethod]
         public void GetAndSetCompressionLevelTest()
         {
             _nativeImplementation.Setup(x => x.mdf_message_set_compression_level(It.IsAny<IntPtr>(), It.IsAny<int>())).Returns(1);
@@ -337,6 +355,14 @@ namespace Millistream.Streaming.UnitTests
             using (Message message = new()) { }
             _nativeImplementation.Verify(x => x.mdf_message_destroy(It.IsAny<IntPtr>()));
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void CreateMessageWithNoNativeLibraryPathTest () => new Message(default);
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void CreateMessageWithEmptyNativeLibraryPathTest() => new Message(string.Empty);
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]

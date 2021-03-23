@@ -15,6 +15,25 @@ namespace Millistream.Streaming.IntegrationTests
         public TestContext TestContext { get; set; }
 
         [TestMethod]
+        public void CreateMarketDataFeed()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                using MarketDataFeed mdf = new MarketDataFeed("libmdf.so.0");
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                using MarketDataFeed mdf = new MarketDataFeed("libmdf-0.dll");
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                using MarketDataFeed mdf = new MarketDataFeed("libmdf.0.dylib");
+            }
+            else
+                throw new PlatformNotSupportedException();
+        }
+
+        [TestMethod]
         public void GetAndSetPropertiesTest()
         {
             using MarketDataFeed mdf = new MarketDataFeed();

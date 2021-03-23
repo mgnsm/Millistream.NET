@@ -8,6 +8,25 @@ namespace Millistream.Streaming.IntegrationTests
     public class MessageTests
     {
         [TestMethod]
+        public void CreateMessageTest()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                using Message message = new Message("libmdf.so.0");
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                using Message message = new Message("libmdf-0.dll");
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                using Message message = new Message("libmdf.0.dylib");
+            }
+            else
+                throw new PlatformNotSupportedException();
+        }
+
+        [TestMethod]
         public void SetMessageCompressionLevelTest()
         {
             using Message message = new Message();
