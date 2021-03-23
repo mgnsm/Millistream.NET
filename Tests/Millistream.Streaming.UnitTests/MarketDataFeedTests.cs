@@ -19,6 +19,25 @@ namespace Millistream.Streaming.UnitTests
         private delegate void GetInt64PropertyCallback(IntPtr handle, int option, ref long value);
 
         [TestMethod]
+        public void CreateMarketDataFeedTest()
+        {
+            Mock<INativeImplementation> nativeImplementation = new();
+            NativeImplementation.Implementation = nativeImplementation.Object;
+
+            int expectedInstanceCount = NativeImplementation.InstanceCount == 0 ? 1 : NativeImplementation.InstanceCount;
+            using MarketDataFeed mdf = new();
+            using MarketDataFeed mdf2 = new();
+            using MarketDataFeed mdf3 = new();
+            Assert.AreEqual(expectedInstanceCount, NativeImplementation.InstanceCount);
+
+            using MarketDataFeed mdf4 = new("lib");
+            using MarketDataFeed mdf5 = new("lib");
+            using MarketDataFeed mdf6 = new("lib2");
+            using MarketDataFeed mdf7 = new();
+            Assert.AreEqual(expectedInstanceCount + 3, NativeImplementation.InstanceCount);
+        }
+
+        [TestMethod]
         public void GetFileDescriptorTest()
         {
             const int FileDescriptor = 1000;
@@ -57,6 +76,14 @@ namespace Millistream.Streaming.UnitTests
         [TestMethod]
         public void GetAndSetConnectionTimeoutTest() => 
             GetAndSetProperty(MDF_OPTION.MDF_OPT_CONNECT_TIMEOUT, mdf => mdf.ConnectionTimeout, mdf => mdf.ConnectionTimeout = 10);
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void CreateMarketDataFeedWithNoNativeLibraryPathTest() => new MarketDataFeed(default);
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void CreateMarketDataFeedWithEmptyNativeLibraryPathTest() => new MarketDataFeed(string.Empty);
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentOutOfRangeException))]

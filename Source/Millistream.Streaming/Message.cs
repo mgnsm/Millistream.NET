@@ -11,6 +11,7 @@ namespace Millistream.Streaming
     /// <remarks>Handles are not thread-safe. If multiple threads will share access to a single handle, the accesses has to be serialized using a mutex or other forms of locking mechanisms. The API as such is thread-safe so multiple threads can have local handles without the need for locks.</remarks>
     public unsafe sealed class Message : IMessage, IDisposable
     {
+        private readonly NativeImplementation _nativeImplementation;
         private CompressionLevel _compressionLevel = CompressionLevel.Z_BEST_SPEED;
         private bool _utf8Validation = true;
         private bool _isDisposed;
@@ -20,7 +21,26 @@ namespace Millistream.Streaming
         /// </summary>
         /// <exception cref="DllNotFoundException">The native dependency is missing.</exception>
         /// <remarks>The corresponding native function is mdf_message_create.</remarks>
-        public Message() => Handle = NativeImplementation.mdf_message_create();
+        public Message()
+            : this(default, false) { }
+
+        /// <summary>
+        /// Creates an instance of the <see cref="Message"/> class.
+        /// </summary>
+        /// <param name="nativeLibraryPath">The path of the native dependency.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="nativeLibraryPath"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
+        /// <exception cref="DllNotFoundException">The native dependency can't be found.</exception>
+        /// <remarks>The corresponding native function is mdf_message_create.</remarks>
+        public Message(string nativeLibraryPath) 
+            : this(nativeLibraryPath, true) { }
+
+        private Message(string nativeLibraryPath, bool validateArgument)
+        {
+            _nativeImplementation = string.IsNullOrEmpty(nativeLibraryPath) ?
+                (validateArgument ? throw new ArgumentNullException(nameof(nativeLibraryPath)) : NativeImplementation.Default)
+                : new NativeImplementation(nativeLibraryPath);
+            Handle = _nativeImplementation.mdf_message_create();
+        }
 
         ~Message() => Dispose();
 
@@ -39,7 +59,7 @@ namespace Millistream.Streaming
             set
             {
                 ThrowIfDisposed();
-                if (NativeImplementation.mdf_message_set_compression_level(Handle, (int)value) == 1)
+                if (_nativeImplementation.mdf_message_set_compression_level(Handle, (int)value) == 1)
                     _compressionLevel = value;
             }
         }
@@ -53,7 +73,7 @@ namespace Millistream.Streaming
             get
             {
                 ThrowIfDisposed();
-                return NativeImplementation.mdf_message_get_num(Handle);
+                return _nativeImplementation.mdf_message_get_num(Handle);
             }
         }
 
@@ -66,7 +86,7 @@ namespace Millistream.Streaming
             get
             {
                 ThrowIfDisposed();
-                return NativeImplementation.mdf_message_get_num_active(Handle);
+                return _nativeImplementation.mdf_message_get_num_active(Handle);
             }
         }
 
@@ -84,7 +104,7 @@ namespace Millistream.Streaming
             set
             {
                 ThrowIfDisposed();
-                if (NativeImplementation.mdf_message_set_utf8_validation(Handle, value ? 1 : 0) == 1)
+                if (_nativeImplementation.mdf_message_set_utf8_validation(Handle, value ? 1 : 0) == 1)
                     _utf8Validation = value;
             }
         }
@@ -102,7 +122,7 @@ namespace Millistream.Streaming
         public bool Add(ulong insref, int mref)
         {
             ThrowIfDisposed();
-            return NativeImplementation.mdf_message_add(Handle, insref, mref) == 1;
+            return _nativeImplementation.mdf_message_add(Handle, insref, mref) == 1;
         }
 
         /// <summary>
@@ -137,7 +157,7 @@ namespace Millistream.Streaming
                 byte* bytes = stackalloc byte[value.Length + 1];
                 if (!TryGetAsciiBytes(value, bytes))
                     return false;
-                return NativeImplementation.mdf_message_add_numeric(Handle, tag, (IntPtr)bytes) == 1;
+                return _nativeImplementation.mdf_message_add_numeric(Handle, tag, (IntPtr)bytes) == 1;
             }
         }
 
@@ -169,7 +189,7 @@ namespace Millistream.Streaming
             if (decimals < 0 || decimals > 19)
                 throw new ArgumentException($"{nameof(decimals)} cannot be smaller than 0 or greater than 19.", nameof(decimals));
             ThrowIfDisposed();
-            return NativeImplementation.mdf_message_add_int(Handle, tag, value, decimals) == 1;
+            return _nativeImplementation.mdf_message_add_int(Handle, tag, value, decimals) == 1;
         }
 
         /// <summary>
@@ -202,7 +222,7 @@ namespace Millistream.Streaming
             if (decimals < 0 || decimals > 19)
                 throw new ArgumentException($"{nameof(decimals)} cannot be smaller than 0 or greater than 19.", nameof(decimals));
             ThrowIfDisposed();
-            return NativeImplementation.mdf_message_add_uint(Handle, tag, value, decimals) == 1;
+            return _nativeImplementation.mdf_message_add_uint(Handle, tag, value, decimals) == 1;
         }
 
         /// <summary>
@@ -243,7 +263,7 @@ namespace Millistream.Streaming
                     byte* b = stackalloc byte[length + 1];
                     int bytesWritten = Encoding.UTF8.GetBytes(c, value.Length, b, length);
                     b[bytesWritten] = 0;
-                    return NativeImplementation.mdf_message_add_string(Handle, tag, (IntPtr)b) == 1;
+                    return _nativeImplementation.mdf_message_add_string(Handle, tag, (IntPtr)b) == 1;
                 }
             }
         }
@@ -276,7 +296,7 @@ namespace Millistream.Streaming
                     int byteCount = Encoding.UTF8.GetByteCount(c, length);
                     byte* b = stackalloc byte[byteCount + 1];
                     Encoding.UTF8.GetBytes(c, length, b, byteCount);
-                    return NativeImplementation.mdf_message_add_string2(Handle, tag, (IntPtr)b, byteCount) == 1;
+                    return _nativeImplementation.mdf_message_add_string2(Handle, tag, (IntPtr)b, byteCount) == 1;
                 }
             }
         }
@@ -328,7 +348,7 @@ namespace Millistream.Streaming
                 byte* bytes = stackalloc byte[value.Length + 1];
                 if (!TryGetAsciiBytes(value, bytes))
                     return false;
-                return NativeImplementation.mdf_message_add_date(Handle, tag, (IntPtr)bytes) == 1;
+                return _nativeImplementation.mdf_message_add_date(Handle, tag, (IntPtr)bytes) == 1;
             }
         }
 
@@ -358,7 +378,7 @@ namespace Millistream.Streaming
         public bool AddDate(uint tag, int year, int month, int day)
         {
             ThrowIfDisposed();
-            return NativeImplementation.mdf_message_add_date2(Handle, tag, year, month, day) == 1;
+            return _nativeImplementation.mdf_message_add_date2(Handle, tag, year, month, day) == 1;
         }
 
         /// <summary>
@@ -396,7 +416,7 @@ namespace Millistream.Streaming
                 byte* bytes = stackalloc byte[value.Length + 1];
                 if (!TryGetAsciiBytes(value, bytes))
                     return false;
-                return NativeImplementation.mdf_message_add_time(Handle, tag, (IntPtr)bytes) == 1;
+                return _nativeImplementation.mdf_message_add_time(Handle, tag, (IntPtr)bytes) == 1;
             }
         }
 
@@ -427,7 +447,7 @@ namespace Millistream.Streaming
         public bool AddTime2(uint tag, int hour, int minute, int second, int millisecond)
         {
             ThrowIfDisposed();
-            return NativeImplementation.mdf_message_add_time2(Handle, tag, hour, minute, second, millisecond) == 1;
+            return _nativeImplementation.mdf_message_add_time2(Handle, tag, hour, minute, second, millisecond) == 1;
         }
 
         /// <summary>
@@ -460,7 +480,7 @@ namespace Millistream.Streaming
         public bool AddTime3(uint tag, int hour, int minute, int second, int nanosecond)
         {
             ThrowIfDisposed();
-            return NativeImplementation.mdf_message_add_time3(Handle, tag, hour, minute, second, nanosecond) == 1;
+            return _nativeImplementation.mdf_message_add_time3(Handle, tag, hour, minute, second, nanosecond) == 1;
         }
 
         /// <summary>
@@ -503,7 +523,7 @@ namespace Millistream.Streaming
                 byte* bytes = stackalloc byte[value.Length + 1];
                 if (!TryGetAsciiBytes(value, bytes))
                     return false;
-                return NativeImplementation.mdf_message_add_list(Handle, tag, (IntPtr)bytes) == 1;
+                return _nativeImplementation.mdf_message_add_list(Handle, tag, (IntPtr)bytes) == 1;
             }
         }
 
@@ -531,7 +551,7 @@ namespace Millistream.Streaming
         public void Reset()
         {
             ThrowIfDisposed();
-            NativeImplementation.mdf_message_reset(Handle);
+            _nativeImplementation.mdf_message_reset(Handle);
         }
 
         /// <summary>
@@ -543,7 +563,7 @@ namespace Millistream.Streaming
         public bool Delete()
         {
             ThrowIfDisposed();
-            return NativeImplementation.mdf_message_del(Handle) == 1;
+            return _nativeImplementation.mdf_message_del(Handle) == 1;
         }
 
         /// <summary>
@@ -555,14 +575,14 @@ namespace Millistream.Streaming
         /// <param name="destinationInsRef">The new instrument reference of the moved or modified messages.</param>
         /// <returns><see langword="true" /> if the operation was successfull, or <see langword="false" /> if it failed.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null" />.</exception>
-        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_move function.</exception>
+        /// <exception cref="InvalidOperationException">The installed version of the native library of <paramref name="source"/> doesn't include the mdf_message_move function.</exception>
         /// <remarks>The corresponding native function is mdf_message_move.</remarks>
         public static bool Move(Message source, Message destination, ulong sourceInsref, ulong destinationInsRef)
         {
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
 
-            return NativeImplementation.mdf_message_move(source.Handle, destination?.Handle ?? IntPtr.Zero, sourceInsref, destinationInsRef) == 1;
+            return source._nativeImplementation.mdf_message_move(source.Handle, destination?.Handle ?? IntPtr.Zero, sourceInsref, destinationInsRef) == 1;
         }
 
         /// <summary>
@@ -577,7 +597,7 @@ namespace Millistream.Streaming
         {
             ThrowIfDisposed();
             result = IntPtr.Zero;
-            return NativeImplementation.mdf_message_serialize(Handle, ref result) == 1;
+            return _nativeImplementation.mdf_message_serialize(Handle, ref result) == 1;
         }
 
         /// <summary>
@@ -600,7 +620,7 @@ namespace Millistream.Streaming
                 byte* bytes = stackalloc byte[data.Length + 1];
                 if (!TryGetAsciiBytes(data, bytes))
                     return false;
-                return NativeImplementation.mdf_message_deserialize(Handle, (IntPtr)bytes) == 1;
+                return _nativeImplementation.mdf_message_deserialize(Handle, (IntPtr)bytes) == 1;
             }
         }
 
@@ -615,7 +635,7 @@ namespace Millistream.Streaming
         public bool Deserialize(IntPtr data)
         {
             ThrowIfDisposed();
-            return NativeImplementation.mdf_message_deserialize(Handle, data) == 1;
+            return _nativeImplementation.mdf_message_deserialize(Handle, data) == 1;
         }
 
         /// <summary>
@@ -626,7 +646,7 @@ namespace Millistream.Streaming
         {
             if (!_isDisposed)
             {
-                NativeImplementation.mdf_message_destroy(Handle);
+                _nativeImplementation?.mdf_message_destroy(Handle);
                 _isDisposed = true;
                 GC.SuppressFinalize(this);
             }
