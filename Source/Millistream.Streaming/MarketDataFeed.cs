@@ -9,6 +9,8 @@ namespace Millistream.Streaming
     /// <summary>
     /// Represents a managed API handle (mdf_t) that can be connected to the system.
     /// </summary>
+    /// <typeparam name="TCallbackUserData">The type of the custom user data that will be available to the data callback function.</typeparam>
+    /// <typeparam name="TStatusCallbackUserData">The type of the custom user data that will be available to the status callback function.</typeparam>
     /// <remarks>Handles are not thread-safe. If multiple threads will share access to a single handle, the accesses has to be serialized using a mutex or other forms of locking mechanisms. The API as such is thread-safe so multiple threads can have local handles without the need for locks.</remarks>
     public unsafe sealed class MarketDataFeed<TCallbackUserData, TStatusCallbackUserData> : IMarketDataFeed<TCallbackUserData, TStatusCallbackUserData>, IDisposable
     {
@@ -108,13 +110,13 @@ namespace Millistream.Streaming
             set => SetProperty(MDF_OPTION.MDF_OPT_SENT_BYTES, value);
         }
 
-        private Action<TCallbackUserData, MarketDataFeed<TCallbackUserData, TStatusCallbackUserData>> _dataCallback;
+        private DataCallback<TCallbackUserData, TStatusCallbackUserData> _dataCallback;
         /// <summary>
         /// A callback function that will be called by the consume function if there are any messages to decode.
         /// </summary>
         /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_DATA_CALLBACK_FUNCTION"/> option cannot be fetched or modified.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
-        public Action<TCallbackUserData, MarketDataFeed<TCallbackUserData, TStatusCallbackUserData>> DataCallback
+        public DataCallback<TCallbackUserData, TStatusCallbackUserData> DataCallback
         {
             get
             {
@@ -150,13 +152,13 @@ namespace Millistream.Streaming
             }
         }
 
-        private Action<TStatusCallbackUserData, ConnectionStatus, string, string> _statusCallback;
+        private StatusCallback<TStatusCallbackUserData> _statusCallback;
         /// <summary>
         /// A callback function that will be called whenever there is a change of the status of the connection.
         /// </summary>
         /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_STATUS_CALLBACK_FUNCTION"/> option cannot be fetched or modified.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
-        public Action<TStatusCallbackUserData, ConnectionStatus, string, string> StatusCallback
+        public StatusCallback<TStatusCallbackUserData> StatusCallback
         {
             get
             {
@@ -546,8 +548,22 @@ namespace Millistream.Streaming
             }
         }
 
-        private void OnStatusChanged(IntPtr data, ConnectionStatus connectionStatus, string host, string ip) =>
-            _statusCallback?.Invoke(StatusCallbackUserData, connectionStatus, host, ip);
+        private void OnStatusChanged(IntPtr data, ConnectionStatus connectionStatus, IntPtr host, IntPtr ip)
+        {
+            static ReadOnlySpan<byte> GetSpan(IntPtr handle)
+            {
+                if (handle == IntPtr.Zero)
+                    return default;
+
+                byte* p = (byte*)handle;
+                int byteCount = 0;
+                while (*(p + byteCount) != 0)
+                    byteCount++;
+                return new Span<byte>(p, byteCount);
+            }
+
+            _statusCallback?.Invoke(StatusCallbackUserData, connectionStatus, GetSpan(host), GetSpan(ip));
+        }
 
         private void OnDataReceived(IntPtr userData, IntPtr handle) => _dataCallback?.Invoke(CallbackUserData, this);
 

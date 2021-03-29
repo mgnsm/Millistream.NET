@@ -5,6 +5,8 @@ namespace Millistream.Streaming
     /// <summary>
     /// Represents a managed API handle that can be connected to the system.
     /// </summary>
+    /// <typeparam name="TCallbackUserData">The type of the custom user data that will be available to the data callback function.</typeparam>
+    /// <typeparam name="TStatusCallbackUserData">The type of the custom user data that will be available to the status callback function.</typeparam>
     public interface IMarketDataFeed<TCallbackUserData, TStatusCallbackUserData>
     {
         /// <summary>
@@ -30,7 +32,7 @@ namespace Millistream.Streaming
         /// <summary>
         /// A callback function that will be called by the consume function if there are any messages to decode.
         /// </summary>
-        Action<TCallbackUserData, MarketDataFeed<TCallbackUserData, TStatusCallbackUserData>> DataCallback { get; set; }
+        DataCallback<TCallbackUserData, TStatusCallbackUserData> DataCallback { get; set; }
 
         /// <summary>
         /// Custom userdata that will be available to the data callback function.
@@ -40,7 +42,7 @@ namespace Millistream.Streaming
         /// <summary>
         /// A callback function that will be called whenever there is a change of the status of the connection.
         /// </summary>
-        Action<TStatusCallbackUserData, ConnectionStatus, string, string> StatusCallback { get; set; }
+        StatusCallback<TStatusCallbackUserData> StatusCallback { get; set; }
 
         /// <summary>
         /// Custom userdata that will be available to the status callback function.

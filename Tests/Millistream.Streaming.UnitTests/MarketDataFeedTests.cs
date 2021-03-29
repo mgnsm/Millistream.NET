@@ -274,7 +274,7 @@ namespace Millistream.Streaming.UnitTests
             NativeImplementation.Implementation = nativeImplementation.Object;
             using MarketDataFeed mdf = new();
             Assert.IsNull(mdf.DataCallback);
-            mdf.DataCallback = new Action<object, MarketDataFeed<object, object>>((userData, mdf) => { });
+            mdf.DataCallback = new DataCallback<object, object>((userData, mdf) => { });
             Assert.IsNotNull(mdf.DataCallback);
             nativeImplementation.Verify();
             mdf.DataCallback = null;
@@ -290,7 +290,7 @@ namespace Millistream.Streaming.UnitTests
             NativeImplementation.Implementation = nativeImplementation.Object;
             using MarketDataFeed mdf = new();
             Assert.IsNull(mdf.StatusCallback);
-            mdf.StatusCallback = new Action<object, ConnectionStatus, string, string>((userData, status, host, ip) => { });
+            mdf.StatusCallback = new StatusCallback<object>((userData, status, host, ip) => { });
             Assert.IsNotNull(mdf.StatusCallback);
             nativeImplementation.Verify();
             mdf.StatusCallback = null;
@@ -546,7 +546,7 @@ namespace Millistream.Streaming.UnitTests
 
         [TestMethod]
         [ExpectedException(typeof(ObjectDisposedException))]
-        public void CannotSetDataCallbackAfterDisposeTest() => GetDisposedMdf().DataCallback = new Action<object, MarketDataFeed<object, object>>((userData, mdf) => { });
+        public void CannotSetDataCallbackAfterDisposeTest() => GetDisposedMdf().DataCallback = new DataCallback<object, object>((userData, mdf) => { });
 
         [TestMethod]
         [ExpectedException(typeof(ObjectDisposedException))]
@@ -562,7 +562,7 @@ namespace Millistream.Streaming.UnitTests
 
         [TestMethod]
         [ExpectedException(typeof(ObjectDisposedException))]
-        public void CannotSetStatusCallbackAfterDisposeTest() => GetDisposedMdf().StatusCallback = new Action<object, ConnectionStatus, string, string>((userData, status, host, ip) => { });
+        public void CannotSetStatusCallbackAfterDisposeTest() => GetDisposedMdf().StatusCallback = new StatusCallback<object>((userData, status, host, ip) => { });
 
         [TestMethod]
         [ExpectedException(typeof(ObjectDisposedException))]

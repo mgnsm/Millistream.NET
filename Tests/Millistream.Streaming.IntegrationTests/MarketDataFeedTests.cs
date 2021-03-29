@@ -3,6 +3,7 @@ using System;
 using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using MarketDataFeed = Millistream.Streaming.MarketDataFeed<object, object>;
@@ -242,21 +243,32 @@ namespace Millistream.Streaming.IntegrationTests
         [TestMethod]
         public void StatusCallbackTest()
         {
+            string host = GetTestRunParameter("host");
+            Assert.IsFalse(string.IsNullOrEmpty(host));
+            int index = host.LastIndexOf(':');
+            string hostWithoutPort = index > -1 ? host.Substring(0, index) : host;
+
             HashSet<ConnectionStatus> receivedStatuses = new HashSet<ConnectionStatus>();
             using MarketDataFeed<object, HashSet<ConnectionStatus>> mdf = new MarketDataFeed<object, HashSet<ConnectionStatus>>()
             {
                 StatusCallbackUserData = receivedStatuses
             };
 
-            static void OnStatusChanged(HashSet<ConnectionStatus> statuses, ConnectionStatus status, string host, string ip)
+            void OnStatusChanged(HashSet<ConnectionStatus> statuses, ConnectionStatus status, ReadOnlySpan<byte> host, ReadOnlySpan<byte> ip)
             {
                 if (!statuses.Contains(status))
                     statuses.Add(status);
+
+                if (host != default)
+                    Assert.AreEqual(hostWithoutPort, Encoding.UTF8.GetString(host.ToArray()));
+
+                if (ip != default)
+                    Assert.IsTrue(IPAddress.TryParse(Encoding.UTF8.GetString(ip.ToArray()), out _));
             }
             mdf.StatusCallback = OnStatusChanged;
 
             //connect
-            Assert.IsTrue(mdf.Connect(GetTestRunParameter("host")));
+            Assert.IsTrue(mdf.Connect(host));
             Assert.AreEqual(4, receivedStatuses.Count);
             Assert.IsTrue(receivedStatuses.Contains(ConnectionStatus.MDF_STATUS_LOOKUP));
             Assert.IsTrue(receivedStatuses.Contains(ConnectionStatus.MDF_STATUS_CONNECTING));
