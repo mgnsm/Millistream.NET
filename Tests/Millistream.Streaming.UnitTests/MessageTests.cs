@@ -366,36 +366,6 @@ namespace Millistream.Streaming.UnitTests
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void AddNullNumericTest() =>
-            new Message().AddNumeric(Field.MDF_F_LASTPRICE, null);
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void AddEmptyNumericTest() =>
-            new Message().AddNumeric(Field.MDF_F_LASTPRICE, string.Empty);
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void AddNullStringTest() =>
-            new Message().AddString(Field.MDF_F_REQUESTID, null);
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void AddEmptyStringTest() =>
-            new Message().AddString(Field.MDF_F_REQUESTID, string.Empty);
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void AddNullDateTest() =>
-            new Message().AddDate(Field.MDF_F_DATE, null);
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void AddEmptyDateTest() =>
-            new Message().AddDate(Field.MDF_F_DATE, string.Empty);
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void AddNullTimeTest() =>
             new Message().AddTime(Field.MDF_F_TIME, null);
 
@@ -403,16 +373,6 @@ namespace Millistream.Streaming.UnitTests
         [ExpectedException(typeof(ArgumentNullException))]
         public void AddEmptyTimeTest() =>
             new Message().AddTime(Field.MDF_F_TIME, string.Empty);
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void AddNullListTest() =>
-            new Message().AddList(Field.MDF_F_INSREFLIST, default);
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void AddEmptyListTest() =>
-            new Message().AddList(Field.MDF_F_INSREFLIST, string.Empty);
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]

@@ -142,15 +142,13 @@ namespace Millistream.Streaming
         /// <param name="tag">The field tag.</param>
         /// <param name="value">The numeric value as a UTF-8 string.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false"/> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
         /// <remarks>The corresponding native function is mdf_message_add_numeric.</remarks>
         public bool AddNumeric(uint tag, string value)
         {
-            if (string.IsNullOrEmpty(value))
-                throw new ArgumentNullException(nameof(value));
-
             ThrowIfDisposed();
+            if (value == null)
+                return _nativeImplementation.mdf_message_add_numeric(Handle, tag, IntPtr.Zero) == 1;
 
             unsafe
             {
@@ -167,7 +165,6 @@ namespace Millistream.Streaming
         /// <param name="tag">The field tag.</param>
         /// <param name="value">The numeric value as a UTF-8 string.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false"/> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
         /// <remarks>The corresponding native function is mdf_message_add_numeric.</remarks>
         public bool AddNumeric(Field tag, string value) =>
@@ -245,15 +242,13 @@ namespace Millistream.Streaming
         /// <param name="tag">The field tag.</param>
         /// <param name="value">The UTF-8 string field value.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
         /// <remarks>The corresponding native function is mdf_message_add_string.</remarks>
         public bool AddString(uint tag, string value)
         {
-            if (string.IsNullOrEmpty(value))
-                throw new ArgumentNullException(nameof(value));
-
             ThrowIfDisposed();
+            if (value == null)
+                return _nativeImplementation.mdf_message_add_string(Handle, tag, IntPtr.Zero) == 1;
 
             unsafe
             {
@@ -275,16 +270,14 @@ namespace Millistream.Streaming
         /// <param name="value">The UTF-8 string field value.</param>
         /// <param name="length">The number of characters in <paramref name="value"/> to be added to the message.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
         /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_add_string2 function.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
         /// <remarks>The corresponding native function is mdf_message_add_string2.</remarks>
         public bool AddString(uint tag, string value, int length)
         {
-            if (string.IsNullOrEmpty(value))
-                throw new ArgumentNullException(nameof(value));
-
             ThrowIfDisposed();
+            if (value == null)
+                return _nativeImplementation.mdf_message_add_string2(Handle, tag, IntPtr.Zero, length) == 1;
 
             if (length < 0)
                 return false;
@@ -307,7 +300,6 @@ namespace Millistream.Streaming
         /// <param name="tag">The field tag.</param>
         /// <param name="value">The UTF-8 string field value.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
         /// <remarks>The corresponding native function is mdf_message_add_string.</remarks>
         public bool AddString(Field tag, string value) =>
@@ -320,7 +312,6 @@ namespace Millistream.Streaming
         /// <param name="value">The UTF-8 string field value.</param>
         /// <param name="length">The number of characters in <paramref name="value"/> to be added to the message.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
         /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_add_string2 function.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
         /// <remarks>The corresponding native function is mdf_message_add_string2.</remarks>
@@ -333,15 +324,13 @@ namespace Millistream.Streaming
         /// <param name="tag">The field tag.</param>
         /// <param name="value">The date field value.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
         /// <remarks>The corresponding native function is mdf_message_add_date.</remarks>
         public bool AddDate(uint tag, string value)
         {
-            if (string.IsNullOrEmpty(value))
-                throw new ArgumentNullException(nameof(value));
-
             ThrowIfDisposed();
+            if (value == null)
+                return _nativeImplementation.mdf_message_add_date(Handle, tag, IntPtr.Zero) == 1;
 
             unsafe
             {
@@ -358,7 +347,6 @@ namespace Millistream.Streaming
         /// <param name="tag">The field tag.</param>
         /// <param name="value">The date field value.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
         /// <remarks>The corresponding native function is mdf_message_add_date.</remarks>
         public bool AddDate(Field tag, string value) =>
@@ -508,15 +496,13 @@ namespace Millistream.Streaming
         /// <param name="tag">The field tag.</param>
         /// <param name="value">The list field value.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
         /// <remarks>The corresponding native function is mdf_message_add_list.</remarks>
         public bool AddList(uint tag, string value)
         {
-            if (string.IsNullOrEmpty(value))
-                throw new ArgumentNullException(nameof(value));
-
             ThrowIfDisposed();
+            if (value == null)
+                return _nativeImplementation.mdf_message_add_list(Handle, tag, IntPtr.Zero) == 1;
 
             unsafe
             {
@@ -537,7 +523,6 @@ namespace Millistream.Streaming
         /// <param name="tag">The field tag.</param>
         /// <param name="value">The list field value.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
         /// <remarks>The corresponding native function is mdf_message_add_list.</remarks>
         public bool AddList(Field tag, string value) =>
