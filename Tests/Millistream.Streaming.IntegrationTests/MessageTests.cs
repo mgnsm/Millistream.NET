@@ -74,6 +74,8 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.IsTrue(message.AddNumeric(Field.MDF_F_LANGUAGE, "-0.000000000000001"));
             Assert.IsTrue(message.AddNumeric(Field.MDF_F_LANGUAGE, "-1.0000001"));
             Assert.IsTrue(message.AddNumeric(Field.MDF_F_LANGUAGE, "-18446.744073709551615"));
+            Assert.IsTrue(message.AddNumeric(Field.MDF_F_LANGUAGE, null));
+            Assert.IsTrue(message.AddNumeric(Field.MDF_F_LANGUAGE, string.Empty));
         }
 
         [TestMethod]
@@ -170,6 +172,7 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.IsTrue(message.AddDate(Field.MDF_F_DATE, "2008-Q4"));
             Assert.IsTrue(message.AddDate(Field.MDF_F_DATE, "2008-W22"));
             Assert.IsTrue(message.AddDate(Field.MDF_F_DATE, "2008-W53"));
+            Assert.IsTrue(message.AddDate(Field.MDF_F_DATE, null));
             Assert.IsFalse(message.AddDate(Field.MDF_F_DATE, "2020-14-30"));
             Assert.IsFalse(message.AddDate(Field.MDF_F_DATE, "-1"));
             Assert.IsFalse(message.AddDate(Field.MDF_F_DATE, "abc"));
@@ -224,6 +227,8 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.IsTrue(message.AddList(Field.MDF_F_INSREFLIST, "-28"));
             Assert.IsTrue(message.AddList(Field.MDF_F_INSREFLIST, "-28 28"));
             Assert.IsTrue(message.AddList(Field.MDF_F_INSREFLIST, "-28 28 343"));
+            Assert.IsTrue(message.AddList(Field.MDF_F_INSREFLIST, null));
+            Assert.IsTrue(message.AddList(Field.MDF_F_INSREFLIST, string.Empty));
         }
 
         [TestMethod]
@@ -262,6 +267,7 @@ namespace Millistream.Streaming.IntegrationTests
                 "åäöÅÄÖæß€µ",
                 "12-------P----",
                 "46--X-B--P-3--",
+                string.Empty
             };
 
             using Message message = new Message();
@@ -273,6 +279,9 @@ namespace Millistream.Streaming.IntegrationTests
                 Assert.IsTrue(message.AddString(Field.MDF_F_LANGUAGE, @string, @string.Length + 5));
                 Assert.IsFalse(message.AddString(Field.MDF_F_LANGUAGE, @string, -1));
             }
+
+            Assert.IsTrue(message.AddString(Field.MDF_F_LANGUAGE, null));
+            Assert.IsTrue(message.AddString(Field.MDF_F_LANGUAGE, null, -1));
         }
 
         [TestMethod]
