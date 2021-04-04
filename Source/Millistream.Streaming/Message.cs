@@ -9,7 +9,7 @@ namespace Millistream.Streaming
     /// Represents a managed message handle (mdf_message_t) that can contain several messages for efficiency.
     /// </summary>
     /// <remarks>Handles are not thread-safe. If multiple threads will share access to a single handle, the accesses has to be serialized using a mutex or other forms of locking mechanisms. The API as such is thread-safe so multiple threads can have local handles without the need for locks.</remarks>
-    public unsafe sealed class Message : IMessage, IDisposable
+    public unsafe sealed partial class Message : IMessage, IDisposable
     {
         private readonly NativeImplementation _nativeImplementation;
         private CompressionLevel _compressionLevel = CompressionLevel.Z_BEST_SPEED;
@@ -140,7 +140,7 @@ namespace Millistream.Streaming
         /// Adds a numeric field to the current active message.
         /// </summary>
         /// <param name="tag">The field tag.</param>
-        /// <param name="value">The numeric value as a UTF-8 string.</param>
+        /// <param name="value">The numeric field value.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false"/> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
         /// <remarks>The corresponding native function is mdf_message_add_numeric.</remarks>
@@ -150,20 +150,17 @@ namespace Millistream.Streaming
             if (value == null)
                 return _nativeImplementation.mdf_message_add_numeric(Handle, tag, IntPtr.Zero) == 1;
 
-            unsafe
-            {
-                byte* bytes = stackalloc byte[value.Length + 1];
-                if (!TryGetAsciiBytes(value, bytes))
-                    return false;
-                return _nativeImplementation.mdf_message_add_numeric(Handle, tag, (IntPtr)bytes) == 1;
-            }
+            byte* bytes = stackalloc byte[value.Length + 1];
+            if (!TryGetAsciiBytes(value, bytes))
+                return false;
+            return _nativeImplementation.mdf_message_add_numeric(Handle, tag, (IntPtr)bytes) == 1;
         }
 
         /// <summary>
         /// Adds a numeric field to the current active message.
         /// </summary>
         /// <param name="tag">The field tag.</param>
-        /// <param name="value">The numeric value as a UTF-8 string.</param>
+        /// <param name="value">The numeric field value.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false"/> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
         /// <remarks>The corresponding native function is mdf_message_add_numeric.</remarks>
@@ -250,16 +247,13 @@ namespace Millistream.Streaming
             if (value == null)
                 return _nativeImplementation.mdf_message_add_string(Handle, tag, IntPtr.Zero) == 1;
 
-            unsafe
+            fixed (char* c = value)
             {
-                fixed (char* c = value)
-                {
-                    int length = Encoding.UTF8.GetMaxByteCount(value.Length);
-                    byte* b = stackalloc byte[length + 1];
-                    int bytesWritten = Encoding.UTF8.GetBytes(c, value.Length, b, length);
-                    b[bytesWritten] = 0;
-                    return _nativeImplementation.mdf_message_add_string(Handle, tag, (IntPtr)b) == 1;
-                }
+                int length = Encoding.UTF8.GetMaxByteCount(value.Length);
+                byte* b = stackalloc byte[length + 1];
+                int bytesWritten = Encoding.UTF8.GetBytes(c, value.Length, b, length);
+                b[bytesWritten] = 0;
+                return _nativeImplementation.mdf_message_add_string(Handle, tag, (IntPtr)b) == 1;
             }
         }
 
@@ -282,15 +276,12 @@ namespace Millistream.Streaming
             if (length < 0)
                 return false;
 
-            unsafe
+            fixed (char* c = value)
             {
-                fixed (char* c = value)
-                {
-                    int byteCount = Encoding.UTF8.GetByteCount(c, length);
-                    byte* b = stackalloc byte[byteCount + 1];
-                    Encoding.UTF8.GetBytes(c, length, b, byteCount);
-                    return _nativeImplementation.mdf_message_add_string2(Handle, tag, (IntPtr)b, byteCount) == 1;
-                }
+                int byteCount = Encoding.UTF8.GetByteCount(c, length);
+                byte* b = stackalloc byte[byteCount + 1];
+                Encoding.UTF8.GetBytes(c, length, b, byteCount);
+                return _nativeImplementation.mdf_message_add_string2(Handle, tag, (IntPtr)b, byteCount) == 1;
             }
         }
 
@@ -332,13 +323,10 @@ namespace Millistream.Streaming
             if (value == null)
                 return _nativeImplementation.mdf_message_add_date(Handle, tag, IntPtr.Zero) == 1;
 
-            unsafe
-            {
-                byte* bytes = stackalloc byte[value.Length + 1];
-                if (!TryGetAsciiBytes(value, bytes))
-                    return false;
-                return _nativeImplementation.mdf_message_add_date(Handle, tag, (IntPtr)bytes) == 1;
-            }
+            byte* bytes = stackalloc byte[value.Length + 1];
+            if (!TryGetAsciiBytes(value, bytes))
+                return false;
+            return _nativeImplementation.mdf_message_add_date(Handle, tag, (IntPtr)bytes) == 1;
         }
 
         /// <summary>
@@ -387,34 +375,28 @@ namespace Millistream.Streaming
         /// Adds a time field to the current active message. Please note that all times and dates are expressed in UTC. The format of value must be "HH:MM:SS" or "HH:MM:SS.mmm" (where mmm is the milliseconds). libmdf 1.0.24 accepts up to nanoseconds resolution, i.e. "HH:MM:SS.nnnnnnnnn".
         /// </summary>
         /// <param name="tag">The field tag.</param>
-        /// <param name="value">The time.</param>
+        /// <param name="value">The time field value.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
         /// <remarks>The corresponding native function is mdf_message_add_time.</remarks>
         public bool AddTime(uint tag, string value)
         {
-            if (string.IsNullOrEmpty(value))
-                throw new ArgumentNullException(nameof(value));
-
             ThrowIfDisposed();
+            if (string.IsNullOrEmpty(value))
+                return false;
 
-            unsafe
-            {
-                byte* bytes = stackalloc byte[value.Length + 1];
-                if (!TryGetAsciiBytes(value, bytes))
-                    return false;
-                return _nativeImplementation.mdf_message_add_time(Handle, tag, (IntPtr)bytes) == 1;
-            }
+            byte* bytes = stackalloc byte[value.Length + 1];
+            if (!TryGetAsciiBytes(value, bytes))
+                return false;
+            return _nativeImplementation.mdf_message_add_time(Handle, tag, (IntPtr)bytes) == 1;
         }
 
         /// <summary>
         /// Adds a time field to the current active message. Please note that all times and dates are expressed in UTC. The format of value must be "HH:MM:SS" or "HH:MM:SS.mmm" (where mmm is the milliseconds). libmdf 1.0.24 accepts up to nanoseconds resolution, i.e. "HH:MM:SS.nnnnnnnnn".
         /// </summary>
         /// <param name="tag">The field tag.</param>
-        /// <param name="value">The time.</param>
+        /// <param name="value">The time field value.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
         /// <remarks>The corresponding native function is mdf_message_add_time.</remarks>
         public bool AddTime(Field tag, string value) =>
@@ -504,13 +486,10 @@ namespace Millistream.Streaming
             if (value == null)
                 return _nativeImplementation.mdf_message_add_list(Handle, tag, IntPtr.Zero) == 1;
 
-            unsafe
-            {
-                byte* bytes = stackalloc byte[value.Length + 1];
-                if (!TryGetAsciiBytes(value, bytes))
-                    return false;
-                return _nativeImplementation.mdf_message_add_list(Handle, tag, (IntPtr)bytes) == 1;
-            }
+            byte* bytes = stackalloc byte[value.Length + 1];
+            if (!TryGetAsciiBytes(value, bytes))
+                return false;
+            return _nativeImplementation.mdf_message_add_list(Handle, tag, (IntPtr)bytes) == 1;
         }
 
         /// <summary>
@@ -600,13 +579,10 @@ namespace Millistream.Streaming
                 throw new ArgumentNullException(nameof(data));
 
             ThrowIfDisposed();
-            unsafe
-            {
-                byte* bytes = stackalloc byte[data.Length + 1];
-                if (!TryGetAsciiBytes(data, bytes))
-                    return false;
-                return _nativeImplementation.mdf_message_deserialize(Handle, (IntPtr)bytes) == 1;
-            }
+            byte* bytes = stackalloc byte[data.Length + 1];
+            if (!TryGetAsciiBytes(data, bytes))
+                return false;
+            return _nativeImplementation.mdf_message_deserialize(Handle, (IntPtr)bytes) == 1;
         }
 
         /// <summary>
@@ -644,7 +620,7 @@ namespace Millistream.Streaming
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private unsafe static bool TryGetAsciiBytes(string value, byte* bytes)
+        private static bool TryGetAsciiBytes(string value, byte* bytes)
         {
             for (int i = 0; i < value.Length; ++i)
             {

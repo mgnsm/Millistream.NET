@@ -112,6 +112,10 @@ namespace Millistream.Streaming.UnitTests
             Assert.IsTrue(message.AddNumeric(Field, Value));
             Assert.IsTrue(message.AddNumeric((uint)Field, Value));
             _nativeImplementation.Verify(x => x.mdf_message_add_numeric(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(2));
+            byte[] bytes = Encoding.UTF8.GetBytes(Value);
+            Assert.IsTrue(message.AddNumeric(Field, bytes));
+            Assert.IsTrue(message.AddNumeric((uint)Field, bytes));
+            _nativeImplementation.Verify(x => x.mdf_message_add_numeric(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(4));
         }
 
         [TestMethod]
@@ -188,7 +192,16 @@ namespace Millistream.Streaming.UnitTests
             Assert.IsTrue(message.AddString((uint)Field, Value, Value.Length));
 
             _nativeImplementation.Verify(x => x.mdf_message_add_string(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(2));
-            _nativeImplementation.Verify(x => x.mdf_message_add_string2(message.Handle, (uint)Field, It.IsAny<IntPtr>(), Value.Length));
+            _nativeImplementation.Verify(x => x.mdf_message_add_string2(message.Handle, (uint)Field, It.IsAny<IntPtr>(), Value.Length), Times.Exactly(2));
+
+            byte[] bytes = Encoding.UTF8.GetBytes(Value);
+            Assert.IsTrue(message.AddString(Field, Value));
+            Assert.IsTrue(message.AddString((uint)Field, Value));
+            _nativeImplementation.Verify(x => x.mdf_message_add_string(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(4));
+
+            Assert.IsTrue(message.AddString(Field, bytes, bytes.Length));
+            Assert.IsTrue(message.AddString((uint)Field, bytes, bytes.Length));
+            _nativeImplementation.Verify(x => x.mdf_message_add_string2(message.Handle, (uint)Field, It.IsAny<IntPtr>(), Value.Length), Times.Exactly(4));
         }
 
 
@@ -207,6 +220,10 @@ namespace Millistream.Streaming.UnitTests
             Assert.IsTrue(message.AddDate(Field, Value));
             Assert.IsTrue(message.AddDate((uint)Field, Value));
             _nativeImplementation.Verify(x => x.mdf_message_add_date(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(2));
+            byte[] bytes = Encoding.UTF8.GetBytes(Value);
+            Assert.IsTrue(message.AddDate(Field, bytes));
+            Assert.IsTrue(message.AddDate((uint)Field, bytes));
+            _nativeImplementation.Verify(x => x.mdf_message_add_date(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(4));
 
             const int Year = 2020;
             const int Month = 12;
@@ -264,6 +281,10 @@ namespace Millistream.Streaming.UnitTests
             Assert.IsTrue(message.AddList(Field, Value));
             Assert.IsTrue(message.AddList((uint)Field, Value));
             _nativeImplementation.Verify(x => x.mdf_message_add_list(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(2));
+            byte[] bytes = Encoding.UTF8.GetBytes(Value);
+            Assert.IsTrue(message.AddList(Field, bytes));
+            Assert.IsTrue(message.AddList((uint)Field, bytes));
+            _nativeImplementation.Verify(x => x.mdf_message_add_list(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(4));
         }
 
         [TestMethod]
@@ -366,16 +387,6 @@ namespace Millistream.Streaming.UnitTests
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void AddNullTimeTest() =>
-            new Message().AddTime(Field.MDF_F_TIME, null);
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void AddEmptyTimeTest() =>
-            new Message().AddTime(Field.MDF_F_TIME, string.Empty);
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
         public void MoveNullReferenceTest() =>
             Message.Move(null, new(), 1, 2);
 
@@ -423,6 +434,9 @@ namespace Millistream.Streaming.UnitTests
 
             CatchObjectDisposedException(() => disposedMessage.AddNumeric(1, StringConstants.RequestTypes.MDF_RT_IMAGE));
             CatchObjectDisposedException(() => disposedMessage.AddNumeric(Field.MDF_F_AVERAGE, "1.1"));
+            byte[] bytes = Encoding.UTF8.GetBytes("1.1");
+            CatchObjectDisposedException(() => disposedMessage.AddNumeric(1, bytes));
+            CatchObjectDisposedException(() => disposedMessage.AddNumeric(Field.MDF_F_AVERAGE, bytes));
 
             CatchObjectDisposedException(() => disposedMessage.AddInt64(1, -12345, 2));
             CatchObjectDisposedException(() => disposedMessage.AddInt64(Field.MDF_F_AVERAGE, -12345, 2));
@@ -434,14 +448,26 @@ namespace Millistream.Streaming.UnitTests
             CatchObjectDisposedException(() => disposedMessage.AddString(1, "abc", 1));
             CatchObjectDisposedException(() => disposedMessage.AddString(Field.MDF_F_REQUESTID, "abc"));
             CatchObjectDisposedException(() => disposedMessage.AddString(Field.MDF_F_REQUESTID, "abc", 1));
+            bytes = Encoding.UTF8.GetBytes("abc");
+            CatchObjectDisposedException(() => disposedMessage.AddString(1, bytes));
+            CatchObjectDisposedException(() => disposedMessage.AddString(1, bytes, 1));
+            CatchObjectDisposedException(() => disposedMessage.AddString(Field.MDF_F_REQUESTID, bytes));
+            CatchObjectDisposedException(() => disposedMessage.AddString(Field.MDF_F_REQUESTID, bytes, 1));
+
 
             CatchObjectDisposedException(() => disposedMessage.AddDate(1, "2020-12-30"));
             CatchObjectDisposedException(() => disposedMessage.AddDate(Field.MDF_F_DATE, "2020-12-30"));
             CatchObjectDisposedException(() => disposedMessage.AddDate(1, 2020, 12, 30));
             CatchObjectDisposedException(() => disposedMessage.AddDate(Field.MDF_F_DATE, 2020, 12, 30));
+            bytes = Encoding.UTF8.GetBytes("2020-12-30");
+            CatchObjectDisposedException(() => disposedMessage.AddDate(1, bytes));
+            CatchObjectDisposedException(() => disposedMessage.AddDate(Field.MDF_F_DATE, bytes));
 
             CatchObjectDisposedException(() => disposedMessage.AddTime(1, "16:30:30"));
             CatchObjectDisposedException(() => disposedMessage.AddTime(Field.MDF_F_TIME, "16:30:30"));
+            bytes = Encoding.UTF8.GetBytes("16:30:30");
+            CatchObjectDisposedException(() => disposedMessage.AddTime(1, bytes));
+            CatchObjectDisposedException(() => disposedMessage.AddTime(Field.MDF_F_TIME, bytes));
 
             CatchObjectDisposedException(() => disposedMessage.AddTime2(1, 16, 30, 30, 999));
             CatchObjectDisposedException(() => disposedMessage.AddTime2(Field.MDF_F_TIME, 16, 30, 30, 999));
@@ -451,6 +477,9 @@ namespace Millistream.Streaming.UnitTests
 
             CatchObjectDisposedException(() => disposedMessage.AddList(1, "1"));
             CatchObjectDisposedException(() => disposedMessage.AddList(Field.MDF_F_INSREFLIST, "1"));
+            bytes = Encoding.UTF8.GetBytes("1");
+            CatchObjectDisposedException(() => disposedMessage.AddList(1, bytes));
+            CatchObjectDisposedException(() => disposedMessage.AddList(Field.MDF_F_INSREFLIST, bytes));
 
             CatchObjectDisposedException(() => disposedMessage.Reset());
 
