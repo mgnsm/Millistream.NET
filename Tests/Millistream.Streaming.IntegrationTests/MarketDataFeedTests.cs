@@ -15,6 +15,9 @@ namespace Millistream.Streaming.IntegrationTests
     {
         public TestContext TestContext { get; set; }
 
+        [AssemblyInitialize]
+        public static void AssemblyInitialize(TestContext _) => AppDomain.MonitoringIsEnabled = true;
+
         [TestMethod]
         public void CreateMarketDataFeed()
         {
@@ -111,6 +114,40 @@ namespace Millistream.Streaming.IntegrationTests
             //TimeDifferenceNs (requires version 1.0.24 of the native library which currently only comes as a pre-built binary on Linux)
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 _ = mdf.TimeDifferenceNs;
+
+            //Allocations
+            long allocatedBytes = GetTotalAllocatedBytes();
+            _ = mdf.FileDescriptor;
+
+            mdf.ErrorCode = Error.MDF_ERR_MSG_OOB;
+            _ = mdf.ErrorCode;
+
+            mdf.ReceivedBytes += 100;
+            _ = mdf.ReceivedBytes;
+
+            mdf.SentBytes -= 100;
+            _ = mdf.SentBytes;
+
+            mdf.ConnectionTimeout = 35;
+            _ = mdf.ConnectionTimeout;
+
+            mdf.HeartbeatInterval = 1000;
+            _ = mdf.HeartbeatInterval;
+
+            mdf.MaximumMissedHeartbeats = 50;
+            _ = mdf.MaximumMissedHeartbeats;
+
+            mdf.NoDelay = false;
+            _ = mdf.NoDelay;
+
+            mdf.NoEncryption = true;
+            _ = mdf.NoEncryption;
+
+            _ = mdf.TimeDifference;
+
+            mdf.BindAddress = "abc";
+
+            Assert.AreEqual(allocatedBytes, GetTotalAllocatedBytes());
         }
 
         [TestMethod]
@@ -538,5 +575,17 @@ namespace Millistream.Streaming.IntegrationTests
 
             return numberOfFinishedRequests == requestIds.Count;
         }
+
+        private static long GetTotalAllocatedBytes()
+        {
+#if NET45
+            //GC statistics are guaranteed to be accurate only after a full, blocking collection.
+            GC.Collect();
+            return AppDomain.CurrentDomain.MonitoringTotalAllocatedMemorySize;
+#else
+            return GC.GetTotalAllocatedBytes(true);
+#endif
+        }
+
     }
 }
