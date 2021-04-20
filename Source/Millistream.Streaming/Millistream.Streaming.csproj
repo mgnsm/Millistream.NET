@@ -9,13 +9,17 @@
     <Product>Millistream Market Data Feed (MDF)</Product>
     <Title>Millistream Streaming API</Title>
     <PackageTags>fintech;streaming;.net;real-time;C#</PackageTags>
-    <Copyright>Copyright 2021 Magnus Montin</Copyright>
+    <Copyright>© Magnus Montin. All rights reserved.</Copyright>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
     <PackageReleaseNotes>https://github.com/mgnsm/Millistream.NET/releases</PackageReleaseNotes>
 	<LangVersion>9.0</LangVersion>
+	<PublishRepositoryUrl>true</PublishRepositoryUrl>
+	<EmbedUntrackedSources>true</EmbedUntrackedSources>
+	<IncludeSymbols>true</IncludeSymbols>
+	<SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
-
+	
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
   </ItemGroup>
@@ -24,6 +28,7 @@
     <PackageReference Include="System.Buffers" Version="4.5.1" />
     <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
     <PackageReference Include="System.Memory" Version="4.5.4" />
+	<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
   </ItemGroup>
 
   <PropertyGroup>
