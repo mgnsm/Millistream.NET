@@ -21,6 +21,8 @@ namespace Millistream.Streaming
         internal const int MaxHeartbeatInterval = 86400;
         internal const int MinMissedHeartbeats = 1;
         internal const int MaxMissedHeartbeats = 100;
+        private const string UnknownOptionMessage = "The native value of the property cannot be fetched. " +
+            "Please make sure that you have installed the latest version of the native dependency.";
         #endregion
 
         #region Fields
@@ -562,7 +564,7 @@ namespace Millistream.Streaming
             ThrowIfDisposed();
             int value = default;
             if (_nativeImplementation.mdf_get_int_property(_feedHandle, option, ref value) != 1)
-                throw new InvalidOperationException();
+                throw new InvalidOperationException(UnknownOptionMessage);
             return value;
         }
 
@@ -571,7 +573,7 @@ namespace Millistream.Streaming
             ThrowIfDisposed();
             ulong value = default;
             if (_nativeImplementation.mdf_get_ulong_property(_feedHandle, option, ref value) != 1)
-                throw new InvalidOperationException();
+                throw new InvalidOperationException(UnknownOptionMessage);
             return value;
         }
 
@@ -580,7 +582,7 @@ namespace Millistream.Streaming
             ThrowIfDisposed();
             IntPtr value = default;
             if (_nativeImplementation.mdf_get_property(_feedHandle, option, ref value) != 1)
-                throw new InvalidOperationException();
+                throw new InvalidOperationException(UnknownOptionMessage);
 
             if (value == IntPtr.Zero)
                 return null;
