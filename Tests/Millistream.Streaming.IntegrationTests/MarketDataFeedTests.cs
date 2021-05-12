@@ -112,8 +112,9 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.AreEqual(bindAddress, mdf.BindAddress);
 
             //TimeDifferenceNs (requires version 1.0.24 of the native library which currently only comes as a pre-built binary on Linux)
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                _ = mdf.TimeDifferenceNs;
+#if Linux
+            _ = mdf.TimeDifferenceNs;
+#endif
 
             //Allocations
             long allocatedBytes = GetTotalAllocatedBytes();
@@ -148,6 +149,59 @@ namespace Millistream.Streaming.IntegrationTests
             mdf.BindAddress = "abc";
 
             Assert.AreEqual(allocatedBytes, GetTotalAllocatedBytes());
+        }
+
+#if Linux
+        [TestMethod]
+        public void GetAndSetMessageDigestsAndCiphersTest()
+        {
+            const string PrefferedDigest = "md5";
+            const string PreferredChipher = "chacha20";
+
+            using MarketDataFeed mdf = new MarketDataFeed();
+            Assert.IsFalse(string.IsNullOrEmpty(mdf.MessageDigests));
+            Assert.IsFalse(string.IsNullOrEmpty(mdf.Ciphers));
+
+            char[] separator = new char[1] { ',' };
+            string[] digests = mdf.MessageDigests.Split(separator);
+            Assert.IsTrue(digests != null && digests.Length > 0);
+            Assert.IsTrue(digests.Contains(PrefferedDigest));
+
+            string[] ciphers = mdf.Ciphers.Split(separator);
+            Assert.IsTrue(ciphers != null && ciphers.Length > 0);
+            Assert.IsTrue(ciphers.Contains(PreferredChipher));
+
+            mdf.MessageDigests = PrefferedDigest;
+            mdf.Ciphers = PreferredChipher;
+            Assert.IsTrue(mdf.Connect(GetTestRunParameter("host")));
+            Assert.AreEqual(PrefferedDigest, mdf.MessageDigest);
+            Assert.AreEqual(PreferredChipher, mdf.Cipher);
+
+            mdf.Disconnect();
+            mdf.MessageDigests = null;
+            Assert.IsFalse(string.IsNullOrEmpty(mdf.MessageDigests));
+            mdf.Ciphers = null;
+            Assert.IsFalse(string.IsNullOrEmpty(mdf.Ciphers));
+            Assert.IsTrue(mdf.Connect(GetTestRunParameter("host")));
+            Assert.IsFalse(string.IsNullOrEmpty(mdf.MessageDigest));
+            Assert.IsFalse(string.IsNullOrEmpty(mdf.Cipher));
+        }
+#endif
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void CannotGetDigestBeforeConnectTest()
+        {
+            using MarketDataFeed mdf = new MarketDataFeed();
+            _ = mdf.MessageDigest;
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException))]
+        public void CannotGetCipherBeforeConnectTest()
+        {
+            using MarketDataFeed mdf = new MarketDataFeed();
+            _ = mdf.Cipher;
         }
 
         [TestMethod]

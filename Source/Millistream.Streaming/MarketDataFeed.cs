@@ -266,54 +266,8 @@ namespace Millistream.Streaming
         /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         public string BindAddress
         {
-            get
-            {
-                ThrowIfDisposed();
-                IntPtr value = default;
-                if (_nativeImplementation.mdf_get_property(_feedHandle, MDF_OPTION.MDF_OPT_BIND_ADDRESS, ref value) != 1)
-                    throw new InvalidOperationException();
-
-                if (value == IntPtr.Zero)
-                    return null;
-
-                unsafe
-                {
-                    byte* p = (byte*)value;
-                    int byteCount = 0;
-                    while (*(p + byteCount++) != 0) ;
-                    int charCount = Encoding.UTF8.GetCharCount(p, byteCount);
-                    char* c = stackalloc char[charCount];
-                    Encoding.UTF8.GetChars(p, byteCount, c, charCount);
-                    return new string(c);
-                }
-            }
-            set
-            {
-                ThrowIfDisposed();
-
-                int ret = 0;
-                if (value != null)
-                {
-                    unsafe
-                    {
-                        fixed (char* c = value)
-                        {
-                            int length = Encoding.UTF8.GetMaxByteCount(value.Length);
-                            byte* b = stackalloc byte[length + 1];
-                            int bytesWritten = Encoding.UTF8.GetBytes(c, value.Length, b, length);
-                            b[bytesWritten] = 0;
-                            ret = _nativeImplementation.mdf_set_property(_feedHandle, MDF_OPTION.MDF_OPT_BIND_ADDRESS, (IntPtr)b);
-                        }
-                    }
-                }
-                else
-                {
-                    ret = _nativeImplementation.mdf_set_property(_feedHandle, MDF_OPTION.MDF_OPT_BIND_ADDRESS, IntPtr.Zero);
-                }
-
-                if (ret != 1)
-                    throw new InvalidOperationException();
-            }
+            get => GetStringProperty(MDF_OPTION.MDF_OPT_BIND_ADDRESS);
+            set => SetProperty(MDF_OPTION.MDF_OPT_BIND_ADDRESS, value);
         }
 
         /// <summary>
@@ -332,6 +286,42 @@ namespace Millistream.Streaming
                 return value;
             }
         }
+
+        /// <summary>
+        /// A comma separated list of the message digests that the client will offer to the server upon connect.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_CRYPT_DIGESTS"/> option cannot be fetched or modified.</exception>
+        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
+        public string MessageDigests
+        {
+            get => GetStringProperty(MDF_OPTION.MDF_OPT_CRYPT_DIGESTS);
+            set => SetProperty(MDF_OPTION.MDF_OPT_CRYPT_DIGESTS, value);
+        }
+
+        /// <summary>
+        /// A comma separated list of the encryption ciphers that the client will offer to the server upon connect.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_CRYPT_CIPHERS"/> option cannot be fetched or modified.</exception>
+        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
+        public string Ciphers
+        {
+            get => GetStringProperty(MDF_OPTION.MDF_OPT_CRYPT_CIPHERS);
+            set => SetProperty(MDF_OPTION.MDF_OPT_CRYPT_CIPHERS, value);
+        }
+
+        /// <summary>
+        /// Returns the digest chosen by the server, only available after <see cref="Connect"/> returns.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_CRYPT_DIGEST"/> option cannot be fetched.</exception>
+        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
+        public string MessageDigest => GetStringProperty(MDF_OPTION.MDF_OPT_CRYPT_DIGEST);
+
+        /// <summary>
+        /// Returns the cipher chosen by the server, only available after <see cref="Connect"/> returns.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_CRYPT_CIPHER"/> option cannot be fetched.</exception>
+        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
+        public string Cipher => GetStringProperty(MDF_OPTION.MDF_OPT_CRYPT_CIPHER);
         #endregion
 
         #region Methods
@@ -585,6 +575,28 @@ namespace Millistream.Streaming
             return value;
         }
 
+        private string GetStringProperty(MDF_OPTION option)
+        {
+            ThrowIfDisposed();
+            IntPtr value = default;
+            if (_nativeImplementation.mdf_get_property(_feedHandle, option, ref value) != 1)
+                throw new InvalidOperationException();
+
+            if (value == IntPtr.Zero)
+                return null;
+
+            unsafe
+            {
+                byte* p = (byte*)value;
+                int byteCount = 0;
+                while (*(p + byteCount++) != 0) ;
+                int charCount = Encoding.UTF8.GetCharCount(p, byteCount);
+                char* c = stackalloc char[charCount];
+                Encoding.UTF8.GetChars(p, byteCount, c, charCount);
+                return new string(c);
+            }
+        }
+
         private void SetProperty(MDF_OPTION option, int value)
         {
             ThrowIfDisposed();
@@ -613,6 +625,34 @@ namespace Millistream.Streaming
                 throw new ArgumentOutOfRangeException();
 
             SetProperty(option, value);
+        }
+
+        private void SetProperty(MDF_OPTION option, string value)
+        {
+            ThrowIfDisposed();
+
+            int ret = 0;
+            if (value != null)
+            {
+                unsafe
+                {
+                    fixed (char* c = value)
+                    {
+                        int length = Encoding.UTF8.GetMaxByteCount(value.Length);
+                        byte* b = stackalloc byte[length + 1];
+                        int bytesWritten = Encoding.UTF8.GetBytes(c, value.Length, b, length);
+                        b[bytesWritten] = 0;
+                        ret = _nativeImplementation.mdf_set_property(_feedHandle, option, (IntPtr)b);
+                    }
+                }
+            }
+            else
+            {
+                ret = _nativeImplementation.mdf_set_property(_feedHandle, option, IntPtr.Zero);
+            }
+
+            if (ret != 1)
+                throw new InvalidOperationException();
         }
 
         private void ThrowIfDisposed()
