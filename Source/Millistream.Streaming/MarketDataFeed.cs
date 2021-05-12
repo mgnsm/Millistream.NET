@@ -622,7 +622,7 @@ namespace Millistream.Streaming
         private void SetProperty(MDF_OPTION option, int value, int minValue, int maxValue)
         {
             if (value < minValue || value > maxValue)
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(value));
 
             SetProperty(option, value);
         }
