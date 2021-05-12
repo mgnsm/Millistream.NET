@@ -17,6 +17,7 @@ namespace Millistream.Streaming.UnitTests
         private delegate void GetInt32PropertyCallback(IntPtr handle, int option, ref int value);
         private delegate void GetUInt64PropertyCallback(IntPtr handle, int option, ref ulong value);
         private delegate void GetInt64PropertyCallback(IntPtr handle, int option, ref long value);
+        private delegate void GetIntPtrPropertyCallback(IntPtr handle, int option, ref IntPtr value);
 
         [TestMethod]
         public void CreateMarketDataFeedTest()
@@ -68,14 +69,57 @@ namespace Millistream.Streaming.UnitTests
         }
 
         [TestMethod]
-        public void GetAndSetReceivedBytesTest() => GetAndSetUInt64Property(MDF_OPTION.MDF_OPT_RCV_BYTES, mdf => mdf.ReceivedBytes, mdf => mdf.ReceivedBytes = 100);
+        public void GetAndSetReceivedBytesTest() => 
+            GetUInt64Property(MDF_OPTION.MDF_OPT_RCV_BYTES, mdf => mdf.ReceivedBytes);
 
         [TestMethod]
-        public void GetAndSetSentBytesTest() => GetAndSetUInt64Property(MDF_OPTION.MDF_OPT_SENT_BYTES, mdf => mdf.SentBytes, mdf => mdf.SentBytes = 500);
+        public void SetReceivedBytesTest()
+        {
+            const ulong ReceivedBytes = 100;
+            Mock<INativeImplementation> nativeImplementation = new();
+            Setup(nativeImplementation, MDF_OPTION.MDF_OPT_RCV_BYTES, ReceivedBytes);
+
+            using MarketDataFeed mdf = new()
+            {
+                ReceivedBytes = ReceivedBytes
+            };
+            nativeImplementation.Verify();
+        }
 
         [TestMethod]
-        public void GetAndSetConnectionTimeoutTest() => 
-            GetAndSetProperty(MDF_OPTION.MDF_OPT_CONNECT_TIMEOUT, mdf => mdf.ConnectionTimeout, mdf => mdf.ConnectionTimeout = 10);
+        public void GetAndSetSentBytesTest() => GetUInt64Property(MDF_OPTION.MDF_OPT_SENT_BYTES, mdf => mdf.SentBytes);
+
+        [TestMethod]
+        public void SetSentBytesTest()
+        {
+            const ulong SentBytes = 500;
+            Mock<INativeImplementation> nativeImplementation = new();
+            Setup(nativeImplementation, MDF_OPTION.MDF_OPT_SENT_BYTES, SentBytes);
+
+            using MarketDataFeed mdf = new()
+            {
+                SentBytes = SentBytes
+            };
+            nativeImplementation.Verify();
+        }
+
+        [TestMethod]
+        public void GetConnectionTimeoutTest() => 
+            GetInt32Property(MDF_OPTION.MDF_OPT_CONNECT_TIMEOUT, mdf => mdf.ConnectionTimeout);
+
+        [TestMethod]
+        public void SetConnectionTimeoutTest()
+        {
+            const int ConnectionTimeout = 10;
+            Mock<INativeImplementation> nativeImplementation = new();
+            Setup(nativeImplementation, MDF_OPTION.MDF_OPT_CONNECT_TIMEOUT, ConnectionTimeout);
+
+            using MarketDataFeed mdf = new()
+            {
+                ConnectionTimeout = ConnectionTimeout
+            };
+            nativeImplementation.Verify();
+        }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
@@ -108,8 +152,22 @@ namespace Millistream.Streaming.UnitTests
         }
 
         [TestMethod]
-        public void GetAndSetHeartbeatIntervalTest() => 
-            GetAndSetProperty(MDF_OPTION.MDF_OPT_HEARTBEAT_INTERVAL, mdf => mdf.HeartbeatInterval, mdf => mdf.HeartbeatInterval = 60);
+        public void GetHeartbeatIntervalTest() => 
+            GetInt32Property(MDF_OPTION.MDF_OPT_HEARTBEAT_INTERVAL, mdf => mdf.HeartbeatInterval);
+
+        [TestMethod]
+        public void SetHeartbeatIntervalTest()
+        {
+            const int HeartbeatInterval = 60;
+            Mock<INativeImplementation> nativeImplementation = new();
+            Setup(nativeImplementation, MDF_OPTION.MDF_OPT_HEARTBEAT_INTERVAL, HeartbeatInterval);
+
+            using MarketDataFeed mdf = new()
+            {
+                HeartbeatInterval = HeartbeatInterval
+            };
+            nativeImplementation.Verify();
+        }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
@@ -134,8 +192,22 @@ namespace Millistream.Streaming.UnitTests
         }
 
         [TestMethod]
-        public void GetAndSetMaximumMissedHeartbeats() => 
-            GetAndSetProperty(MDF_OPTION.MDF_OPT_HEARTBEAT_MAX_MISSED, mdf => mdf.MaximumMissedHeartbeats, mdf => mdf.MaximumMissedHeartbeats = 50);
+        public void GetMaximumMissedHeartbeatsTest() => 
+            GetInt32Property(MDF_OPTION.MDF_OPT_HEARTBEAT_MAX_MISSED, mdf => mdf.MaximumMissedHeartbeats);
+
+        [TestMethod]
+        public void SetMaximumMissedHeartbeatsTest()
+        {
+            const int MaximumMissedHeartbeats = 50;
+            Mock<INativeImplementation> nativeImplementation = new();
+            Setup(nativeImplementation, MDF_OPTION.MDF_OPT_HEARTBEAT_MAX_MISSED, MaximumMissedHeartbeats);
+
+            using MarketDataFeed mdf = new()
+            {
+                MaximumMissedHeartbeats = MaximumMissedHeartbeats
+            };
+            nativeImplementation.Verify();
+        }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
@@ -228,24 +300,19 @@ namespace Millistream.Streaming.UnitTests
         }
 
         [TestMethod]
-        public void GetAndSetBindAddressTest()
+        public void GetBindAddressTest() => GetStringProperty(MDF_OPTION.MDF_OPT_BIND_ADDRESS, mdf => mdf.BindAddress);
+
+        [TestMethod]
+        public void SetBindAddressTest()
         {
             const string BindingAddress = "123";
             Mock<INativeImplementation> nativeImplementation = new();
-            nativeImplementation.Setup(x => x.mdf_set_property(It.IsAny<IntPtr>(), (int)MDF_OPTION.MDF_OPT_BIND_ADDRESS, It.IsAny<IntPtr>()))
-                .Callback((IntPtr handle, int option, IntPtr value) => Compare(BindingAddress, value))
-                .Returns(1)
-                .Verifiable();
-            nativeImplementation.Setup(x => x.mdf_get_property(It.IsAny<IntPtr>(), (int)MDF_OPTION.MDF_OPT_BIND_ADDRESS, ref It.Ref<IntPtr>.IsAny))
-                .Returns(1)
-                .Verifiable();
-            NativeImplementation.Implementation = nativeImplementation.Object;
+            Setup(nativeImplementation, MDF_OPTION.MDF_OPT_BIND_ADDRESS, BindingAddress);
 
             using MarketDataFeed mdf = new()
             {
                 BindAddress = BindingAddress
             };
-            _ = mdf.BindAddress;
             nativeImplementation.Verify();
         }
 
@@ -265,6 +332,48 @@ namespace Millistream.Streaming.UnitTests
             using MarketDataFeed mdf = new();
             Assert.AreEqual(Difference, mdf.TimeDifferenceNs);
         }
+
+        [TestMethod]
+        public void GetMessageDigestsTest() => GetStringProperty(MDF_OPTION.MDF_OPT_CRYPT_DIGESTS, mdf => mdf.MessageDigests);
+
+        [TestMethod]
+        public void SetMessageDigestsTest()
+        {
+            const string MessageDigests = "sha1,md5";
+            Mock<INativeImplementation> nativeImplementation = new();
+            Setup(nativeImplementation, MDF_OPTION.MDF_OPT_CRYPT_DIGESTS, MessageDigests);
+
+            using MarketDataFeed mdf = new()
+            {
+                MessageDigests = MessageDigests
+            };
+            nativeImplementation.Verify();
+        }
+
+        [TestMethod]
+        public void GetCiphersTest() => GetStringProperty(MDF_OPTION.MDF_OPT_CRYPT_CIPHERS, mdf => mdf.Ciphers);
+
+        [TestMethod]
+        public void SetCiphersTest()
+        {
+            const string Ciphers = "aes-128-ctr,chacha20";
+            Mock<INativeImplementation> nativeImplementation = new();
+            Setup(nativeImplementation, MDF_OPTION.MDF_OPT_CRYPT_CIPHERS, Ciphers);
+
+            using MarketDataFeed mdf = new()
+            {
+                Ciphers = Ciphers
+            };
+            nativeImplementation.Verify();
+        }
+
+        [TestMethod]
+        public void GetMessageDigestTest() => 
+            GetStringProperty(MDF_OPTION.MDF_OPT_CRYPT_DIGEST, mdf => mdf.MessageDigest);
+
+        [TestMethod]
+        public void GetCipherTest() =>
+            GetStringProperty(MDF_OPTION.MDF_OPT_CRYPT_CIPHER, mdf => mdf.Cipher);
 
         [TestMethod]
         public void GetAndSetDataCallbackTest()
@@ -542,6 +651,30 @@ namespace Millistream.Streaming.UnitTests
 
         [TestMethod]
         [ExpectedException(typeof(ObjectDisposedException))]
+        public void CannotGetMessageDigestsAfterDisposeTest() => _ = GetDisposedMdf().MessageDigests;
+
+        [TestMethod]
+        [ExpectedException(typeof(ObjectDisposedException))]
+        public void CannotSetMessageDigestsAfterDisposeTest() => GetDisposedMdf().MessageDigests = "sha1";
+
+        [TestMethod]
+        [ExpectedException(typeof(ObjectDisposedException))]
+        public void CannotGetCiphersAfterDisposeTest() => _ = GetDisposedMdf().Ciphers;
+
+        [TestMethod]
+        [ExpectedException(typeof(ObjectDisposedException))]
+        public void CannotSetCiphersAfterDisposeTest() => GetDisposedMdf().Ciphers = "chacha20";
+
+        [TestMethod]
+        [ExpectedException(typeof(ObjectDisposedException))]
+        public void CannotGetMessageDigestAfterDisposeTest() => _ = GetDisposedMdf().MessageDigest;
+
+        [TestMethod]
+        [ExpectedException(typeof(ObjectDisposedException))]
+        public void CannotGetCipherAfterDisposeTest() => _ = GetDisposedMdf().Cipher;
+
+        [TestMethod]
+        [ExpectedException(typeof(ObjectDisposedException))]
         public void CannotGetDataCallbackfterDisposeTest() => _ = GetDisposedMdf().DataCallback;
 
         [TestMethod]
@@ -640,44 +773,98 @@ namespace Millistream.Streaming.UnitTests
             GetDisposedMdf().Send(message);
         }
 
-        private static void GetAndSetProperty(MDF_OPTION option, Func<MarketDataFeed, int> getter, Action<MarketDataFeed> setter)
+        private static void GetInt32Property(MDF_OPTION option, Func<MarketDataFeed, int> getter)
         {
             const int Value = 5;
             Mock<INativeImplementation> nativeImplementationMock = new();
             nativeImplementationMock
                 .Setup(x => x.mdf_get_property(It.IsAny<IntPtr>(), (int)option, ref It.Ref<int>.IsAny))
                 .Returns(1)
-                .Callback(new GetInt32PropertyCallback((IntPtr handler, int option_, ref int value) => value = Value));
+                .Callback(new GetInt32PropertyCallback((IntPtr handler, int option_, ref int value) => value = Value))
+                .Verifiable();
             NativeImplementation.Implementation = nativeImplementationMock.Object;
-            SetProperty(nativeImplementationMock, Value, option, getter, setter);
+            using MarketDataFeed mdf = new();
+            //assert that the expected value is returned from the getter
+            Assert.AreEqual(Value, getter(mdf));
+            //assert that the setter was invoked
+            nativeImplementationMock.Verify();
         }
 
-        private static void GetAndSetUInt64Property(MDF_OPTION option, Func<MarketDataFeed, ulong> getter, Action<MarketDataFeed> setter)
+        private static void GetUInt64Property(MDF_OPTION option, Func<MarketDataFeed, ulong> getter)
         {
-            const ulong Bytes = 100;
+            const ulong Value = 100;
             Mock<INativeImplementation> nativeImplementationMock = new();
             nativeImplementationMock
                 .Setup(x => x.mdf_get_property(It.IsAny<IntPtr>(), (int)option, ref It.Ref<ulong>.IsAny))
                 .Returns(1)
-                .Callback(new GetUInt64PropertyCallback((IntPtr handler, int option_, ref ulong value) => value = Bytes));
+                .Callback(new GetUInt64PropertyCallback((IntPtr handler, int option_, ref ulong value) => value = Value))
+                .Verifiable();
             NativeImplementation.Implementation = nativeImplementationMock.Object;
-            SetProperty(nativeImplementationMock, Bytes, option, getter, setter);
+            using MarketDataFeed mdf = new();
+            Assert.AreEqual(Value, getter(mdf));
+            nativeImplementationMock.Verify();
         }
 
-        private static void SetProperty<T>(Mock<INativeImplementation> nativeImplementationMock, T Value, MDF_OPTION option, Func<MarketDataFeed, T> getter, Action<MarketDataFeed> setter)
+        private static void GetStringProperty(MDF_OPTION option, Func<MarketDataFeed, string> getter)
         {
-            nativeImplementationMock
-                .Setup(x => x.mdf_set_property(It.IsAny<IntPtr>(), (int)option, It.IsAny<IntPtr>()))
+            const string Value = "abc";
+            byte[] bytes = Encoding.UTF8.GetBytes(Value + char.MinValue);
+            Mock<INativeImplementation> nativeImplementation = new();
+            IntPtr ptr = Marshal.AllocHGlobal(bytes.Length);
+            try
+            {
+                Marshal.Copy(bytes, 0, ptr, bytes.Length);
+
+                nativeImplementation
+                    .Setup(x => x.mdf_get_property(It.IsAny<IntPtr>(), (int)option, ref It.Ref<IntPtr>.IsAny))
+                    .Returns(1)
+                    .Callback(new GetIntPtrPropertyCallback((IntPtr handler, int option, ref IntPtr value) => value = ptr))
+                    .Verifiable();
+                NativeImplementation.Implementation = nativeImplementation.Object;
+
+                using MarketDataFeed mdf = new();
+                Assert.AreEqual(Value, getter(mdf));
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(ptr);
+            }
+            nativeImplementation.Verify();
+        }
+
+        private static void Setup(Mock<INativeImplementation> nativeImplementation, MDF_OPTION option, int value)
+        {
+            IntPtr feedHandle = new(123);
+            nativeImplementation.Setup(x => x.mdf_create()).Returns(feedHandle);
+            nativeImplementation.Setup(x => x.mdf_set_property(feedHandle, (int)option, It.IsAny<IntPtr>()))
+                .Callback((IntPtr handle, int option, IntPtr value_) => Assert.AreEqual(value, Marshal.ReadInt32(value_)))
                 .Returns(1)
                 .Verifiable();
+            NativeImplementation.Implementation = nativeImplementation.Object;
 
-            using MarketDataFeed mdf = new();
-            //assert that the expected value is returned from the getter
-            Assert.AreEqual(Value, getter(mdf));
-            //set the property
-            setter(mdf);
-            //assert that the setter was invoked
-            nativeImplementationMock.Verify();
+        }
+
+        private static void Setup(Mock<INativeImplementation> nativeImplementation, MDF_OPTION option, ulong value)
+        {
+            IntPtr feedHandle = new(123);
+            nativeImplementation.Setup(x => x.mdf_create()).Returns(feedHandle);
+            nativeImplementation.Setup(x => x.mdf_set_property(feedHandle, (int)option, It.IsAny<IntPtr>()))
+                .Callback((IntPtr handle, int option, IntPtr value_) => Assert.AreEqual(value, (ulong)Marshal.ReadInt64(value_)))
+                .Returns(1)
+                .Verifiable();
+            NativeImplementation.Implementation = nativeImplementation.Object;
+
+        }
+
+        private static void Setup(Mock<INativeImplementation> nativeImplementation, MDF_OPTION option, string value)
+        {
+            IntPtr feedHandle = new(123);
+            nativeImplementation.Setup(x => x.mdf_create()).Returns(feedHandle);
+            nativeImplementation.Setup(x => x.mdf_set_property(feedHandle, (int)option, It.IsAny<IntPtr>()))
+                .Callback((IntPtr handle, int option, IntPtr value_) => Compare(value, value_))
+                .Returns(1)
+                .Verifiable();
+            NativeImplementation.Implementation = nativeImplementation.Object;
         }
 
         private static MarketDataFeed GetDisposedMdf()
