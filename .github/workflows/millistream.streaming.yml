@@ -49,7 +49,7 @@ jobs:
         runNumber=$GITHUB_RUN_NUMBER
         revision=$((runNumber-2))
         version="$major.$minor.$revision"
-        dotnet build Source/Millistream.Streaming/Millistream.Streaming.csproj -c Release -p:Version=$version
+        dotnet build Source/Millistream.Streaming/Millistream.Streaming.csproj -c Release -p:Version=$version -p:ContinuousIntegrationBuild=true
         dotnet build Tests/Millistream.Streaming.UnitTests/Millistream.Streaming.UnitTests.csproj -c Release -p:Version=$version
         dotnet build Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release -p:Version=$version
 
@@ -122,12 +122,12 @@ jobs:
       if: ${{ matrix.os == 'windows-latest' }}
       shell: bash
       run: |
-        dotnet pack Source/Millistream.Streaming/Millistream.Streaming.csproj -c Release /property:PackageVersion=$major.$minor.$patch --no-build --no-restore /p:ContinuousIntegrationBuild=true
+        dotnet pack Source/Millistream.Streaming/Millistream.Streaming.csproj -c Release /property:PackageVersion=$major.$minor.$patch --no-build --no-restore --output packages
 
     - name: Upload Artifact
       if: ${{ matrix.os == 'windows-latest' }}
       uses: actions/upload-artifact@v2
       with:
         name: Millistream.Streaming
-        path: 'Source/Millistream.Streaming/bin/Release/**/*.nupkg'
+        path: packages
         if-no-files-found: error
