@@ -73,10 +73,15 @@ jobs:
     - name: Download and Install libmdf on Linux
       if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
-        sudo wget "https://packages.millistream.com/apt/sources.list.d/`lsb_release -cs`.list" -O /etc/apt/sources.list.d/millistream.list 
-        wget -q "https://packages.millistream.com/D2FCCE35.gpg" -O- | sudo apt-key add - 
-        sudo apt update
-        sudo apt-get install libmdf
+        #download
+        wget https://packages.millistream.com/source/libmdf-1.0.25.tar.gz
+        #unpack
+        tar -zxf libmdf-1.0.25.tar.gz
+        cd libmdf-1.0.25
+        #compile
+        ./configure --prefix=/usr
+        make
+        sudo make install
 
     - name: Download and Install libmdf on Windows
       if: ${{ matrix.os == 'windows-latest' }}
