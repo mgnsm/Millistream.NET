@@ -362,12 +362,13 @@ namespace Millistream.Streaming.UnitTests
             Assert.IsTrue(message.Deserialize(Data));
             IntPtr p = Marshal.StringToHGlobalAnsi(Data);
             Assert.IsTrue(message.Deserialize(p));
-            _nativeImplementation.Verify(expression, Times.Exactly(2));
+            Assert.IsTrue(message.Deserialize(Encoding.ASCII.GetBytes(Data)));
+            _nativeImplementation.Verify(expression, Times.Exactly(3));
 
             _nativeImplementation.Setup(expression).Returns(0);
             Assert.IsFalse(message.Deserialize(Data));
             Assert.IsFalse(message.Deserialize(p));
-            _nativeImplementation.Verify(expression, Times.Exactly(4));
+            _nativeImplementation.Verify(expression, Times.Exactly(5));
         }
 
         [TestMethod]
@@ -393,7 +394,7 @@ namespace Millistream.Streaming.UnitTests
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void DeserializeNullReferenceTest() =>
-            new Message().Deserialize(null);
+            new Message().Deserialize(default(string));
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
@@ -489,6 +490,7 @@ namespace Millistream.Streaming.UnitTests
 
             CatchObjectDisposedException(() => disposedMessage.Deserialize("ABC"));
             CatchObjectDisposedException(() => disposedMessage.Deserialize(new IntPtr(123)));
+            CatchObjectDisposedException(() => disposedMessage.Deserialize(Encoding.ASCII.GetBytes("ABC")));
         }
 
         private static void Compare(string expectedValue, IntPtr actualValue)

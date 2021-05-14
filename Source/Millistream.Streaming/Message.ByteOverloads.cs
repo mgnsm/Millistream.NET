@@ -173,5 +173,21 @@ namespace Millistream.Streaming
         /// <remarks>The corresponding native function is mdf_message_add_list.</remarks>
         public bool AddList(Field tag, ReadOnlySpan<byte> value) =>
             AddList((uint)tag, value);
+
+
+        /// <summary>
+        /// Deserializes a base64 encoded message chain and replaces the existing (if any) message chain in the message handle.
+        /// </summary>
+        /// <param name="data">A memory span that contains a base64 encoded (serialized) message chain.</param>
+        /// <returns><see langword="true" /> if the message chain was successfully deserialized, or <see langword="false" /> if the deserialization failed (if so the current message chain in the message handler is left untouched).</returns>
+        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_deserialize function.</exception>
+        /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
+        /// <remarks>The corresponding native function is mdf_message_deserialize.</remarks>
+        public bool Deserialize(ReadOnlySpan<byte> data)
+        {
+            ThrowIfDisposed();
+            fixed (byte* bytes = data)
+                return _nativeImplementation.mdf_message_deserialize(Handle, (IntPtr)bytes) == 1;
+        }
     }
 }

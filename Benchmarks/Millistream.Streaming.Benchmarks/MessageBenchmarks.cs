@@ -1,5 +1,6 @@
 ﻿using BenchmarkDotNet.Attributes;
 using System;
+using System.Text;
 
 namespace Millistream.Streaming.Benchmarks
 {
@@ -445,8 +446,13 @@ namespace Millistream.Streaming.Benchmarks
         [Benchmark]
         public bool Serialize() => _message.Serialize(out IntPtr _);
 
+        private const string Base64EncodedMessage = "AQAAAAIAAAADAAAAAAAAAAAAAAAAAAAABQAAAAEAAAAAAAAAAAAAABMAAAABAAAAAAAAAAAAAABLAAAAAgAAAAIAAAAAAAAAMwAAAAEAAAAAX2U=";
         [Benchmark]
-        public bool Deserialize() => _message.Deserialize("AQAAAAIAAAADAAAAAAAAAAAAAAAAAAAABQAAAAEAAAAAAAAAAAAAABMAAAABAAAAAAAAAAAAAABLAAAAAgAAAAIAAAAAAAAAMwAAAAEAAAAAX2U=");
+        public bool Deserialize() => _message.Deserialize(Base64EncodedMessage);
+
+        private static readonly byte[] Base64EncodedMessageBytes = Encoding.ASCII.GetBytes(Base64EncodedMessage);
+        [Benchmark]
+        public bool DeserializeBytes() => _message.Deserialize(Base64EncodedMessageBytes);
 
         [Benchmark]
         public void SetCompressionLevel() => _message.CompressionLevel = CompressionLevel.Z_BEST_COMPRESSION;
