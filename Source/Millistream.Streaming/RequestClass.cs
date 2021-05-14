@@ -30,6 +30,7 @@
         MDF_RC_MIFIDHISTORY = 22,
         MDF_RC_MAPPINGS = 23,
         MDF_RC_MBO = 24,
-        MDF_RC_GREEKS = 25
+        MDF_RC_GREEKS = 25,
+        MDF_RC_QUOTEBBO = 26
     }
 }
