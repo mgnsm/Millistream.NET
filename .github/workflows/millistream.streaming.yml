@@ -47,7 +47,7 @@ jobs:
       shell: bash
       run: |
         runNumber=$GITHUB_RUN_NUMBER
-        revision=$((runNumber-10))
+        revision=$((runNumber-11))
         version="$major.$minor.$revision"
         dotnet build Source/Millistream.Streaming/Millistream.Streaming.csproj -c Release -p:Version=$version -p:ContinuousIntegrationBuild=true
         dotnet build Tests/Millistream.Streaming.UnitTests/Millistream.Streaming.UnitTests.csproj -c Release -p:Version=$version
