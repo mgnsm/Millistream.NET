@@ -37,6 +37,7 @@
             public const string MDF_RC_MAPPINGS = "23";
             public const string MDF_RC_MBO = "24";
             public const string MDF_RC_GREEKS = "25";
+            public const string MDF_RC_QUOTEBBO = "26";
         }
 
         /// <summary>
