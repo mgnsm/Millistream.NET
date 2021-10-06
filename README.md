@@ -10,10 +10,10 @@ An unofficial .NET wrapper for Millistream's low-latency, high-throughput and hi
 ## Installation
 Millistream.NET is distributed via [NuGet](https://www.nuget.org/packages/Millistream.Streaming). The native and wrapped API can be downloaded from [Millistream's official website](https://packages.millistream.com/). Binaries are available for Linux, macOS and Windows. They come in both 32- and 64-bit versions and should work on both little- and big-endian systems. Please refer to [the official documentation](https://packages.millistream.com/documents/MDF%20C%20API.pdf) for more information about the wrapped API itself. The NuGet package does not include any native assemblies. You will have to download and install these separately.
 ### Native Dependency
-On **Windows** you download and run an [.exe](https://packages.millistream.com/Windows/libmdf-1.0.23.exe) that will install the native `libmdf` core library along pre-built binaries of [zlib](http://zlib.net) and [OpenSSL](http://openssl.org/) (`libmdf` links against these). You can do this silently from a command prompt using Powershell:
+On **Windows** you download and run an [.exe](https://packages.millistream.com/Windows/libmdf-1.0.25.exe) that will install the native `libmdf` core library along pre-built binaries of [zlib](http://zlib.net) and [OpenSSL](http://openssl.org/) (`libmdf` links against these). You can do this silently from a command prompt using Powershell:
 
-    powershell (new-object System.Net.WebClient).DownloadFile('https://packages.millistream.com/Windows/libmdf-1.0.23.exe', 'libmdf-1.0.23.exe')
-    .\libmdf-1.0.23.exe /S
+    powershell (new-object System.Net.WebClient).DownloadFile('https://packages.millistream.com/Windows/libmdf-1.0.25.exe', 'libmdf-1.0.25.exe')
+    .\libmdf-1.0.25.exe /S
 
 On **macOS** you download and install a `.pkg` file, for example in a Bash shell:
 

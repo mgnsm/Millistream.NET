@@ -93,8 +93,8 @@ jobs:
       if: ${{ matrix.os == 'windows-latest' }}
       shell: powershell
       run: |
-        (new-object System.Net.WebClient).DownloadFile('https://packages.millistream.com/Windows/libmdf-1.0.23.exe','libmdf-1.0.23.exe')
-        .\libmdf-1.0.23.exe /S
+        (new-object System.Net.WebClient).DownloadFile('https://packages.millistream.com/Windows/libmdf-1.0.25.exe','libmdf-1.0.25.exe')
+        .\libmdf-1.0.25.exe /S
 
     - name: Set Credentials
       shell: pwsh
