@@ -111,8 +111,8 @@ namespace Millistream.Streaming.IntegrationTests
             mdf.BindAddress = bindAddress;
             Assert.AreEqual(bindAddress, mdf.BindAddress);
 
-            //TimeDifferenceNs (requires version 1.0.24 of the native library which currently only comes as a pre-built binary on Linux)
-#if Linux
+            //TimeDifferenceNs (requires version 1.0.24 of the native library which currently only comes as a pre-built binary on Linux and Windows)
+#if !OSX
             _ = mdf.TimeDifferenceNs;
 #endif
 
