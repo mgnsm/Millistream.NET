@@ -1,14 +1,14 @@
-name: Millistream.Streaming.DataTypes (development)
+name: Millistream.Streaming.DataTypes CI
 
 on:
-  push:
-    branches:
-      - development
-    paths:
-     - 'Source/Millistream.Streaming.DataTypes/**'
-     - 'Tests/Millistream.Streaming.DataTypes.UnitTests/**'
-     - '.github/workflows/millistream.streaming.datatypes.yml'
-     - '.github/workflows/millistream.streaming.datatypes.development.yml'
+#  push: # pushing directly to these branches is effectively disabled by protecting the branches
+#    branches:
+#      - development
+#    paths:
+#     - 'Source/Millistream.Streaming.DataTypes/**'
+#     - 'Tests/Millistream.Streaming.DataTypes.UnitTests/**'
+#     - '.github/workflows/millistream.streaming.datatypes.cd.yml'
+#     - '.github/workflows/millistream.streaming.datatypes.ci.yml'
   pull_request:
     branches:
       - main
@@ -16,8 +16,8 @@ on:
     paths:
      - 'Source/Millistream.Streaming.DataTypes/**'
      - 'Tests/Millistream.Streaming.DataTypes.UnitTests/**'
-     - '.github/workflows/millistream.streaming.datatypes.yml'
-     - '.github/workflows/millistream.streaming.datatypes.development.yml'
+     - '.github/workflows/millistream.streaming.datatypes.cd.yml'
+     - '.github/workflows/millistream.streaming.datatypes.ci.yml'
   workflow_dispatch:
 
 jobs:

@@ -1,4 +1,4 @@
-name: Millistream.Streaming.DataTypes
+name: Millistream.Streaming.DataTypes CD
 
 env:
   major: 1
@@ -7,10 +7,8 @@ env:
 
 on:
   push:
-    branches:
-      - main
-    paths:
-     - 'Source/Millistream.Streaming.DataTypes/**'
+    tags:        
+     - 'v*-datatypes'
   workflow_dispatch:
 
 jobs:
@@ -32,7 +30,7 @@ jobs:
       shell: bash
       run: |
         runNumber=$GITHUB_RUN_NUMBER
-        revision=$((runNumber-2))
+        revision=$((runNumber-0)) # decrease runNumber as needed
         version=$major.$minor.$revision
         dotnet build Source/Millistream.Streaming.DataTypes/Millistream.Streaming.DataTypes.csproj -c Release -p:Version=$version
         dotnet build Tests/Millistream.Streaming.DataTypes.UnitTests/Millistream.Streaming.DataTypes.UnitTests.csproj -c Release -p:Version=$version
