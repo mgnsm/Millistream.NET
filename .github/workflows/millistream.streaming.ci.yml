@@ -1,16 +1,15 @@
 name: Millistream.Streaming CI
 
 on:
-#  push: # pushing directly to these branches is effectively disabled by protecting the branches
-#    branches:
-#      - main
-#      - development
-#    paths:
-#     - 'Source/Millistream.Streaming/**'
-#     - 'Tests/Millistream.Streaming.UnitTests/**'
-#     - 'Tests/Millistream.Streaming.IntegrationTests/**'
-#     - '.github/workflows/millistream.streaming.ci.yml'
-#     - '.github/workflows/millistream.streaming.cd.yml'
+  push:
+    branches:
+      - main
+    paths:
+     - 'Source/Millistream.Streaming/**'
+     - 'Tests/Millistream.Streaming.UnitTests/**'
+     - 'Tests/Millistream.Streaming.IntegrationTests/**'
+     - '.github/workflows/millistream.streaming.ci.yml'
+     - '.github/workflows/millistream.streaming.cd.yml'
   pull_request:
     branches:
       - main
