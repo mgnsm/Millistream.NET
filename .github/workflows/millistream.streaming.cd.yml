@@ -1,16 +1,10 @@
 name: Millistream.Streaming CD
 
-env:
-  major: 2
-  minor: 0
-  patch: 0
-
 on:
   push:
     tags:
      - 'v*'
      - '!v*-datatypes'
-  workflow_dispatch:
 
 jobs:
   Build:
@@ -41,13 +35,21 @@ jobs:
         dotnet build Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release -f netcoreapp3.1
         dotnet build Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release -f net5.0
 
+    - name: Get Version From Tag
+      if: ${{ matrix.os == 'windows-latest' }}
+      shell: bash
+      run: |
+        version=${GITHUB_REF/refs\/tags\//} # = e.g. v2.0.1
+        parts=(${version//./ }) # Replace '.' with ' '
+        echo "major=${parts[0]#*v}" >> $GITHUB_ENV # Remove "v" prefix
+        echo "minor=${parts[1]}" >> $GITHUB_ENV
+        echo "patch=${parts[2]}" >> $GITHUB_ENV
+
     - name: Build on Windows
       if: ${{ matrix.os == 'windows-latest' }}
       shell: bash
       run: |
-        runNumber=$GITHUB_RUN_NUMBER
-        revision=$((runNumber-0)) # decrease runNumber as needed
-        version="$major.$minor.$revision"
+        version="$major.$minor.$patch"
         dotnet build Source/Millistream.Streaming/Millistream.Streaming.csproj -c Release -p:Version=$version -p:ContinuousIntegrationBuild=true
         dotnet build Tests/Millistream.Streaming.UnitTests/Millistream.Streaming.UnitTests.csproj -c Release -p:Version=$version
         dotnet build Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release -p:Version=$version

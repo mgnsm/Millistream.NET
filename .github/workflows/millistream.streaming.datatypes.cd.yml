@@ -1,15 +1,9 @@
 name: Millistream.Streaming.DataTypes CD
 
-env:
-  major: 1
-  minor: 1
-  patch: 0
-
 on:
   push:
     tags:        
      - 'v*-datatypes'
-  workflow_dispatch:
 
 jobs:
   Build:
@@ -26,12 +20,19 @@ jobs:
       with:
         dotnet-version: 3.1.x
 
+    - name: Get Version From Tag
+      shell: bash
+      run: |
+        version=${GITHUB_REF/refs\/tags\//} # = v1.1.1-datatypes
+        parts=(${version//./ }) # Replace '.' with ' '
+        echo "major=${parts[0]#*v}" >> $GITHUB_ENV # Remove "v" prefix
+        echo "minor=${parts[1]}" >> $GITHUB_ENV
+        echo "patch=${parts[2]%-datatypes}" >> $GITHUB_ENV # Remove "-datatypes" suffix
+
     - name: Build
       shell: bash
       run: |
-        runNumber=$GITHUB_RUN_NUMBER
-        revision=$((runNumber-0)) # decrease runNumber as needed
-        version=$major.$minor.$revision
+        version=$major.$minor.$patch
         dotnet build Source/Millistream.Streaming.DataTypes/Millistream.Streaming.DataTypes.csproj -c Release -p:Version=$version
         dotnet build Tests/Millistream.Streaming.DataTypes.UnitTests/Millistream.Streaming.DataTypes.UnitTests.csproj -c Release -p:Version=$version
 
