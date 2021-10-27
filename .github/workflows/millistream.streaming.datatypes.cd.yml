@@ -21,18 +21,20 @@ jobs:
         dotnet-version: 3.1.x
 
     - name: Get Version From Tag
+      id: version
       shell: bash
       run: |
         version=${GITHUB_REF/refs\/tags\//} # = v1.1.1-datatypes
         parts=(${version//./ }) # Replace '.' with ' '
-        echo "major=${parts[0]#*v}" >> $GITHUB_ENV # Remove "v" prefix
-        echo "minor=${parts[1]}" >> $GITHUB_ENV
-        echo "patch=${parts[2]%-datatypes}" >> $GITHUB_ENV # Remove "-datatypes" suffix
+        major=${parts[0]#*v} # Remove the "v" prefix
+        minor=${parts[1]}
+        patch=${parts[2]%-datatypes} # Remove the "-datatypes" suffix
+        echo ::set-output name=version::$major.$minor.$patch
 
     - name: Build
       shell: bash
       run: |
-        version=$major.$minor.$patch
+        version=${{ steps.version.outputs.version }}
         dotnet build Source/Millistream.Streaming.DataTypes/Millistream.Streaming.DataTypes.csproj -c Release -p:Version=$version
         dotnet build Tests/Millistream.Streaming.DataTypes.UnitTests/Millistream.Streaming.DataTypes.UnitTests.csproj -c Release -p:Version=$version
 
@@ -44,12 +46,35 @@ jobs:
       if: ${{ matrix.os == 'windows-latest' }}
       shell: bash
       run: |
-        dotnet pack Source/Millistream.Streaming.DataTypes/Millistream.Streaming.DataTypes.csproj -c Release /property:PackageVersion=$major.$minor.$patch --no-build --no-restore
+        dotnet pack Source/Millistream.Streaming.DataTypes/Millistream.Streaming.DataTypes.csproj -c Release /property:PackageVersion=${{ steps.version.outputs.version }} --no-build --no-restore --output packages
+
+    - name: Create a GitHub Release
+      id: create_release
+      if: ${{ matrix.os == 'windows-latest' }}
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: DataTypes Version ${{ steps.version.outputs.version }}
+        draft: true
+        prerelease: false
+
+    - name: Upload the Release Asset
+      if: ${{ matrix.os == 'windows-latest' }}
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: packages/Millistream.Streaming.DataTypes.${{ steps.version.outputs.version }}.nupkg
+        asset_name: Millistream.Streaming.DataTypes.${{ steps.version.outputs.version }}.nupkg
+        asset_content_type: application/zip
 
     - name: Upload Artifact
       if: ${{ matrix.os == 'windows-latest' }}
       uses: actions/upload-artifact@v2
       with:
         name: Millistream.Streaming.Datatypes
-        path: 'Source/Millistream.Streaming.Datatypes/bin/Release/**/*.nupkg'
+        path: packages
         if-no-files-found: error

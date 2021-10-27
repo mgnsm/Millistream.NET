@@ -36,20 +36,22 @@ jobs:
         dotnet build Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release -f net5.0
 
     - name: Get Version From Tag
+      id: version
       if: ${{ matrix.os == 'windows-latest' }}
       shell: bash
       run: |
         version=${GITHUB_REF/refs\/tags\//} # = e.g. v2.0.1
         parts=(${version//./ }) # Replace '.' with ' '
-        echo "major=${parts[0]#*v}" >> $GITHUB_ENV # Remove "v" prefix
-        echo "minor=${parts[1]}" >> $GITHUB_ENV
-        echo "patch=${parts[2]}" >> $GITHUB_ENV
+        major=${parts[0]#*v} # Remove the "v" prefix
+        minor=${parts[1]}
+        patch=${parts[2]}
+        echo ::set-output name=version::$major.$minor.$patch
 
     - name: Build on Windows
       if: ${{ matrix.os == 'windows-latest' }}
       shell: bash
       run: |
-        version="$major.$minor.$patch"
+        version=${{ steps.version.outputs.version }}
         dotnet build Source/Millistream.Streaming/Millistream.Streaming.csproj -c Release -p:Version=$version -p:ContinuousIntegrationBuild=true
         dotnet build Tests/Millistream.Streaming.UnitTests/Millistream.Streaming.UnitTests.csproj -c Release -p:Version=$version
         dotnet build Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release -p:Version=$version
@@ -123,7 +125,30 @@ jobs:
       if: ${{ matrix.os == 'windows-latest' }}
       shell: bash
       run: |
-        dotnet pack Source/Millistream.Streaming/Millistream.Streaming.csproj -c Release /property:PackageVersion=$major.$minor.$patch --no-build --no-restore --output packages
+        dotnet pack Source/Millistream.Streaming/Millistream.Streaming.csproj -c Release /property:PackageVersion=${{ steps.version.outputs.version }} --no-build --no-restore --output packages
+
+    - name: Create a GitHub Release
+      id: create_release
+      if: ${{ matrix.os == 'windows-latest' }}
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Version ${{ steps.version.outputs.version }}
+        draft: true
+        prerelease: false
+
+    - name: Upload the Release Asset
+      if: ${{ matrix.os == 'windows-latest' }}
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: packages/Millistream.Streaming.${{ steps.version.outputs.version }}.nupkg
+        asset_name: Millistream.Streaming.${{ steps.version.outputs.version }}.nupkg
+        asset_content_type: application/zip
 
     - name: Upload Artifact
       if: ${{ matrix.os == 'windows-latest' }}
