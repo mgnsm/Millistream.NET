@@ -40,7 +40,7 @@ jobs:
       shell: bash
       run: |
         version=${{ steps.version.outputs.version }}
-        dotnet build Source/Millistream.Streaming.DataTypes/Millistream.Streaming.DataTypes.csproj -c Release -p:Version=$version
+        dotnet build Source/Millistream.Streaming.DataTypes/Millistream.Streaming.DataTypes.csproj -c Release -p:Version=$version -p:ContinuousIntegrationBuild=true
         dotnet build Tests/Millistream.Streaming.DataTypes.UnitTests/Millistream.Streaming.DataTypes.UnitTests.csproj -c Release -p:Version=$version
 
     - name: Test
