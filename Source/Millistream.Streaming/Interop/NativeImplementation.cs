@@ -5,6 +5,8 @@ namespace Millistream.Streaming.Interop
 {
     unsafe internal sealed class NativeImplementation
     {
+        private static NativeImplementation s_defaultImplementation;
+
         internal readonly delegate* unmanaged[Cdecl]<IntPtr> mdf_create;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, void> mdf_destroy;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, int, int> mdf_consume;
@@ -115,6 +117,6 @@ namespace Millistream.Streaming.Interop
                 mdf_message_set_utf8_validation = (delegate* unmanaged[Cdecl]<IntPtr, int, int>)address;
         }
 
-        internal static NativeImplementation Default { get; } = new(null);
+        internal static NativeImplementation Default => s_defaultImplementation ??= new(null);
     }
 }

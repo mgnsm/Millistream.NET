@@ -19,23 +19,32 @@ namespace Millistream.Streaming.UnitTests
         private delegate void GetInt64PropertyCallback(IntPtr handle, int option, ref long value);
         private delegate void GetIntPtrPropertyCallback(IntPtr handle, int option, ref IntPtr value);
 
+        [AssemblyInitialize]
+        public static void DoNotInitializeDefaultMarketDataFeedByDefaultTest(TestContext _1)
+        {
+            NativeImplementation.Implementation = new Mock<INativeImplementation>().Object;
+            Assert.AreEqual(0, NativeImplementation.InstanceCount);
+            _ = NativeImplementation.Default;
+            Assert.AreEqual(1, NativeImplementation.InstanceCount);
+            _ = NativeImplementation.Default;
+            Assert.AreEqual(1, NativeImplementation.InstanceCount);
+        }
+
         [TestMethod]
         public void CreateMarketDataFeedTest()
         {
-            Mock<INativeImplementation> nativeImplementation = new();
-            NativeImplementation.Implementation = nativeImplementation.Object;
+            NativeImplementation.Implementation = new Mock<INativeImplementation>().Object;
 
-            int expectedInstanceCount = NativeImplementation.InstanceCount == 0 ? 1 : NativeImplementation.InstanceCount;
             using MarketDataFeed mdf = new();
             using MarketDataFeed mdf2 = new();
             using MarketDataFeed mdf3 = new();
-            Assert.AreEqual(expectedInstanceCount, NativeImplementation.InstanceCount);
+            Assert.AreEqual(1, NativeImplementation.InstanceCount);
 
             using MarketDataFeed mdf4 = new("lib");
             using MarketDataFeed mdf5 = new("lib");
             using MarketDataFeed mdf6 = new("lib2");
             using MarketDataFeed mdf7 = new();
-            Assert.AreEqual(expectedInstanceCount + 3, NativeImplementation.InstanceCount);
+            Assert.AreEqual(4, NativeImplementation.InstanceCount);
         }
 
         [TestMethod]

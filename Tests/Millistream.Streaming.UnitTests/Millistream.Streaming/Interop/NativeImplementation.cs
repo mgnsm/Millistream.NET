@@ -4,7 +4,8 @@ namespace Millistream.Streaming.Interop
 {
     internal class NativeImplementation
     {
-        internal static NativeImplementation Default { get; } = new(null);
+        private static NativeImplementation s_defaultImplementation;
+        internal static NativeImplementation Default => s_defaultImplementation ??= new(null);
         internal static INativeImplementation Implementation { get; set; }
         internal static int InstanceCount { get; private set; }
 
