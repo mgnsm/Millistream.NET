@@ -716,6 +716,25 @@
         MDF_F_IVASK = 709,
         MDF_F_DAYCOUNTCONVENTION = 710,
         MDF_F_EXPIRATIONTYPE = 711,
-        MDF_F_TENOR = 712
+        MDF_F_TENOR = 712,
+        MDF_F_S12 = 713,
+        MDF_F_S13 = 714,
+        MDF_F_S14 = 715,
+        MDF_F_S15 = 716,
+        MDF_F_N6 = 717,
+        MDF_F_N7 = 718,
+        MDF_F_N8 = 719,
+        MDF_F_N9 = 720,
+        MDF_F_N10 = 721,
+        MDF_F_I6 = 722,
+        MDF_F_I7 = 723,
+        MDF_F_I8 = 724,
+        MDF_F_I9 = 725,
+        MDF_F_I10 = 726,
+        MDF_F_INSREF1 = 727,
+        MDF_F_INSREF2 = 728,
+        MDF_F_INSREF3 = 729,
+        MDF_F_INSREF4 = 730,
+        MDF_F_INSREF5 = 731
     }
 }
