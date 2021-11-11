@@ -17,7 +17,7 @@ namespace Millistream.Streaming.DataTypes.UnitTests
             CreateStringTest("123.456.918.xxx");
             CreateStringTest("@*-?+-;&&&%%%");
 
-            String @string;
+            String @string = default;
             Assert.AreEqual(0, @string.Length);
 
             @string = new String("abc");
