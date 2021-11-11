@@ -154,15 +154,14 @@ This package targets .NET Standard 2.1. The reason for this is that it internall
 
 `Millistream.Streaming` targets .NET Standard 1.4 and .NET Framework 4.5 and has no dependency on `Millistream.Streaming.DataTypes`.
 
-Below is an example of how to parse the value of an `MDF_F_LASTPRICE` field that is included in a `ResponseMessage` to a `Number`:
+Below is an example of how to parse the value of a `ReadOnlySpan<byte>` received from the `GetNextField` method of the `MarketDataFeed` handle to a `Number`:
 
 ```cs
-Number? lastPrice;
-IReadOnlyDictionary<Field, ReadOnlyMemory<byte>> fields = responseMessage.Fields;
-if (fields.TryGetValue(Field.MDF_F_LASTPRICE, out ReadOnlyMemory<byte> value)
-    && Number.TryParse(value.Span, out Number number))
+Number? number;
+if (handle.GetNextField(out Field field, out ReadOnlySpan<byte> value)
+    && Number.TryParse(value, out Number parsedNumber)
 {
-    lastPrice = number;
+    number = parsedNumber;
 }
 ```
 
