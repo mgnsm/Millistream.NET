@@ -73,17 +73,17 @@ jobs:
     - name: Download and Install libmdf on macOS
       if: ${{ matrix.os == 'macOS-latest' }}
       run: |
-        curl -O https://packages.millistream.com/macOS/libmdf-1.0.23.pkg 
-        sudo installer -pkg libmdf-1.0.23.pkg -target /
+        curl -O https://packages.millistream.com/macOS/libmdf-1.0.26.pkg 
+        sudo installer -pkg libmdf-1.0.26.pkg -target /
 
     - name: Download and Install libmdf on Linux
       if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
         #download
-        wget https://packages.millistream.com/source/libmdf-1.0.25.tar.gz
+        wget https://packages.millistream.com/source/libmdf-1.0.26.tar.gz
         #unpack
-        tar -zxf libmdf-1.0.25.tar.gz
-        cd libmdf-1.0.25
+        tar -zxf libmdf-1.0.26.tar.gz
+        cd libmdf-1.0.26
         #compile
         ./configure --prefix=/usr
         make
@@ -93,8 +93,8 @@ jobs:
       if: ${{ matrix.os == 'windows-latest' }}
       shell: powershell
       run: |
-        (new-object System.Net.WebClient).DownloadFile('https://packages.millistream.com/Windows/libmdf-1.0.25.exe','libmdf-1.0.25.exe')
-        .\libmdf-1.0.25.exe /S
+        (new-object System.Net.WebClient).DownloadFile('https://packages.millistream.com/Windows/libmdf-1.0.26.exe','libmdf-1.0.26.exe')
+        .\libmdf-1.0.26.exe /S
 
     - name: Set Credentials
       shell: pwsh
