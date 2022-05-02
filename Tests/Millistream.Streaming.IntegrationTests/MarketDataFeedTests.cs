@@ -111,10 +111,7 @@ namespace Millistream.Streaming.IntegrationTests
             mdf.BindAddress = bindAddress;
             Assert.AreEqual(bindAddress, mdf.BindAddress);
 
-            //TimeDifferenceNs (requires version 1.0.24 of the native library which currently only comes as a pre-built binary on Linux and Windows)
-#if !OSX
             _ = mdf.TimeDifferenceNs;
-#endif
 
             //Allocations
             long allocatedBytes = GetTotalAllocatedBytes();
@@ -151,13 +148,9 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.AreEqual(allocatedBytes, GetTotalAllocatedBytes());
         }
 
-#if Linux
         [TestMethod]
         public void GetAndSetMessageDigestsAndCiphersTest()
         {
-            const string PrefferedDigest = "md5";
-            const string PreferredChipher = "chacha20";
-
             using MarketDataFeed mdf = new MarketDataFeed();
             Assert.IsFalse(string.IsNullOrEmpty(mdf.MessageDigests));
             Assert.IsFalse(string.IsNullOrEmpty(mdf.Ciphers));
@@ -165,17 +158,19 @@ namespace Millistream.Streaming.IntegrationTests
             char[] separator = new char[1] { ',' };
             string[] digests = mdf.MessageDigests.Split(separator);
             Assert.IsTrue(digests != null && digests.Length > 0);
-            Assert.IsTrue(digests.Contains(PrefferedDigest));
+            string prefferedDigest = digests.FirstOrDefault(x => x?.Equals("md5", StringComparison.OrdinalIgnoreCase) == true);
+            Assert.IsFalse(string.IsNullOrEmpty(prefferedDigest));
 
             string[] ciphers = mdf.Ciphers.Split(separator);
             Assert.IsTrue(ciphers != null && ciphers.Length > 0);
-            Assert.IsTrue(ciphers.Contains(PreferredChipher));
+            string preferredChipher = ciphers.FirstOrDefault(x => x?.Equals("chacha20", StringComparison.OrdinalIgnoreCase) == true);
+            Assert.IsFalse(string.IsNullOrEmpty(preferredChipher));
 
-            mdf.MessageDigests = PrefferedDigest;
-            mdf.Ciphers = PreferredChipher;
+            mdf.MessageDigests = prefferedDigest;
+            mdf.Ciphers = preferredChipher;
             Assert.IsTrue(mdf.Connect(GetTestRunParameter("host")));
-            Assert.AreEqual(PrefferedDigest, mdf.MessageDigest);
-            Assert.AreEqual(PreferredChipher, mdf.Cipher);
+            Assert.AreEqual(prefferedDigest, mdf.MessageDigest);
+            Assert.AreEqual(preferredChipher, mdf.Cipher);
 
             mdf.Disconnect();
             mdf.MessageDigests = null;
@@ -186,7 +181,6 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.IsFalse(string.IsNullOrEmpty(mdf.MessageDigest));
             Assert.IsFalse(string.IsNullOrEmpty(mdf.Cipher));
         }
-#endif
 
         [TestMethod]
         [ExpectedException(typeof(InvalidOperationException))]
