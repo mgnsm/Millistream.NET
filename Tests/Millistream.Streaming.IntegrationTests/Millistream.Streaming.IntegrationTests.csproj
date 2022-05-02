@@ -4,7 +4,6 @@
     <TargetFrameworks>net45;netcoreapp3.1;net6.0</TargetFrameworks>
     <LangVersion>8.0</LangVersion>
     <IsPackable>false</IsPackable>
-	<IsOSX Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' == 'true'">true</IsOSX>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,9 +15,5 @@
    <ItemGroup>
     <ProjectReference Include="..\..\Source\Millistream.Streaming\Millistream.Streaming.csproj" />
   </ItemGroup>
-
-  <PropertyGroup Condition="'$(IsOSX)'=='true'">
-    <DefineConstants>OSX</DefineConstants>
-  </PropertyGroup>
 
 </Project>
