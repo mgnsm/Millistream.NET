@@ -55,19 +55,28 @@ namespace Millistream.Streaming.UnitTests
         [TestMethod]
         public void GetCountTest()
         {
-            const int Num = 11;
-            _nativeImplementation.Setup(x => x.mdf_message_get_num(It.IsAny<IntPtr>())).Returns(Num);
+            const int Count = 11;
+            _nativeImplementation.Setup(x => x.mdf_message_get_num(It.IsAny<IntPtr>())).Returns(Count);
             using Message message = new();
-            Assert.AreEqual(Num, message.Count);
+            Assert.AreEqual(Count, message.Count);
         }
 
         [TestMethod]
-        public void GetCountActiveTest()
+        public void GetActiveCountTest()
         {
-            const int NumActive = 5;
-            _nativeImplementation.Setup(x => x.mdf_message_get_num_active(It.IsAny<IntPtr>())).Returns(NumActive);
+            const int Count = 5;
+            _nativeImplementation.Setup(x => x.mdf_message_get_num_active(It.IsAny<IntPtr>())).Returns(Count);
             using Message message = new();
-            Assert.AreEqual(NumActive, message.ActiveCount);
+            Assert.AreEqual(Count, message.ActiveCount);
+        }
+
+        [TestMethod]
+        public void GetFieldCountTest()
+        {
+            const int Count = 6;
+            _nativeImplementation.Setup(x => x.mdf_message_get_num_fields(It.IsAny<IntPtr>())).Returns(Count);
+            using Message message = new();
+            Assert.AreEqual(Count, message.FieldCount);
         }
 
         [TestMethod]
@@ -419,6 +428,10 @@ namespace Millistream.Streaming.UnitTests
 
         [TestMethod]
         [ExpectedException(typeof(ObjectDisposedException))]
+        public void CannotGetFieldCountAfterDisposeTest() => _ = GetDisposedMessage().FieldCount;
+
+        [TestMethod]
+        [ExpectedException(typeof(ObjectDisposedException))]
         public void CannotGetUtf8ValidationAfterDisposeTest() => _ = GetDisposedMessage().Utf8Validation;
 
         [TestMethod]
@@ -504,7 +517,7 @@ namespace Millistream.Streaming.UnitTests
         }
 
         [TestMethod]
-        public unsafe void CannotSetPropertyWhenNativeFunctionIsMissingTest()
+        public unsafe void MemberThrowsWhenNativeFunctionIsMissingTest()
         {
             NativeImplementation nativeImplementation = new(default);
             nativeImplementation.mdf_message_set_property = default;
@@ -517,6 +530,7 @@ namespace Millistream.Streaming.UnitTests
             nativeImplementation.mdf_message_move = default;
             nativeImplementation.mdf_message_serialize = default;
             nativeImplementation.mdf_message_deserialize = default;
+            nativeImplementation.mdf_message_get_num_fields = default;
 
             using Message message = new(nativeImplementation);
             CatchInvalidOperationException(() => message.CompressionLevel = CompressionLevel.Z_BEST_COMPRESSION, nameof(nativeImplementation.mdf_message_set_property));
@@ -539,8 +553,7 @@ namespace Millistream.Streaming.UnitTests
             CatchInvalidOperationException(() => message.Serialize(out _), nameof(nativeImplementation.mdf_message_serialize));
             CatchInvalidOperationException(() => message.Deserialize("..."), nameof(nativeImplementation.mdf_message_deserialize));
             CatchInvalidOperationException(() => message.Deserialize(default(ReadOnlySpan<byte>)), nameof(nativeImplementation.mdf_message_deserialize));
-
-
+            CatchInvalidOperationException(() => _ = message.FieldCount, nameof(nativeImplementation.mdf_message_get_num_fields));
 
             static void CatchInvalidOperationException(Action action, string missingFunctionName)
             {

@@ -40,6 +40,7 @@ namespace Millistream.Streaming.Interop
         int mdf_message_serialize(IntPtr message, ref IntPtr result);
         int mdf_message_deserialize(IntPtr message, IntPtr data);
         int mdf_message_set_property(IntPtr message, int option, int value);
+        int mdf_message_get_num_fields(IntPtr message);
 #pragma warning restore IDE1006
     }
 }

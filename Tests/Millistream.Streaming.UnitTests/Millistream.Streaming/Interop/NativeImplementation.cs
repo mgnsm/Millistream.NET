@@ -41,6 +41,7 @@ namespace Millistream.Streaming.Interop
         internal delegate*<IntPtr, ref IntPtr, int> mdf_message_serialize;
         internal delegate*<IntPtr, IntPtr, int> mdf_message_deserialize;
         internal delegate*<IntPtr, MDF_MSG_OPTION, int, int> mdf_message_set_property;
+        internal delegate*<IntPtr, int> mdf_message_get_num_fields;
 
         internal static NativeImplementation Default => s_defaultImplementation ??= new(null);
         internal static INativeImplementation Implementation { get; set; }
@@ -85,6 +86,7 @@ namespace Millistream.Streaming.Interop
             mdf_message_serialize = &MdfMessageSerialize;
             mdf_message_deserialize = &MdfMessageDeserialize;
             mdf_message_set_property = &MdfMessageSetProperty;
+            mdf_message_get_num_fields = &MdfMessageGetNumFields;
         }
 
         private static IntPtr MdfCreate() => Implementation.mdf_create();
@@ -122,5 +124,6 @@ namespace Millistream.Streaming.Interop
         private static int MdfMessageSerialize(IntPtr message, ref IntPtr result) => Implementation.mdf_message_serialize(message, ref result);
         private static int MdfMessageDeserialize(IntPtr message, IntPtr data) => Implementation.mdf_message_deserialize(message, data);
         private static int MdfMessageSetProperty(IntPtr message, MDF_MSG_OPTION option, int value) => Implementation.mdf_message_set_property(message, (int)option, value);
+        private static int MdfMessageGetNumFields(IntPtr message) => Implementation.mdf_message_get_num_fields(message);
     }
 }
