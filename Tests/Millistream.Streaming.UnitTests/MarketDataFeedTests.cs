@@ -258,9 +258,9 @@ namespace Millistream.Streaming.UnitTests
             NativeImplementation.Implementation = nativeImplementation.Object;
             using MarketDataFeed mdf = new();
             //assert that the expected values are returned from the getter
-            Assert.AreEqual(true, mdf.NoDelay);
+            Assert.IsTrue(mdf.NoDelay);
             returnValue = 0;
-            Assert.AreEqual(false, mdf.NoDelay);
+            Assert.IsFalse(mdf.NoDelay);
             //set the property
             mdf.NoDelay = true;
             //verify that the setter was invoked
@@ -285,9 +285,9 @@ namespace Millistream.Streaming.UnitTests
             NativeImplementation.Implementation = nativeImplementation.Object;
             using MarketDataFeed mdf = new();
             //assert that the expected values are returned from the getter
-            Assert.AreEqual(true, mdf.NoEncryption);
+            Assert.IsTrue(mdf.NoEncryption);
             returnValue = 0;
-            Assert.AreEqual(false, mdf.NoEncryption);
+            Assert.IsFalse(mdf.NoEncryption);
             //set the property
             mdf.NoEncryption = true;
             //verify that the setter was invoked
@@ -387,6 +387,33 @@ namespace Millistream.Streaming.UnitTests
         [TestMethod]
         public void GetTimeoutTest() =>
             GetInt32Property(MDF_OPTION.MDF_OPT_TIMEOUT, mdf => mdf.Timeout);
+
+        [TestMethod]
+        public void GetAndSetHandleDelayTest()
+        {
+            Mock<INativeImplementation> nativeImplementation = new();
+            int returnValue = 1;
+            nativeImplementation
+                .Setup(x => x.mdf_get_property(It.IsAny<IntPtr>(), (int)MDF_OPTION.MDF_OPT_HANDLE_DELAY, ref It.Ref<int>.IsAny))
+                .Returns(1)
+                .Callback(new GetInt32PropertyCallback((IntPtr handler, int option_, ref int value) => value = returnValue));
+
+            nativeImplementation
+                .Setup(x => x.mdf_set_property(It.IsAny<IntPtr>(), (int)MDF_OPTION.MDF_OPT_HANDLE_DELAY, It.IsAny<IntPtr>()))
+                .Returns(1)
+                .Verifiable();
+
+            NativeImplementation.Implementation = nativeImplementation.Object;
+            using MarketDataFeed mdf = new();
+            //assert that the expected values are returned from the getter
+            Assert.IsTrue(mdf.HandleDelay);
+            returnValue = 0;
+            Assert.IsFalse(mdf.HandleDelay);
+            //set the property
+            mdf.HandleDelay = true;
+            //verify that the setter was invoked
+            nativeImplementation.Verify();
+        }
 
         [TestMethod]
         public void GetAndSetDataCallbackTest()
@@ -689,6 +716,14 @@ namespace Millistream.Streaming.UnitTests
         [TestMethod]
         [ExpectedException(typeof(ObjectDisposedException))]
         public void CannotGetTimeoutAfterDisposeTest() => _ = GetDisposedMdf().Timeout;
+
+        [TestMethod]
+        [ExpectedException(typeof(ObjectDisposedException))]
+        public void CannotGetHandleDelayAfterDisposeTest() => _ = GetDisposedMdf().HandleDelay;
+
+        [TestMethod]
+        [ExpectedException(typeof(ObjectDisposedException))]
+        public void CannotSetHandleDelayAfterDisposeTest() => GetDisposedMdf().HandleDelay = true;
 
         [TestMethod]
         [ExpectedException(typeof(ObjectDisposedException))]
