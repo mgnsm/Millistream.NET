@@ -90,6 +90,36 @@ namespace Millistream.Streaming
         long TimeDifferenceNs { get; }
 
         /// <summary>
+        /// A comma separated list of the message digests that the client will offer to the server upon connect.
+        /// </summary>
+        public string MessageDigests { get; set; }
+
+        /// <summary>
+        /// A comma separated list of the encryption ciphers that the client will offer to the server upon connect.
+        /// </summary>
+        public string Ciphers { get; set; }
+
+        /// <summary>
+        /// The digest chosen by the server. Only available after <see cref="Connect"/> returns.
+        /// </summary>
+        string MessageDigest { get; }
+
+        /// <summary>
+        /// The cipher chosen by the server. Only available after <see cref="Connect"/> returns.
+        /// </summary>
+        string Cipher { get; }
+
+        /// <summary>
+        /// The number of seconds to wait before having to call <see cref="Consume(int)"/>.
+        /// </summary>
+        public int Timeout { get; }
+
+        /// <summary>
+        /// Enables or disables delay-mode in where the server adds the intended delay to each message sent. This also enables the client to set the intended delay of the messages the client sends to the server. It's disabled by default.
+        /// </summary>
+        public bool HandleDelay { get; set; }
+
+        /// <summary>
         /// Consumes data sent from the server. If there currently is no data the function waits for <paramref name="timeout"/> number of seconds, if <paramref name="timeout"/> is zero (0) the function will return immediately. If <paramref name="timeout"/> is negative then the wait period is treated as number of microseconds instead of number of seconds (i.e. -1000 will wait a maximum of 1000µs).
         /// </summary>
         /// <param name="timeout">The wait period in seconds if positive. If negative, the value is treated as the number of microseconds to wait instead of the number of seconds.</param>
