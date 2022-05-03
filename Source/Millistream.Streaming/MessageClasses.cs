@@ -33,6 +33,7 @@ namespace Millistream.Streaming
         MDF_MC_MAPPINGS = 2097152,
         MDF_MC_MBO = 4194304,
         MDF_MC_GREEKS = 8388608,
-        MDF_MC_QUOTEBBO = 16777216
+        MDF_MC_QUOTEBBO = 16777216,
+        MDF_MC_QUOTEEX = 33554432
     }
 }
