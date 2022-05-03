@@ -19,7 +19,6 @@ namespace Millistream.Streaming.Interop
         void mdf_disconnect(IntPtr handle);
         IntPtr mdf_message_create();
         void mdf_message_destroy(IntPtr message);
-        int mdf_message_set_compression_level(IntPtr message, int level);
         void mdf_message_reset(IntPtr message);
         int mdf_message_del(IntPtr message);
         int mdf_message_add(IntPtr message, ulong instrument_reference, int message_reference);
@@ -40,7 +39,7 @@ namespace Millistream.Streaming.Interop
         int mdf_message_move(IntPtr src, IntPtr dst, ulong insref_src, ulong insref_dst);
         int mdf_message_serialize(IntPtr message, ref IntPtr result);
         int mdf_message_deserialize(IntPtr message, IntPtr data);
-        int mdf_message_set_utf8_validation(IntPtr message, int enable);
+        int mdf_message_set_property(IntPtr message, int option, int value);
 #pragma warning restore IDE1006
     }
 }
