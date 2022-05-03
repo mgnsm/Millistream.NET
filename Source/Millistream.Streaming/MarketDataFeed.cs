@@ -324,6 +324,13 @@ namespace Millistream.Streaming
         /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_CRYPT_CIPHER"/> option cannot be fetched.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         public string Cipher => GetStringProperty(MDF_OPTION.MDF_OPT_CRYPT_CIPHER);
+
+        /// <summary>
+        /// Returns the number of seconds to wait before having to call <see cref="Consume(int)"/>.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_TIMEOUT"/> option cannot be fetched.</exception>
+        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
+        public int Timeout => GetInt32Property(MDF_OPTION.MDF_OPT_TIMEOUT);
         #endregion
 
         #region Methods
