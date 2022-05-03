@@ -548,6 +548,7 @@ namespace Millistream.Streaming
 
         /// <summary>
         /// Moves all messages from <paramref name="source"/> with an insref matching <paramref name="sourceInsref"/> to <paramref name="destination"/> and changes the insref to <paramref name="destinationInsRef"/>. If <paramref name="destination"/> is set to the same message handle as <paramref name="source"/> or if <paramref name="destination"/> is <see langword="null" />, then the change from <paramref name="sourceInsref"/> to <paramref name="destinationInsRef"/> will be done in-place in <paramref name="source"/>.
+        /// <para>If both <paramref name="sourceInsref"/> and <paramref name="destinationInsRef"/> is set to <see cref="ulong.MaxValue"/> then the insrefs in <paramref name="source"/> will not be changed and all the messages regardless of insref will be moved to <paramref name="destination"/>.</para>
         /// </summary>
         /// <param name="source">The message handle to move messages from.</param>
         /// <param name="destination">The message handle to move messages to.</param>
