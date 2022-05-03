@@ -34,6 +34,12 @@ namespace Millistream.Streaming
         public Message(string nativeLibraryPath) 
             : this(nativeLibraryPath, true) { }
 
+        internal Message(NativeImplementation nativeImplementation)
+        {
+            _nativeImplementation = nativeImplementation ?? throw new ArgumentNullException(nameof(nativeImplementation));
+            Handle = _nativeImplementation.mdf_message_create();
+        }
+
         private Message(string nativeLibraryPath, bool validateArgument)
         {
             _nativeImplementation = string.IsNullOrEmpty(nativeLibraryPath) ?
@@ -48,6 +54,7 @@ namespace Millistream.Streaming
         /// The zlib compression level used for the <see cref="AddString(uint, string)"/> and <see cref="AddString(uint, string, int)"/> methods.
         /// </summary>
         /// <exception cref="InvalidOperationException">The installed version of the native library doesn't support setting the zlib compression level.</exception>
+        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_set_property function.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
         public CompressionLevel CompressionLevel
         {
@@ -59,6 +66,7 @@ namespace Millistream.Streaming
             set
             {
                 ThrowIfDisposed();
+                ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_set_property, nameof(_nativeImplementation.mdf_message_set_property));
                 if (_nativeImplementation.mdf_message_set_property(Handle, MDF_MSG_OPTION.MDF_MSG_OPT_COMPRESSION, (int)value) == 1)
                     _compressionLevel = value;
             }
@@ -93,6 +101,7 @@ namespace Millistream.Streaming
         /// <summary>
         /// Enables or disables the UTF-8 validation performed in <see cref="AddString(uint, string)"/> and <see cref="AddString(uint, string, int)"/>. It's enabled by default.
         /// </summary>
+        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_set_property function.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
         public bool Utf8Validation
         {
@@ -104,6 +113,7 @@ namespace Millistream.Streaming
             set
             {
                 ThrowIfDisposed();
+                ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_set_property, nameof(_nativeImplementation.mdf_message_set_property));
                 if (_nativeImplementation.mdf_message_set_property(Handle, MDF_MSG_OPTION.MDF_MSG_OPT_UTF8, value ? 1 : 0) == 1)
                     _utf8Validation = value;
             }
@@ -183,6 +193,7 @@ namespace Millistream.Streaming
             if (decimals < 0 || decimals > 19)
                 throw new ArgumentException($"{nameof(decimals)} cannot be smaller than 0 or greater than 19.", nameof(decimals));
             ThrowIfDisposed();
+            ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_add_int, nameof(_nativeImplementation.mdf_message_add_int));
             return _nativeImplementation.mdf_message_add_int(Handle, tag, value, decimals) == 1;
         }
 
@@ -216,6 +227,7 @@ namespace Millistream.Streaming
             if (decimals < 0 || decimals > 19)
                 throw new ArgumentException($"{nameof(decimals)} cannot be smaller than 0 or greater than 19.", nameof(decimals));
             ThrowIfDisposed();
+            ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_add_uint, nameof(_nativeImplementation.mdf_message_add_uint));
             return _nativeImplementation.mdf_message_add_uint(Handle, tag, value, decimals) == 1;
         }
 
@@ -270,6 +282,7 @@ namespace Millistream.Streaming
         public bool AddString(uint tag, string value, int length)
         {
             ThrowIfDisposed();
+            ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_add_string2, nameof(_nativeImplementation.mdf_message_add_string2));
             if (value == null)
                 return _nativeImplementation.mdf_message_add_string2(Handle, tag, IntPtr.Zero, length) == 1;
 
@@ -354,6 +367,7 @@ namespace Millistream.Streaming
         public bool AddDate(uint tag, int year, int month, int day)
         {
             ThrowIfDisposed();
+            ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_add_date2, nameof(_nativeImplementation.mdf_message_add_date2));
             return _nativeImplementation.mdf_message_add_date2(Handle, tag, year, month, day) == 1;
         }
 
@@ -417,6 +431,7 @@ namespace Millistream.Streaming
         public bool AddTime2(uint tag, int hour, int minute, int second, int millisecond)
         {
             ThrowIfDisposed();
+            ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_add_time2, nameof(_nativeImplementation.mdf_message_add_time2));
             return _nativeImplementation.mdf_message_add_time2(Handle, tag, hour, minute, second, millisecond) == 1;
         }
 
@@ -450,6 +465,7 @@ namespace Millistream.Streaming
         public bool AddTime3(uint tag, int hour, int minute, int second, int nanosecond)
         {
             ThrowIfDisposed();
+            ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_add_time3, nameof(_nativeImplementation.mdf_message_add_time3));
             return _nativeImplementation.mdf_message_add_time3(Handle, tag, hour, minute, second, nanosecond) == 1;
         }
 
@@ -546,6 +562,8 @@ namespace Millistream.Streaming
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
 
+            ThrowIfNativeFunctionIsMissing(source._nativeImplementation.mdf_message_move, nameof(source._nativeImplementation.mdf_message_move));
+
             return source._nativeImplementation.mdf_message_move(source.Handle, destination?.Handle ?? IntPtr.Zero, sourceInsref, destinationInsRef) == 1;
         }
 
@@ -560,6 +578,7 @@ namespace Millistream.Streaming
         public bool Serialize(out IntPtr result)
         {
             ThrowIfDisposed();
+            ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_serialize, nameof(_nativeImplementation.mdf_message_serialize));
             result = IntPtr.Zero;
             return _nativeImplementation.mdf_message_serialize(Handle, ref result) == 1;
         }
@@ -579,6 +598,7 @@ namespace Millistream.Streaming
                 throw new ArgumentNullException(nameof(data));
 
             ThrowIfDisposed();
+            ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_deserialize, nameof(_nativeImplementation.mdf_message_deserialize));
             byte* bytes = stackalloc byte[data.Length + 1];
             if (!TryGetAsciiBytes(data, bytes))
                 return false;
@@ -596,6 +616,7 @@ namespace Millistream.Streaming
         public bool Deserialize(IntPtr data)
         {
             ThrowIfDisposed();
+            ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_deserialize, nameof(_nativeImplementation.mdf_message_deserialize));
             return _nativeImplementation.mdf_message_deserialize(Handle, data) == 1;
         }
 
@@ -617,6 +638,13 @@ namespace Millistream.Streaming
         {
             if (_isDisposed)
                 throw new ObjectDisposedException(typeof(Message).FullName);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static unsafe void ThrowIfNativeFunctionIsMissing(void* function, string name)
+        {
+            if (function == default)
+                throw new InvalidOperationException($"The installed version of the native library doesn't include the {name} function.");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

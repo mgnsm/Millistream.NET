@@ -60,6 +60,7 @@ namespace Millistream.Streaming
             ThrowIfDisposed();
             if (value != null && length < 0)
                 return false;
+            ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_add_string2, nameof(_nativeImplementation.mdf_message_add_string2));
             fixed (byte* bytes = value)
                 return _nativeImplementation.mdf_message_add_string2(Handle, tag, (IntPtr)bytes, length) == 1;
         }
@@ -186,6 +187,7 @@ namespace Millistream.Streaming
         public bool Deserialize(ReadOnlySpan<byte> data)
         {
             ThrowIfDisposed();
+            ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_deserialize, nameof(_nativeImplementation.mdf_message_deserialize));
             fixed (byte* bytes = data)
                 return _nativeImplementation.mdf_message_deserialize(Handle, (IntPtr)bytes) == 1;
         }
