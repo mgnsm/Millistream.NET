@@ -48,6 +48,7 @@
         MDF_M_MBOUPDATE = 40,
         MDF_M_MBODELETE = 41,
         MDF_M_GREEKS = 42,
-        MDF_M_QUOTEBBO = 43
+        MDF_M_QUOTEBBO = 43,
+        MDF_M_QUOTEEX = 44
     }
 }
