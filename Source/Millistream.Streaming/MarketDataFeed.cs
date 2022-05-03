@@ -312,21 +312,21 @@ namespace Millistream.Streaming
         }
 
         /// <summary>
-        /// Returns the digest chosen by the server, only available after <see cref="Connect"/> returns.
+        /// The digest chosen by the server. Only available after <see cref="Connect"/> returns.
         /// </summary>
         /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_CRYPT_DIGEST"/> option cannot be fetched.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         public string MessageDigest => GetStringProperty(MDF_OPTION.MDF_OPT_CRYPT_DIGEST);
 
         /// <summary>
-        /// Returns the cipher chosen by the server, only available after <see cref="Connect"/> returns.
+        /// The cipher chosen by the server. Only available after <see cref="Connect"/> returns.
         /// </summary>
         /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_CRYPT_CIPHER"/> option cannot be fetched.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         public string Cipher => GetStringProperty(MDF_OPTION.MDF_OPT_CRYPT_CIPHER);
 
         /// <summary>
-        /// Returns the number of seconds to wait before having to call <see cref="Consume(int)"/>.
+        /// The number of seconds to wait before having to call <see cref="Consume(int)"/>.
         /// </summary>
         /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_TIMEOUT"/> option cannot be fetched.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
