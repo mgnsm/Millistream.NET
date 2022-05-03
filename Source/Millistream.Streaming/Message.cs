@@ -99,6 +99,21 @@ namespace Millistream.Streaming
         }
 
         /// <summary>
+        /// The number of added fields to the current message.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_get_num_fields function.</exception>
+        /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
+        public int FieldCount
+        {
+            get
+            {
+                ThrowIfDisposed();
+                ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_get_num_fields, nameof(_nativeImplementation.mdf_message_get_num_fields));
+                return _nativeImplementation.mdf_message_get_num_fields(Handle);
+            }
+        }
+
+        /// <summary>
         /// Enables or disables the UTF-8 validation performed in <see cref="AddString(uint, string)"/> and <see cref="AddString(uint, string, int)"/>. It's enabled by default.
         /// </summary>
         /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_set_property function.</exception>
