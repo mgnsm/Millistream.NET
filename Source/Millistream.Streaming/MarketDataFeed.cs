@@ -331,6 +331,18 @@ namespace Millistream.Streaming
         /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_TIMEOUT"/> option cannot be fetched.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         public int Timeout => GetInt32Property(MDF_OPTION.MDF_OPT_TIMEOUT);
+
+        /// <summary>
+        /// Enables or disables delay-mode in where the server adds the intended delay to each message sent. This also enables the client to set the intended delay of the messages the client sends to the server. It's disabled by default.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_HANDLE_DELAY"/> option cannot be fetched or modified.</exception>
+        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
+        /// <remarks>Must be set prior to calling <see cref="Connect(string)"/>.</remarks>
+        public bool HandleDelay
+        {
+            get => Convert.ToBoolean(GetInt32Property(MDF_OPTION.MDF_OPT_HANDLE_DELAY));
+            set => SetProperty(MDF_OPTION.MDF_OPT_HANDLE_DELAY, value ? 1 : 0);
+        }
         #endregion
 
         #region Methods

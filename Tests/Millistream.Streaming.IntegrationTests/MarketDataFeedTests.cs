@@ -45,6 +45,11 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.AreEqual(0UL, mdf.ReceivedBytes);
             Assert.AreEqual(0UL, mdf.SentBytes);
 
+            //HandleDelay
+            Assert.IsFalse(mdf.HandleDelay);
+            mdf.HandleDelay = true;
+            //Assert.IsTrue(mdf.HandleDelay);
+
             //FileDescriptor
             Assert.AreEqual(-1, mdf.FileDescriptor);
             Assert.IsTrue(mdf.Connect(GetTestRunParameter("host")));
@@ -149,6 +154,9 @@ namespace Millistream.Streaming.IntegrationTests
             mdf.BindAddress = "abc";
 
             _ = mdf.Timeout;
+
+            mdf.HandleDelay = false;
+            _ = mdf.HandleDelay;
 
             Assert.AreEqual(allocatedBytes, GetTotalAllocatedBytes());
         }
