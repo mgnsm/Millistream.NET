@@ -37,7 +37,7 @@ namespace Millistream.Streaming.UnitTests
         [TestMethod]
         public void GetAndSetCompressionLevelTest()
         {
-            _nativeImplementation.Setup(x => x.mdf_message_set_compression_level(It.IsAny<IntPtr>(), It.IsAny<int>())).Returns(1);
+            _nativeImplementation.Setup(x => x.mdf_message_set_property(It.IsAny<IntPtr>(), It.IsAny<int>(), It.IsAny<int>())).Returns(1);
 
             using Message message = new();
             //assert that the default value is Z_BEST_SPEED
@@ -47,7 +47,7 @@ namespace Millistream.Streaming.UnitTests
             foreach (CompressionLevel compressionLevel in Enum.GetValues(typeof(CompressionLevel)))
             {
                 message.CompressionLevel = compressionLevel;
-                _nativeImplementation.Verify(x => x.mdf_message_set_compression_level(It.IsAny<IntPtr>(), (int)compressionLevel));
+                _nativeImplementation.Verify(x => x.mdf_message_set_property(It.IsAny<IntPtr>(), (int)MDF_MSG_OPTION.MDF_MSG_OPT_COMPRESSION, (int)compressionLevel));
                 Assert.AreEqual(compressionLevel, message.CompressionLevel);
             }
         }
@@ -73,13 +73,13 @@ namespace Millistream.Streaming.UnitTests
         [TestMethod]
         public void GetAndSetUtf8ValidationTest()
         {
-            _nativeImplementation.Setup(x => x.mdf_message_set_utf8_validation(It.IsAny<IntPtr>(), 0)).Returns(1).Verifiable();
+            _nativeImplementation.Setup(x => x.mdf_message_set_property(It.IsAny<IntPtr>(), (int)MDF_MSG_OPTION.MDF_MSG_OPT_UTF8, 0)).Returns(1).Verifiable();
             using Message message = new();
             Assert.AreEqual(true, message.Utf8Validation);
             message.Utf8Validation = false;
             Assert.AreEqual(false, message.Utf8Validation);
             _nativeImplementation.Verify();
-            _nativeImplementation.Setup(x => x.mdf_message_set_utf8_validation(It.IsAny<IntPtr>(), 1)).Returns(1).Verifiable();
+            _nativeImplementation.Setup(x => x.mdf_message_set_property(It.IsAny<IntPtr>(), (int)MDF_MSG_OPTION.MDF_MSG_OPT_UTF8, 1)).Returns(1).Verifiable();
             message.Utf8Validation = true;
             Assert.AreEqual(true, message.Utf8Validation);
             _nativeImplementation.Verify();

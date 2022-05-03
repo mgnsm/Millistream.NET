@@ -28,7 +28,6 @@ namespace Millistream.Streaming.Interop
         internal void mdf_disconnect(IntPtr handle) => Implementation.mdf_disconnect(handle);
         internal IntPtr mdf_message_create() => Implementation.mdf_message_create();
         internal void mdf_message_destroy(IntPtr message) => Implementation.mdf_message_destroy(message);
-        internal int mdf_message_set_compression_level(IntPtr message, int level) => Implementation.mdf_message_set_compression_level(message, level);
         internal void mdf_message_reset(IntPtr message) => Implementation.mdf_message_reset(message);
         internal int mdf_message_del(IntPtr message) => Implementation.mdf_message_del(message);
         internal int mdf_message_add(IntPtr message, ulong insref, int mref) => Implementation.mdf_message_add(message, insref, mref);
@@ -49,7 +48,7 @@ namespace Millistream.Streaming.Interop
         internal int mdf_message_move(IntPtr src, IntPtr dst, ulong insref_src, ulong insref_dst) => Implementation.mdf_message_move(src, dst, insref_src, insref_dst);
         internal int mdf_message_serialize(IntPtr message, ref IntPtr result) => Implementation.mdf_message_serialize(message, ref result);
         internal int mdf_message_deserialize(IntPtr message, IntPtr data) => Implementation.mdf_message_deserialize(message, data);
-        internal int mdf_message_set_utf8_validation(IntPtr message, int enable) => Implementation.mdf_message_set_utf8_validation(message, enable);
+        internal int mdf_message_set_property(IntPtr message, MDF_MSG_OPTION option, int value) => Implementation.mdf_message_set_property(message, (int)option, value);
 #pragma warning restore CA1822
 #pragma warning restore IDE0079
 #pragma warning restore IDE1006
