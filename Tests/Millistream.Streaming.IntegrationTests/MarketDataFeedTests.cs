@@ -256,20 +256,24 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE));
             Assert.IsTrue(message.AddString(Field.MDF_F_INSREFLIST, "772"));
             Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTID, requestIds[0]));
+            Assert.AreEqual(1, message.ActiveCount);
+            Assert.AreEqual(4, message.FieldCount);
 
             Assert.IsTrue(message.Add(0, MessageReference.MDF_M_REQUEST));
             Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTCLASS, StringConstants.RequestClasses.MDF_RC_QUOTE));
             Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE));
             Assert.IsTrue(message.AddString(Field.MDF_F_INSREFLIST, "1146"));
             Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTID, requestIds[1]));
+            Assert.AreEqual(2, message.ActiveCount);
+            Assert.AreEqual(4, message.FieldCount);
 
             Assert.IsTrue(message.Add(0, MessageReference.MDF_M_REQUEST));
             Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTCLASS, StringConstants.RequestClasses.MDF_RC_TRADE));
             Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE));
             Assert.IsTrue(message.AddString(Field.MDF_F_INSREFLIST, "105"));
             Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTID, requestIds[2]));
-
             Assert.AreEqual(3, message.ActiveCount);
+            Assert.AreEqual(4, message.FieldCount);
 
             //send a request with 3 messages
             Assert.IsTrue(mdf.Send(message));
@@ -278,6 +282,7 @@ namespace Millistream.Streaming.IntegrationTests
 
             message.Reset();
             Assert.AreEqual(0, message.ActiveCount);
+            Assert.AreEqual(0, message.FieldCount);
 
             Assert.IsTrue(message.Add(0, MessageReference.MDF_M_REQUEST));
             Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTCLASS, StringConstants.RequestClasses.MDF_RC_ORDER));
@@ -286,6 +291,7 @@ namespace Millistream.Streaming.IntegrationTests
             string requestId = Guid.NewGuid().ToString();
             Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTID, requestId));
             Assert.AreEqual(1, message.ActiveCount);
+            Assert.AreEqual(4, message.FieldCount);
 
             //send another request with a single message
             Assert.IsTrue(mdf.Send(message));

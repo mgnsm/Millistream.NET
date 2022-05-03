@@ -23,6 +23,11 @@ namespace Millistream.Streaming
         int ActiveCount { get; }
 
         /// <summary>
+        /// The number of added fields to the current message.
+        /// </summary>
+        int FieldCount { get; }
+
+        /// <summary>
         /// Enables or disables the UTF-8 validation performed in <see cref="AddString(uint, string)"/> and <see cref="AddString(uint, string, int)"/>. It's enabled by default.
         /// </summary>
         bool Utf8Validation { get; set; }

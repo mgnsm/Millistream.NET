@@ -305,8 +305,10 @@ namespace Millistream.Streaming.IntegrationTests
             using Message message = new Message();
             Assert.IsTrue(message.Add(0, MessageReference.MDF_M_QUOTE));
             Assert.AreEqual(1, message.ActiveCount);
+            Assert.AreEqual(0, message.FieldCount);
             message.Reset();
             Assert.AreEqual(0, message.ActiveCount);
+            Assert.AreEqual(0, message.FieldCount);
         }
 
         [TestMethod]
@@ -316,12 +318,16 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.IsTrue(message.Add(0, MessageReference.MDF_M_QUOTE));
             Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTCLASS, StringConstants.RequestClasses.MDF_RC_BASICDATA));
             Assert.AreEqual(1, message.ActiveCount);
+            Assert.AreEqual(1, message.FieldCount);
             Assert.IsTrue(message.Add(0, MessageReference.MDF_M_QUOTE));
             Assert.AreEqual(2, message.ActiveCount);
+            Assert.AreEqual(0, message.FieldCount);
             message.Delete();
             Assert.AreEqual(1, message.ActiveCount);
+            Assert.AreEqual(1, message.FieldCount);
             message.Delete();
             Assert.AreEqual(0, message.ActiveCount);
+            Assert.AreEqual(0, message.FieldCount);
         }
 
         [TestMethod]
@@ -381,18 +387,26 @@ namespace Millistream.Streaming.IntegrationTests
             const ulong SourceInsRef = 1;
             Assert.IsTrue(source.Add(SourceInsRef, MessageReference.MDF_M_REQUEST));
             Assert.IsTrue(source.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE));
+            Assert.AreEqual(1, source.ActiveCount);
+            Assert.AreEqual(1, source.FieldCount);
             Assert.IsTrue(source.Add(SourceInsRef, MessageReference.MDF_M_BASICDATA));
             Assert.IsTrue(source.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE));
+            Assert.AreEqual(2, source.ActiveCount);
+            Assert.AreEqual(1, source.FieldCount);
             Assert.IsTrue(source.Add(SourceInsRef, MessageReference.MDF_M_QUOTE));
             Assert.IsTrue(source.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE));
             Assert.AreEqual(3, source.ActiveCount);
+            Assert.AreEqual(1, source.FieldCount);
 
             using Message destination = new Message();
             Assert.AreEqual(0, destination.ActiveCount);
+            Assert.AreEqual(0, destination.FieldCount);
 
             Assert.IsTrue(Message.Move(source, destination, 1, 10));
             Assert.AreEqual(0, source.ActiveCount);
+            Assert.AreEqual(0, source.FieldCount);
             Assert.AreEqual(3, destination.ActiveCount);
+            Assert.AreEqual(1, destination.FieldCount);
 
             Assert.IsFalse(Message.Move(source, null, 1, 10));
             Assert.IsTrue(Message.Move(destination, null, 10, 11));
@@ -419,16 +433,21 @@ namespace Millistream.Streaming.IntegrationTests
             using Message message2 = new Message();
             Assert.IsTrue(message2.Deserialize(s));
             Assert.AreEqual(2, message2.ActiveCount);
+            Assert.AreEqual(1, message2.FieldCount);
             Assert.IsTrue(message.Deserialize(s));
             message2.Reset();
             Assert.AreEqual(0, message2.ActiveCount);
+            Assert.AreEqual(0, message2.FieldCount);
             Assert.IsTrue(message2.Deserialize(result));
             Assert.AreEqual(2, message2.ActiveCount);
+            Assert.AreEqual(1, message2.FieldCount);
             message2.Reset();
             Assert.AreEqual(0, message2.ActiveCount);
+            Assert.AreEqual(0, message2.FieldCount);
             byte[] bytes = Encoding.ASCII.GetBytes(s);
             Assert.IsTrue(message2.Deserialize(bytes));
             Assert.AreEqual(2, message2.ActiveCount);
+            Assert.AreEqual(1, message2.FieldCount);
         }
     }
 }

@@ -464,6 +464,9 @@ namespace Millistream.Streaming.Benchmarks
         public int GetActiveCount() => _message.ActiveCount;
 
         [Benchmark]
+        public int GetFieldCount() => _message.FieldCount;
+
+        [Benchmark]
         public void SetUtf8Validation() => _message.Utf8Validation = false;
 
         [Benchmark]

@@ -42,6 +42,7 @@ namespace Millistream.Streaming.Interop
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, ref IntPtr, int> mdf_message_serialize;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, IntPtr, int> mdf_message_deserialize;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, MDF_MSG_OPTION, int, int> mdf_message_set_property;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, int> mdf_message_get_num_fields;
 
         internal NativeImplementation(string libraryPath)
         {
@@ -112,6 +113,8 @@ namespace Millistream.Streaming.Interop
                 mdf_message_deserialize = (delegate* unmanaged[Cdecl]<IntPtr, IntPtr, int>)address;
             if (nativeLibrary.TryGetExport(lib, nameof(mdf_message_set_property), out address))
                 mdf_message_set_property = (delegate* unmanaged[Cdecl]<IntPtr, MDF_MSG_OPTION, int, int>)address;
+            if (nativeLibrary.TryGetExport(lib, nameof(mdf_message_get_num_fields), out address))
+                mdf_message_get_num_fields = (delegate* unmanaged[Cdecl]<IntPtr, int>)address;
         }
 
         internal static NativeImplementation Default => s_defaultImplementation ??= new(null);
