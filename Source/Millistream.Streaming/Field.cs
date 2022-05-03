@@ -735,6 +735,12 @@
         MDF_F_INSREF2 = 728,
         MDF_F_INSREF3 = 729,
         MDF_F_INSREF4 = 730,
-        MDF_F_INSREF5 = 731
+        MDF_F_INSREF5 = 731,
+        MDF_F_COMBOLEGS = 732,
+        MDF_F_SWINGFACTOR = 733,
+        MDF_F_SWINGMETHOD = 734,
+        MDF_F_INCOMEPROPMAN = 735,
+        MDF_F_CLOSEPRICE1DDATE = 736,
+        MDF_F_CLOSEPRICEDATE = 737
     }
 }
