@@ -158,12 +158,12 @@ namespace Millistream.Streaming.IntegrationTests
             char[] separator = new char[1] { ',' };
             string[] digests = mdf.MessageDigests.Split(separator);
             Assert.IsTrue(digests != null && digests.Length > 0);
-            string prefferedDigest = digests.FirstOrDefault(x => x?.Equals("md5", StringComparison.OrdinalIgnoreCase) == true);
+            string prefferedDigest = digests[0];
             Assert.IsFalse(string.IsNullOrEmpty(prefferedDigest));
 
             string[] ciphers = mdf.Ciphers.Split(separator);
             Assert.IsTrue(ciphers != null && ciphers.Length > 0);
-            string preferredChipher = ciphers.FirstOrDefault(x => x?.Equals("chacha20", StringComparison.OrdinalIgnoreCase) == true);
+            string preferredChipher = ciphers[0];
             Assert.IsFalse(string.IsNullOrEmpty(preferredChipher));
 
             mdf.MessageDigests = prefferedDigest;
