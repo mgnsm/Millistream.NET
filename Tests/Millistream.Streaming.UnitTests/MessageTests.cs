@@ -380,7 +380,7 @@ namespace Millistream.Streaming.UnitTests
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void CreateMessageWithNoNativeLibraryPathTest () => new Message(default);
+        public void CreateMessageWithNoNativeLibraryPathTest () => new Message(default(string));
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
@@ -491,6 +491,69 @@ namespace Millistream.Streaming.UnitTests
             CatchObjectDisposedException(() => disposedMessage.Deserialize("ABC"));
             CatchObjectDisposedException(() => disposedMessage.Deserialize(new IntPtr(123)));
             CatchObjectDisposedException(() => disposedMessage.Deserialize(Encoding.ASCII.GetBytes("ABC")));
+
+            static void CatchObjectDisposedException(Action action)
+            {
+                try
+                {
+                    action();
+                    Assert.Fail($"No expected {nameof(ObjectDisposedException)} was thrown.");
+                }
+                catch (ObjectDisposedException) { }
+            }
+        }
+
+        [TestMethod]
+        public unsafe void CannotSetPropertyWhenNativeFunctionIsMissingTest()
+        {
+            NativeImplementation nativeImplementation = new(default);
+            nativeImplementation.mdf_message_set_property = default;
+            nativeImplementation.mdf_message_add_int = default;
+            nativeImplementation.mdf_message_add_uint = default;
+            nativeImplementation.mdf_message_add_string2 = default;
+            nativeImplementation.mdf_message_add_date2 = default;
+            nativeImplementation.mdf_message_add_time2 = default;
+            nativeImplementation.mdf_message_add_time3 = default;
+            nativeImplementation.mdf_message_move = default;
+            nativeImplementation.mdf_message_serialize = default;
+            nativeImplementation.mdf_message_deserialize = default;
+
+            using Message message = new(nativeImplementation);
+            CatchInvalidOperationException(() => message.CompressionLevel = CompressionLevel.Z_BEST_COMPRESSION, nameof(nativeImplementation.mdf_message_set_property));
+            CatchInvalidOperationException(() => message.Utf8Validation = false, nameof(nativeImplementation.mdf_message_set_property));
+            CatchInvalidOperationException(() => message.AddInt64(default(uint), default, default), nameof(nativeImplementation.mdf_message_add_int));
+            CatchInvalidOperationException(() => message.AddInt64(default(Field), default, default), nameof(nativeImplementation.mdf_message_add_int));
+            CatchInvalidOperationException(() => message.AddUInt64(default(uint), default, default), nameof(nativeImplementation.mdf_message_add_uint));
+            CatchInvalidOperationException(() => message.AddUInt64(default(Field), default, default), nameof(nativeImplementation.mdf_message_add_uint));
+            CatchInvalidOperationException(() => message.AddString(default(uint), default(string), default), nameof(nativeImplementation.mdf_message_add_string2));
+            CatchInvalidOperationException(() => message.AddString(default(Field), default(string), default), nameof(nativeImplementation.mdf_message_add_string2));
+            CatchInvalidOperationException(() => message.AddString(default(uint), default(ReadOnlySpan<byte>), default), nameof(nativeImplementation.mdf_message_add_string2));
+            CatchInvalidOperationException(() => message.AddString(default(Field), default(ReadOnlySpan<byte>), default), nameof(nativeImplementation.mdf_message_add_string2));
+            CatchInvalidOperationException(() => message.AddDate(default(uint), default, default, default), nameof(nativeImplementation.mdf_message_add_date2));
+            CatchInvalidOperationException(() => message.AddDate(default(Field), default, default, default), nameof(nativeImplementation.mdf_message_add_date2));
+            CatchInvalidOperationException(() => message.AddTime2(default(uint), default, default, default, default), nameof(nativeImplementation.mdf_message_add_time2));
+            CatchInvalidOperationException(() => message.AddTime2(default(Field), default, default, default, default), nameof(nativeImplementation.mdf_message_add_time2));
+            CatchInvalidOperationException(() => message.AddTime3(default(uint), default, default, default, default), nameof(nativeImplementation.mdf_message_add_time3));
+            CatchInvalidOperationException(() => message.AddTime3(default(Field), default, default, default, default), nameof(nativeImplementation.mdf_message_add_time3));
+            CatchInvalidOperationException(() => Message.Move(message, default, default, default), nameof(nativeImplementation.mdf_message_move));
+            CatchInvalidOperationException(() => message.Serialize(out _), nameof(nativeImplementation.mdf_message_serialize));
+            CatchInvalidOperationException(() => message.Deserialize("..."), nameof(nativeImplementation.mdf_message_deserialize));
+            CatchInvalidOperationException(() => message.Deserialize(default(ReadOnlySpan<byte>)), nameof(nativeImplementation.mdf_message_deserialize));
+
+
+
+            static void CatchInvalidOperationException(Action action, string missingFunctionName)
+            {
+                try
+                {
+                    action();
+                    Assert.Fail($"No expected {nameof(InvalidOperationException)} was thrown.");
+                }
+                catch (InvalidOperationException ex)
+                {
+                    Assert.AreEqual($"The installed version of the native library doesn't include the {missingFunctionName} function.", ex.Message);
+                }
+            }
         }
 
         private static void Compare(string expectedValue, IntPtr actualValue)
@@ -505,16 +568,6 @@ namespace Millistream.Streaming.UnitTests
             Message message = new();
             message.Dispose();
             return message;
-        }
-
-        private static void CatchObjectDisposedException(Action action)
-        {
-            try
-            {
-                action();
-                Assert.Fail();
-            }
-            catch (ObjectDisposedException) { }
         }
     }
 }
