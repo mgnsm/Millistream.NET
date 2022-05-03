@@ -59,7 +59,7 @@ namespace Millistream.Streaming
             set
             {
                 ThrowIfDisposed();
-                if (_nativeImplementation.mdf_message_set_compression_level(Handle, (int)value) == 1)
+                if (_nativeImplementation.mdf_message_set_property(Handle, MDF_MSG_OPTION.MDF_MSG_OPT_COMPRESSION, (int)value) == 1)
                     _compressionLevel = value;
             }
         }
@@ -104,7 +104,7 @@ namespace Millistream.Streaming
             set
             {
                 ThrowIfDisposed();
-                if (_nativeImplementation.mdf_message_set_utf8_validation(Handle, value ? 1 : 0) == 1)
+                if (_nativeImplementation.mdf_message_set_property(Handle, MDF_MSG_OPTION.MDF_MSG_OPT_UTF8, value ? 1 : 0) == 1)
                     _utf8Validation = value;
             }
         }
