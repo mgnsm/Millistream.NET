@@ -113,6 +113,9 @@ namespace Millistream.Streaming.IntegrationTests
 
             _ = mdf.TimeDifferenceNs;
 
+            //Timeout
+            _ = mdf.Timeout;
+
             //Allocations
             long allocatedBytes = GetTotalAllocatedBytes();
             _ = mdf.FileDescriptor;
@@ -144,6 +147,8 @@ namespace Millistream.Streaming.IntegrationTests
             _ = mdf.TimeDifference;
 
             mdf.BindAddress = "abc";
+
+            _ = mdf.Timeout;
 
             Assert.AreEqual(allocatedBytes, GetTotalAllocatedBytes());
         }

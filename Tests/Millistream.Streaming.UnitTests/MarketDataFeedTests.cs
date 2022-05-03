@@ -385,6 +385,10 @@ namespace Millistream.Streaming.UnitTests
             GetStringProperty(MDF_OPTION.MDF_OPT_CRYPT_CIPHER, mdf => mdf.Cipher);
 
         [TestMethod]
+        public void GetTimeoutTest() =>
+            GetInt32Property(MDF_OPTION.MDF_OPT_TIMEOUT, mdf => mdf.Timeout);
+
+        [TestMethod]
         public void GetAndSetDataCallbackTest()
         {
             Mock<INativeImplementation> nativeImplementation = new();
@@ -681,6 +685,10 @@ namespace Millistream.Streaming.UnitTests
         [TestMethod]
         [ExpectedException(typeof(ObjectDisposedException))]
         public void CannotGetCipherAfterDisposeTest() => _ = GetDisposedMdf().Cipher;
+
+        [TestMethod]
+        [ExpectedException(typeof(ObjectDisposedException))]
+        public void CannotGetTimeoutAfterDisposeTest() => _ = GetDisposedMdf().Timeout;
 
         [TestMethod]
         [ExpectedException(typeof(ObjectDisposedException))]
