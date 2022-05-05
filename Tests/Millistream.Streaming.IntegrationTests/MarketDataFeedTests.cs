@@ -464,7 +464,7 @@ namespace Millistream.Streaming.IntegrationTests
 
                     if (ret == 1)
                     {
-                        while (mdf.GetNextMessage(out int mref, out int _, out ulong instrumentReference))
+                        while (mdf.GetNextMessage(out ushort mref, out ulong instrumentReference))
                         {
                             while (mdf.GetNextField(out uint field, out ReadOnlySpan<byte> value))
                             {
@@ -610,8 +610,8 @@ namespace Millistream.Streaming.IntegrationTests
                 switch (ret)
                 {
                     case 1:
-                        while (mdf.GetNextMessage(out int mref, out int _, out ulong _))
-                            if (mref == (int)messageReference)
+                        while (mdf.GetNextMessage(out MessageReference mref, out ulong _))
+                            if (mref == messageReference)
                                 return true;
                         break;
                     case -1:
