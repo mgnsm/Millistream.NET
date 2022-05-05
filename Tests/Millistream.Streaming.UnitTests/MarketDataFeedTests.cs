@@ -132,7 +132,7 @@ namespace Millistream.Streaming.UnitTests
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
-        public void CreateMarketDataFeedWithNoNativeLibraryPathTest() => new MarketDataFeed(default);
+        public void CreateMarketDataFeedWithNoNativeLibraryPathTest() => new MarketDataFeed(default(string));
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
@@ -416,6 +416,22 @@ namespace Millistream.Streaming.UnitTests
         }
 
         [TestMethod]
+        public void GetDelayTest()
+        {
+            const byte Delay = 1;
+            Mock<INativeImplementation> nativeImplementation = new();
+            IntPtr feedHandle = new(123);
+            nativeImplementation.Setup(x => x.mdf_create()).Returns(feedHandle);
+            nativeImplementation
+                .Setup(x => x.mdf_get_delay(feedHandle))
+                .Returns(Delay);
+            NativeImplementation.Implementation = nativeImplementation.Object;
+
+            using MarketDataFeed mdf = new();
+            Assert.AreEqual(Delay, mdf.Delay);
+        }
+
+        [TestMethod]
         public void GetAndSetDataCallbackTest()
         {
             Mock<INativeImplementation> nativeImplementation = new();
@@ -606,6 +622,24 @@ namespace Millistream.Streaming.UnitTests
         }
 
         [TestMethod]
+        public unsafe void DelayThrowsWhenNativeFunctionIsMissingTest()
+        {
+            NativeImplementation nativeImplementation = new(default);
+            nativeImplementation.mdf_get_delay = default;
+
+            using MarketDataFeed mdf = new(nativeImplementation);
+            try
+            {
+                _ = mdf.Delay;
+                Assert.Fail($"No expected {nameof(InvalidOperationException)} was thrown.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                Assert.AreEqual($"The installed version of the native library doesn't include the {nameof(nativeImplementation.mdf_get_delay)} function.", ex.Message);
+            }
+        }
+
+        [TestMethod]
         [ExpectedException(typeof(ObjectDisposedException))]
         public void CannotGetFileDescriptorAfterDisposeTest() => _ = GetDisposedMdf().FileDescriptor;
 
@@ -724,6 +758,10 @@ namespace Millistream.Streaming.UnitTests
         [TestMethod]
         [ExpectedException(typeof(ObjectDisposedException))]
         public void CannotSetHandleDelayAfterDisposeTest() => GetDisposedMdf().HandleDelay = true;
+
+        [TestMethod]
+        [ExpectedException(typeof(ObjectDisposedException))]
+        public void CannotGetDelayAfterDisposeTest() => _ = GetDisposedMdf().Delay;
 
         [TestMethod]
         [ExpectedException(typeof(ObjectDisposedException))]

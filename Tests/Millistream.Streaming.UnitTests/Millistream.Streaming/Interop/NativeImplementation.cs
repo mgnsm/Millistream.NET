@@ -16,6 +16,7 @@ namespace Millistream.Streaming.Interop
         internal delegate*<IntPtr, MDF_OPTION, ref ulong, int> mdf_get_ulong_property;
         internal delegate*<IntPtr, MDF_OPTION, ref long, int> mdf_get_long_property;
         internal delegate*<IntPtr, MDF_OPTION, IntPtr, int> mdf_set_property;
+        internal delegate*<IntPtr, byte> mdf_get_delay;
         internal delegate*<IntPtr, IntPtr, int> mdf_connect;
         internal delegate*<IntPtr, void> mdf_disconnect;
         internal delegate*<IntPtr> mdf_message_create;
@@ -61,6 +62,7 @@ namespace Millistream.Streaming.Interop
             mdf_get_ulong_property = &MdfGetUInt64Property;
             mdf_get_long_property = &MdfGetInt64Property;
             mdf_set_property = &MdfSetProperty;
+            mdf_get_delay = &MdfGetDelay;
             mdf_connect = &MdfConnect;
             mdf_disconnect = &MdfDisconnect;
             mdf_message_create = &MdfMessageCreate;
@@ -99,6 +101,7 @@ namespace Millistream.Streaming.Interop
         private static int MdfGetUInt64Property(IntPtr handle, MDF_OPTION option, ref ulong value) => Implementation.mdf_get_property(handle, (int)option, ref value);
         private static int MdfGetInt64Property(IntPtr handle, MDF_OPTION option, ref long value) => Implementation.mdf_get_property(handle, (int)option, ref value);
         private static int MdfSetProperty(IntPtr handle, MDF_OPTION option, IntPtr value) => Implementation.mdf_set_property(handle, (int)option, value);
+        private static byte MdfGetDelay(IntPtr handle) => Implementation.mdf_get_delay(handle);
         private static int MdfConnect(IntPtr handle, IntPtr server) => Implementation.mdf_connect(handle, server);
         private static void MdfDisconnect(IntPtr handle) => Implementation.mdf_disconnect(handle);
         private static IntPtr MdfMessageCreate() => Implementation.mdf_message_create();

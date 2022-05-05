@@ -50,6 +50,9 @@ namespace Millistream.Streaming.IntegrationTests
             mdf.HandleDelay = true;
             //Assert.IsTrue(mdf.HandleDelay);
 
+            //Delay
+            _ = mdf.Delay;
+
             //FileDescriptor
             Assert.AreEqual(-1, mdf.FileDescriptor);
             Assert.IsTrue(mdf.Connect(GetTestRunParameter("host")));
@@ -157,6 +160,8 @@ namespace Millistream.Streaming.IntegrationTests
 
             mdf.HandleDelay = false;
             _ = mdf.HandleDelay;
+
+            _ = mdf.Delay;
 
             Assert.AreEqual(allocatedBytes, GetTotalAllocatedBytes());
         }

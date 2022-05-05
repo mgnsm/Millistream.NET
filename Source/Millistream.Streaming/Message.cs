@@ -51,7 +51,7 @@ namespace Millistream.Streaming
         ~Message() => Dispose();
 
         /// <summary>
-        /// The zlib compression level used for the <see cref="AddString(uint, string)"/> and <see cref="AddString(uint, string, int)"/> methods.
+        /// Gets or sets the zlib compression level used for the <see cref="AddString(uint, string)"/> and <see cref="AddString(uint, string, int)"/> methods.
         /// </summary>
         /// <exception cref="InvalidOperationException">The installed version of the native library doesn't support setting the zlib compression level.</exception>
         /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_set_property function.</exception>
@@ -73,7 +73,7 @@ namespace Millistream.Streaming
         }
 
         /// <summary>
-        /// The total number of messages in the message handle (the number of active + the number of reused messages currently not used for active messages).
+        /// Gets the total number of messages in the message handle (the number of active + the number of reused messages currently not used for active messages).
         /// </summary>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
         public int Count
@@ -86,7 +86,7 @@ namespace Millistream.Streaming
         }
 
         /// <summary>
-        /// The number of active messages in the message handle.
+        /// Gets the number of active messages in the message handle.
         /// </summary>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
         public int ActiveCount
@@ -99,7 +99,7 @@ namespace Millistream.Streaming
         }
 
         /// <summary>
-        /// The number of added fields to the current message.
+        /// Gets the number of added fields to the current message.
         /// </summary>
         /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_get_num_fields function.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
@@ -650,17 +650,17 @@ namespace Millistream.Streaming
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static unsafe void ThrowIfNativeFunctionIsMissing(void* function, string name)
+        {
+            if (function == default)
+                throw new InvalidOperationException($"The installed version of the native library doesn't include the {name} function.");
+        }
+
         private void ThrowIfDisposed()
         {
             if (_isDisposed)
                 throw new ObjectDisposedException(typeof(Message).FullName);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe void ThrowIfNativeFunctionIsMissing(void* function, string name)
-        {
-            if (function == default)
-                throw new InvalidOperationException($"The installed version of the native library doesn't include the {name} function.");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
