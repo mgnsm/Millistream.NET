@@ -133,7 +133,7 @@ namespace Millistream.Streaming
         /// Consumes data sent from the server. If there currently is no data the function waits for <paramref name="timeout"/> number of seconds, if <paramref name="timeout"/> is zero (0) the function will return immediately. If <paramref name="timeout"/> is negative then the wait period is treated as number of microseconds instead of number of seconds (i.e. -1000 will wait a maximum of 1000µs).
         /// </summary>
         /// <param name="timeout">The wait period in seconds if positive. If negative, the value is treated as the number of microseconds to wait instead of the number of seconds.</param>
-        /// <returns>1 if data has been consumed that needs to be handled by <see cref="GetNextMessage(out int, out int, out ulong)" /> and no callback function has been registered. The function returns 0 on timeout or if a callback function is registered and there was data. On errors, -1 will be returned (and the connection will be dropped).</returns>
+        /// <returns>1 if data has been consumed that needs to be handled by <see cref="GetNextMessage(out ushort, out ulong)" /> and no callback function has been registered. The function returns 0 on timeout or if a callback function is registered and there was data. On errors, -1 will be returned (and the connection will be dropped).</returns>
         int Consume(int timeout);
 
         /// <summary>
@@ -148,11 +148,27 @@ namespace Millistream.Streaming
         /// <summary>
         /// Fetches a message from the current consumed data if one is present and fills the output parameters with values representing the message fetched.
         /// </summary>
+        /// <param name="mref">The fetched message reference. This should match a <see cref="MessageReference"/> value.</param>
+        /// <param name="insref">The fetched instrument reference, which is the unique id of an instrument.</param>
+        /// <returns><see langword="true" /> if a message was returned (and the <paramref name="mref"/> and <paramref name="insref"/> fields will be filled) or <see langword="false" /> if there are no more messages in the current consumed data (or an error occured).</returns>
+        bool GetNextMessage(out ushort mref, out ulong insref);
+
+        /// <summary>
+        /// Fetches a message from the current consumed data if one is present and fills the output parameters with values representing the message fetched.
+        /// </summary>
         /// <param name="messageReference">The fetched message reference.</param>
         /// <param name="messageClasses">The fetched message class(es). The message class is normally only used internally and is supplied to the client for completeness and transparency. The client should under most circumstances only use the message reference in order to determine which message it has received.</param>
         /// <param name="insref">The fetched instrument reference, which is the unique id of an instrument.</param>
         /// <returns><see langword="true" /> if a message was returned (and the <paramref name="messageReference"/>, <paramref name="messageClasses"/> and <paramref name="insref"/> fields will be filled) or <see langword="false" /> if there are no more messages in the current consumed data (or an error occured).</returns>
         bool GetNextMessage(out MessageReference messageReference, out MessageClasses messageClasses, out ulong insref);
+
+        /// <summary>
+        /// Fetches a message from the current consumed data if one is present and fills the output parameters with values representing the message fetched.
+        /// </summary>
+        /// <param name="messageReference">The fetched message reference.</param>
+        /// <param name="insref">The fetched instrument reference, which is the unique id of an instrument.</param>
+        /// <returns><see langword="true" /> if a message was returned (and the <paramref name="messageReference"/> and <paramref name="insref"/> fields will be filled) or <see langword="false" /> if there are no more messages in the current consumed data (or an error occured).</returns>
+        bool GetNextMessage(out MessageReference messageReference, out ulong insref);
 
         /// <summary>
         /// Fetches the next field from the current message.

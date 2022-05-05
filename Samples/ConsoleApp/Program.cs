@@ -33,8 +33,7 @@ Console.WriteLine($"{DateTime.Now.ToShortTimeString()} - Logged in");
 //6. Register a data callback (optional).
 mdf.DataCallback = (data, handle) =>
 {
-    while (handle.GetNextMessage(out MessageReference mref, out MessageClasses mclass,
-        out ulong insref))
+    while (handle.GetNextMessage(out MessageReference mref, out ulong insref))
     {
         Console.WriteLine($"{DateTime.Now.ToShortTimeString()} - " +
             $"Received an {mref} message with the following fields:");
@@ -96,8 +95,7 @@ static bool Consume(MarketDataFeed mdf, MessageReference messageReference)
         switch (ret)
         {
             case 1:
-                while (mdf.GetNextMessage(out MessageReference mref, out MessageClasses _,
-                    out ulong _))
+                while (mdf.GetNextMessage(out MessageReference mref, out ulong _))
                     if (mref == messageReference)
                         return true;
                 break;

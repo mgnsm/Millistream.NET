@@ -126,7 +126,7 @@ namespace Millistream.Streaming.Benchmarks
 
                 if (ret == 1)
                 {
-                    while (mdf.GetNextMessage(out MessageReference mref, out _, out _))
+                    while (mdf.GetNextMessage(out MessageReference mref, out _))
                     {
                         if (mref == MessageReference.MDF_M_LOGONGREETING)
                             return true;
@@ -143,7 +143,7 @@ namespace Millistream.Streaming.Benchmarks
 
         private static void OnDataReceived(object userData, MarketDataFeed<object, object> handle)
         {
-            while (handle.GetNextMessage(out int _, out _, out _))
+            while (handle.GetNextMessage(out ushort _, out _))
                 while (handle.GetNextField(out Field field, out _))
                     if (field == Field.MDF_F_REQUESTID)
                         s_dataCallbackInvoked = true;

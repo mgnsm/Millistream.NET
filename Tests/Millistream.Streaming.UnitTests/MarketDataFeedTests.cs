@@ -13,6 +13,7 @@ namespace Millistream.Streaming.UnitTests
     public class MarketDataFeedTests
     {
         private delegate void GetNextMessageCallback(IntPtr handle, ref int mref, ref int mclass, ref ulong insref);
+        private delegate void GetNextMessage2Callback(IntPtr handle, ref ushort mref, ref ulong insref);
         private delegate void GetNextFieldCallback(IntPtr handle, ref uint tag, ref IntPtr value);
         private delegate void GetInt32PropertyCallback(IntPtr handle, int option, ref int value);
         private delegate void GetUInt64PropertyCallback(IntPtr handle, int option, ref ulong value);
@@ -499,37 +500,41 @@ namespace Millistream.Streaming.UnitTests
         [TestMethod]
         public void GetNextMessageTest()
         {
-            Mock<INativeImplementation> nativeImplementation = new();
-            IntPtr feedHandle = new(123);
-            nativeImplementation.Setup(x => x.mdf_create()).Returns(feedHandle);
             const MessageReference MessageReference = MessageReference.MDF_M_CI;
             const MessageClasses MessageClass = MessageClasses.MDF_MC_ESTIMATES;
             const ulong InstrumentReference = 500;
-            nativeImplementation.Setup(x => x.mdf_get_next_message(feedHandle, ref It.Ref<int>.IsAny, ref It.Ref<int>.IsAny, ref It.Ref<ulong>.IsAny))
+
+            Mock<INativeImplementation> nativeImplementation = new();
+            IntPtr feedHandle = new(123);
+            nativeImplementation.Setup(x => x.mdf_create()).Returns(feedHandle);
+
+            Expression<Func<INativeImplementation, int>> getNextMessageExpression = 
+                x => x.mdf_get_next_message(feedHandle, ref It.Ref<int>.IsAny, ref It.Ref<int>.IsAny, ref It.Ref<ulong>.IsAny);
+
+            nativeImplementation.Setup(getNextMessageExpression)
                 .Callback(new GetNextMessageCallback((IntPtr _, ref int mref, ref int mclass, ref ulong insref) =>
                 {
                     mref = (int)MessageReference;
                     mclass = (int)MessageClass;
                     insref = InstrumentReference;
                 }))
-                .Returns(1)
-                .Verifiable();
+                .Returns(1);
             NativeImplementation.Implementation = nativeImplementation.Object;
 
             using MarketDataFeed mdf = new();
-            Assert.IsTrue(mdf.GetNextMessage(out int returnedMref, out int returnedMclass, out ulong returnedInsref));
-            Assert.AreEqual((int)MessageReference, returnedMref);
-            Assert.AreEqual((int)MessageClass, returnedMclass);
-            Assert.AreEqual(InstrumentReference, returnedInsref);
+            Assert.IsTrue(mdf.GetNextMessage(out int mref, out int mclass, out ulong insref));
+            Assert.AreEqual((int)MessageReference, mref);
+            Assert.AreEqual((int)MessageClass, mclass);
+            Assert.AreEqual(InstrumentReference, insref);
 
-            Assert.IsTrue(mdf.GetNextMessage(out MessageReference returnedMessageReference, out MessageClasses returnedMessageClasses, out returnedInsref));
-            Assert.AreEqual(MessageReference, returnedMessageReference);
-            Assert.AreEqual(MessageClass, returnedMessageClasses);
-            Assert.AreEqual(InstrumentReference, returnedInsref);
+            Assert.IsTrue(mdf.GetNextMessage(out MessageReference messageReference, out MessageClasses messageClasses, out insref));
+            Assert.AreEqual(MessageReference, messageReference);
+            Assert.AreEqual(MessageClass, messageClasses);
+            Assert.AreEqual(InstrumentReference, insref);
 
-            nativeImplementation.Verify();
+            nativeImplementation.Verify(getNextMessageExpression, Times.Exactly(2));
 
-            nativeImplementation.Setup(x => x.mdf_get_next_message(feedHandle, ref It.Ref<int>.IsAny, ref It.Ref<int>.IsAny, ref It.Ref<ulong>.IsAny))
+            nativeImplementation.Setup(getNextMessageExpression)
                 .Callback(new GetNextMessageCallback((IntPtr _, ref int mref, ref int mclass, ref ulong insref) =>
                 {
                     mref = (int)MessageReference;
@@ -537,11 +542,11 @@ namespace Millistream.Streaming.UnitTests
                 }))
                 .Returns(1);
 
-            Assert.IsTrue(mdf.GetNextMessage(out returnedMessageReference, out returnedMessageClasses, out _));
-            Assert.AreEqual(MessageReference, returnedMessageReference);
-            Assert.AreEqual(MessageClasses.MDF_MC_ORDER | MessageClasses.MDF_MC_MBO | MessageClasses.MDF_MC_QUOTEBBO, returnedMessageClasses);
+            Assert.IsTrue(mdf.GetNextMessage(out messageReference, out messageClasses, out _));
+            Assert.AreEqual(MessageReference, messageReference);
+            Assert.AreEqual(MessageClasses.MDF_MC_ORDER | MessageClasses.MDF_MC_MBO | MessageClasses.MDF_MC_QUOTEBBO, messageClasses);
 
-            nativeImplementation.Setup(x => x.mdf_get_next_message(feedHandle, ref It.Ref<int>.IsAny, ref It.Ref<int>.IsAny, ref It.Ref<ulong>.IsAny))
+            nativeImplementation.Setup(getNextMessageExpression)
                 .Callback(new GetNextMessageCallback((IntPtr _, ref int mref, ref int mclass, ref ulong insref) =>
                 {
                     mref = (int)MessageReference;
@@ -549,8 +554,48 @@ namespace Millistream.Streaming.UnitTests
                 }))
                 .Returns(1);
 
-            Assert.IsTrue(mdf.GetNextMessage(out _, out returnedMessageClasses, out _));
-            Assert.AreEqual((MessageClasses)int.MaxValue, returnedMessageClasses);
+            Assert.IsTrue(mdf.GetNextMessage(out _, out messageClasses, out _));
+            Assert.AreEqual((MessageClasses)int.MaxValue, messageClasses);
+
+            nativeImplementation.Verify(getNextMessageExpression, Times.Exactly(4));
+
+            Expression<Func<INativeImplementation, int>> getNextMessage2Expression =
+                x => x.mdf_get_next_message2(feedHandle, ref It.Ref<ushort>.IsAny, ref It.Ref<ulong>.IsAny);
+            nativeImplementation.Setup(getNextMessage2Expression)
+                .Callback(new GetNextMessage2Callback((IntPtr _, ref ushort mref, ref ulong insref) =>
+                {
+                    mref = (ushort)MessageReference;
+                    insref = InstrumentReference;
+                }))
+                .Returns(1);
+            Assert.IsTrue(mdf.GetNextMessage(out ushort unsignedMref, out insref));
+            Assert.AreEqual(unsignedMref, (ushort)MessageReference);
+            Assert.AreEqual(insref, InstrumentReference);
+
+            Assert.IsTrue(mdf.GetNextMessage(out messageReference, out insref));
+            Assert.AreEqual(messageReference, MessageReference);
+            Assert.AreEqual(insref, InstrumentReference);
+
+            nativeImplementation.Verify(getNextMessage2Expression, Times.Exactly(2));
+        }
+
+        [TestMethod]
+        public unsafe void GetNextMessageFallbackTest()
+        {
+            NativeImplementation nativeImplementation = new(default);
+            nativeImplementation.mdf_get_next_message2 = default; // the function is missing from the installed native library
+
+            Mock<INativeImplementation> implemementation = new();
+            Expression<Func<INativeImplementation, int>> expression =
+                x => x.mdf_get_next_message(It.IsAny<IntPtr>(), ref It.Ref<int>.IsAny, ref It.Ref<int>.IsAny, ref It.Ref<ulong>.IsAny);
+            implemementation.Setup(expression).Returns(1);
+            NativeImplementation.Implementation = implemementation.Object;
+
+            using MarketDataFeed mdf = new(nativeImplementation);
+            Assert.IsTrue(mdf.GetNextMessage(out ushort _, out _));
+            Assert.IsTrue(mdf.GetNextMessage(out MessageReference _, out _));
+            implemementation.Verify(expression, Times.Exactly(2)); // mdf_get_next_message should be called instead of the missing mdf_get_next_message2 function
+            implemementation.Verify(x => x.mdf_get_next_message2(It.IsAny<IntPtr>(), ref It.Ref<ushort>.IsAny, ref It.Ref<ulong>.IsAny), Times.Never);
         }
 
         [TestMethod]
@@ -822,14 +867,13 @@ namespace Millistream.Streaming.UnitTests
         public void CannotCallConsumeAfterDisposeTest() => GetDisposedMdf().Consume(10);
 
         [TestMethod]
-        [ExpectedException(typeof(ObjectDisposedException))]
-        public void CannotCallGetNextMessageAfterDisposeTest() => 
-            GetDisposedMdf().GetNextMessage(out int _, out int _, out ulong _);
-
-        [TestMethod]
-        [ExpectedException(typeof(ObjectDisposedException))]
-        public void CannotCallGetNextMessageOverloadAfterDisposeTest() =>
-            GetDisposedMdf().GetNextMessage(out MessageReference _, out MessageClasses _, out ulong _);
+        public void CannotCallGetNextMessageAfterDisposeTest()
+        {
+            Assert.ThrowsException<ObjectDisposedException>(() => GetDisposedMdf().GetNextMessage(out int _, out _, out _));
+            Assert.ThrowsException<ObjectDisposedException>(() => GetDisposedMdf().GetNextMessage(out MessageReference _, out _, out _));
+            Assert.ThrowsException<ObjectDisposedException>(() => GetDisposedMdf().GetNextMessage(out ushort _, out _));
+            Assert.ThrowsException<ObjectDisposedException>(() => GetDisposedMdf().GetNextMessage(out MessageReference _, out _));
+        }
 
         [TestMethod]
         [ExpectedException(typeof(ObjectDisposedException))]

@@ -10,6 +10,7 @@ namespace Millistream.Streaming.Interop
         internal delegate*<IntPtr, void> mdf_destroy;
         internal delegate*<IntPtr, int, int> mdf_consume;
         internal delegate*<IntPtr, ref int, ref int, ref ulong, int> mdf_get_next_message;
+        internal delegate*<IntPtr, ref ushort, ref ulong, int> mdf_get_next_message2;
         internal delegate*<IntPtr, ref uint, ref IntPtr, int> mdf_get_next_field;
         internal delegate*<IntPtr, MDF_OPTION, ref IntPtr, int> mdf_get_property;
         internal delegate*<IntPtr, MDF_OPTION, ref int, int> mdf_get_int_property;
@@ -57,6 +58,7 @@ namespace Millistream.Streaming.Interop
             mdf_destroy = &MdfDestroy;
             mdf_consume = &MdfConsume;
             mdf_get_next_message = &MdfGetNextMessage;
+            mdf_get_next_message2 = &MdfGetNextMessage2;
             mdf_get_next_field = &MdfGetNextField;
             mdf_get_property = &MdfGetProperty;
             mdf_get_int_property = &MdfGetInt32Property;
@@ -97,6 +99,7 @@ namespace Millistream.Streaming.Interop
         private static void MdfDestroy(IntPtr handle) => Implementation.mdf_destroy(handle);
         private static int MdfConsume(IntPtr handle, int timeout) => Implementation.mdf_consume(handle, timeout);
         private static int MdfGetNextMessage(IntPtr handle, ref int mref, ref int mclass, ref ulong insref) => Implementation.mdf_get_next_message(handle, ref mref, ref mclass, ref insref);
+        private static int MdfGetNextMessage2(IntPtr handle, ref ushort mref, ref ulong insref) => Implementation.mdf_get_next_message2(handle, ref mref, ref insref);
         private static int MdfGetNextField(IntPtr handle, ref uint tag, ref IntPtr value) => Implementation.mdf_get_next_field(handle, ref tag, ref value);
         private static int MdfGetProperty(IntPtr handle, MDF_OPTION option, ref IntPtr value) => Implementation.mdf_get_property(handle, (int)option, ref value);
         private static int MdfGetInt32Property(IntPtr handle, MDF_OPTION option, ref int value) => Implementation.mdf_get_property(handle, (int)option, ref value);
