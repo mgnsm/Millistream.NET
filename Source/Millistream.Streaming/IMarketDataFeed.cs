@@ -10,62 +10,62 @@ namespace Millistream.Streaming
     public interface IMarketDataFeed<TCallbackUserData, TStatusCallbackUserData>
     {
         /// <summary>
-        /// The file descriptor used by the connection. Will be -1 (or INVALID_SOCKET on Windows) if there is no connection.
+        /// Gets the file descriptor used by the connection. Will be -1 (or INVALID_SOCKET on Windows) if there is no connection.
         /// </summary>
         int FileDescriptor { get; }
 
         /// <summary>
-        /// The current API error code.
+        /// Gets or sets the current API error code.
         /// </summary>
         Error ErrorCode { get; set; }
 
         /// <summary>
-        /// The number of bytes received by the server since the handle was created.
+        /// Gets or sets the number of bytes received by the server since the handle was created.
         /// </summary>
         ulong ReceivedBytes { get; set; }
 
         /// <summary>
-        /// The number of bytes sent by the client since the handle was created.
+        /// Gets or sets the number of bytes sent by the client since the handle was created.
         /// </summary>
         ulong SentBytes { get; set; }
 
         /// <summary>
-        /// A callback function that will be called by the consume function if there are any messages to decode.
+        /// Gets or sets a callback function that will be called by the consume function if there are any messages to decode.
         /// </summary>
         DataCallback<TCallbackUserData, TStatusCallbackUserData> DataCallback { get; set; }
 
         /// <summary>
-        /// Custom userdata that will be available to the data callback function.
+        /// Gets or sets custom userdata that will be available to the data callback function.
         /// </summary>
         TCallbackUserData CallbackUserData { get; set; }
 
         /// <summary>
-        /// A callback function that will be called whenever there is a change of the status of the connection.
+        /// Gets or sets a callback function that will be called whenever there is a change of the status of the connection.
         /// </summary>
         StatusCallback<TStatusCallbackUserData> StatusCallback { get; set; }
 
         /// <summary>
-        /// Custom userdata that will be available to the status callback function.
+        /// Gets or sets custom userdata that will be available to the status callback function.
         /// </summary>
         TStatusCallbackUserData StatusCallbackUserData { get; set; }
 
         /// <summary>
-        /// The number of seconds before determining that a connect attempt has timed out. Valid values are 1 to 60. The default value is 5.
+        /// Gets or sets the number of seconds before determining that a connect attempt has timed out.
         /// </summary>
         int ConnectionTimeout { get; set; }
 
         /// <summary>
-        /// The number of seconds the connection must be idle before the API sends a heartbeat request to the server. Valid values are 1 to 86400. The default is 30.
+        /// Gets or sets the number of seconds the connection must be idle before the API sends a heartbeat request to the server.
         /// </summary>
         int HeartbeatInterval { get; set; }
 
         /// <summary>
-        /// How many outstanding hearbeat requests to allow before the connection is determined to be disconnected. Valid values are 1 to 100. The default is 2.
+        /// Gets or sets how many outstanding hearbeat requests to allow before the connection is determined to be disconnected.
         /// </summary>
         int MaximumMissedHeartbeats { get; set; }
 
         /// <summary>
-        /// Controls whether Nagle's algorithm is used on the TCP connection. It's enabled by default.
+        /// Gets or sets a value indicating whether Nagle's algorithm is used on the TCP connection.
         /// </summary>
         bool NoDelay { get; set; }
 
@@ -75,42 +75,42 @@ namespace Millistream.Streaming
         bool NoEncryption { get; set; }
 
         /// <summary>
-        /// The time difference in number of seconds between the client and the server. The value should be added to the current time on the client in order to get the server time. Please not that this value can be negative if the client clock is ahead of the server clock.
+        /// Gets the time difference in number of seconds between the client and the server. The value should be added to the current time on the client in order to get the server time. Please not that this value can be negative if the client clock is ahead of the server clock.
         /// </summary>
         int TimeDifference { get; }
 
         /// <summary>
-        /// A numerical address to which the API will bind before attempting to connect to a server in <see cref="Connect"/>. If the bind fails then <see cref="Connect"/> also fails. The string is copied by the API and a <see langword="NULL" /> value can be used in order to "unset" the bind address.
+        /// Gets or sets a numerical address to which the API will bind before attempting to connect to a server in <see cref="Connect"/>. If the bind fails then <see cref="Connect"/> also fails. The string is copied by the API and a <see langword="NULL" /> value can be used in order to "unset" the bind address.
         /// </summary>
         string BindAddress { get; set; }
 
         /// <summary>
-        /// The time difference in number of nanoseconds between the client and the server. The value should be added to the current time on the client in order to get the server time. Please not that this value can be negative if the client clock is ahead of the server clock.
+        /// Gets the time difference in number of nanoseconds between the client and the server. The value should be added to the current time on the client in order to get the server time. Please not that this value can be negative if the client clock is ahead of the server clock.
         /// </summary>
         long TimeDifferenceNs { get; }
 
         /// <summary>
-        /// A comma separated list of the message digests that the client will offer to the server upon connect.
+        /// Gets or sets a comma separated list of the message digests that the client will offer to the server upon connect.
         /// </summary>
         public string MessageDigests { get; set; }
 
         /// <summary>
-        /// A comma separated list of the encryption ciphers that the client will offer to the server upon connect.
+        /// Gets or sets a comma separated list of the encryption ciphers that the client will offer to the server upon connect.
         /// </summary>
         public string Ciphers { get; set; }
 
         /// <summary>
-        /// The digest chosen by the server. Only available after <see cref="Connect"/> returns.
+        /// Gets the digest chosen by the server. Only available after <see cref="Connect"/> returns.
         /// </summary>
         string MessageDigest { get; }
 
         /// <summary>
-        /// The cipher chosen by the server. Only available after <see cref="Connect"/> returns.
+        /// Gets rhe cipher chosen by the server. Only available after <see cref="Connect"/> returns.
         /// </summary>
         string Cipher { get; }
 
         /// <summary>
-        /// The number of seconds to wait before having to call <see cref="Consume(int)"/>.
+        /// Gets the number of seconds to wait before having to call <see cref="Consume(int)"/>.
         /// </summary>
         public int Timeout { get; }
 
@@ -118,6 +118,16 @@ namespace Millistream.Streaming
         /// Enables or disables delay-mode in where the server adds the intended delay to each message sent. This also enables the client to set the intended delay of the messages the client sends to the server. It's disabled by default.
         /// </summary>
         public bool HandleDelay { get; set; }
+
+        /// <summary>
+        /// Gets the intended delay of the current message if delay-mode have been activated by setting the <see cref="HandleDelay"/> property. Note that this is the intended delay of the message and not necessarily the real delay, network latency, server latency and so on are not included.
+        /// </summary>
+        public byte Delay { get; }
+
+        /// <summary>
+        /// Gets the message class of the current received message.
+        /// </summary>
+        public ulong MessageClass { get; }
 
         /// <summary>
         /// Consumes data sent from the server. If there currently is no data the function waits for <paramref name="timeout"/> number of seconds, if <paramref name="timeout"/> is zero (0) the function will return immediately. If <paramref name="timeout"/> is negative then the wait period is treated as number of microseconds instead of number of seconds (i.e. -1000 will wait a maximum of 1000µs).

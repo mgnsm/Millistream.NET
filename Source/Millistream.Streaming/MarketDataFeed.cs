@@ -362,6 +362,21 @@ namespace Millistream.Streaming
                 return _nativeImplementation.mdf_get_delay(_feedHandle);
             }
         }
+
+        /// <summary>
+        /// Gets the message class of the current received message.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_get_mclass function.</exception>
+        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
+        public ulong MessageClass
+        {
+            get
+            {
+                ThrowIfDisposed();
+                Message.ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_get_mclass, nameof(_nativeImplementation.mdf_get_mclass));
+                return _nativeImplementation.mdf_get_mclass(_feedHandle);
+            }
+        }
         #endregion
 
         #region Methods

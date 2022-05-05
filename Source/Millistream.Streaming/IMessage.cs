@@ -8,27 +8,27 @@ namespace Millistream.Streaming
     public interface IMessage
     {
         /// <summary>
-        /// The zlib compression level used for the <see cref="AddString(uint, string)"/> and <see cref="AddString(uint, string, int)"/> methods.
+        /// Gets or sets the zlib compression level used for the <see cref="AddString(uint, string)"/> and <see cref="AddString(uint, string, int)"/> methods.
         /// </summary>
         CompressionLevel CompressionLevel { get; set; }
 
         /// <summary>
-        /// The total number of messages in the message handle (the number of active + the number of reused messages currently not used for active messages).
+        /// Gets the total number of messages in the message handle (the number of active + the number of reused messages currently not used for active messages).
         /// </summary>
         int Count { get; }
 
         /// <summary>
-        /// The number of active messages in the message handle.
+        /// Gets the number of active messages in the message handle.
         /// </summary>
         int ActiveCount { get; }
 
         /// <summary>
-        /// The number of added fields to the current message.
+        /// Gets the number of added fields to the current message.
         /// </summary>
         int FieldCount { get; }
 
         /// <summary>
-        /// Enables or disables the UTF-8 validation performed in <see cref="AddString(uint, string)"/> and <see cref="AddString(uint, string, int)"/>. It's enabled by default.
+        /// Enables or disables the UTF-8 validation performed in <see cref="AddString(uint, string)"/> and <see cref="AddString(uint, string, int)"/>.
         /// </summary>
         bool Utf8Validation { get; set; }
 
