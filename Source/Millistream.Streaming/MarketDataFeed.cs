@@ -384,7 +384,7 @@ namespace Millistream.Streaming
         /// Consumes data sent from the server. If there currently is no data the function waits for <paramref name="timeout"/> number of seconds, if <paramref name="timeout"/> is zero (0) the function will return immediately. If <paramref name="timeout"/> is negative then the wait period is treated as number of microseconds instead of number of seconds (i.e. -1000 will wait a maximum of 1000µs).
         /// </summary>
         /// <param name="timeout">The wait period in seconds if positive. If negative, the value is treated as the number of microseconds to wait instead of the number of seconds.</param>
-        /// <returns>1 if data has been consumed that needs to be handled by <see cref="GetNextMessage(out int, out int, out ulong)" /> and no callback function has been registered. The function returns 0 on timeout or if a callback function is registered and there was data. On errors, -1 will be returned (and the connection will be dropped).</returns>
+        /// <returns>1 if data has been consumed that needs to be handled by <see cref="GetNextMessage(out ushort, out ulong)" /> and no callback function has been registered. The function returns 0 on timeout or if a callback function is registered and there was data. On errors, -1 will be returned (and the connection will be dropped).</returns>
         /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         /// <remarks>The corresponding native function is mdf_consume.</remarks>
         public int Consume(int timeout)
@@ -414,6 +414,31 @@ namespace Millistream.Streaming
         /// <summary>
         /// Fetches a message from the current consumed data if one is present and fills the output parameters with values representing the message fetched.
         /// </summary>
+        /// <param name="mref">The fetched message reference. This should match a <see cref="MessageReference"/> value.</param>
+        /// <param name="insref">The fetched instrument reference, which is the unique id of an instrument.</param>
+        /// <returns><see langword="true" /> if a message was returned (and the <paramref name="mref"/> and <paramref name="insref"/> fields will be filled) or <see langword="false" /> if there are no more messages in the current consumed data (or an error occured).</returns>
+        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
+        /// <remarks>The corresponding native function is mdf_get_next_message2. If this function isn't included in the installed version of the native library, the mdf_get_next_message function will be called instead.</remarks>
+        public bool GetNextMessage(out ushort mref, out ulong insref)
+        {
+            mref = default;
+            insref = default;
+            ThrowIfDisposed();
+
+            if (_nativeImplementation.mdf_get_next_message2 == default)
+            {
+                bool ret = GetNextMessage(out int messageReference, out _, out insref);
+                if (messageReference >= ushort.MinValue && messageReference <= ushort.MaxValue)
+                    mref = (ushort)messageReference;
+                return ret;
+            }
+
+            return _nativeImplementation.mdf_get_next_message2(_feedHandle, ref mref, ref insref) == 1;
+        }
+
+        /// <summary>
+        /// Fetches a message from the current consumed data if one is present and fills the output parameters with values representing the message fetched.
+        /// </summary>
         /// <param name="messageReference">The fetched message reference.</param>
         /// <param name="messageClasses">The fetched message class(es). The message class is normally only used internally and is supplied to the client for completeness and transparency. The client should under most circumstances only use the message reference in order to determine which message it has received.</param>
         /// <param name="insref">The fetched instrument reference, which is the unique id of an instrument.</param>
@@ -435,6 +460,32 @@ namespace Millistream.Streaming
                 default:
                     messageReference = default;
                     messageClasses = default;
+                    break;
+            }
+            return ret;
+        }
+
+        /// <summary>
+        /// Fetches a message from the current consumed data if one is present and fills the output parameters with values representing the message fetched.
+        /// </summary>
+        /// <param name="messageReference">The fetched message reference.</param>
+        /// <param name="insref">The fetched instrument reference, which is the unique id of an instrument.</param>
+        /// <returns><see langword="true" /> if a message was returned (and the <paramref name="messageReference"/> and <paramref name="insref"/> fields will be filled) or <see langword="false" /> if there are no more messages in the current consumed data (or an error occured).</returns>
+        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
+        /// <exception cref="InvalidOperationException">An unknown/undefined message reference was fetched.</exception>
+        /// <remarks>The corresponding native function is mdf_get_next_message.</remarks>
+        public bool GetNextMessage(out MessageReference messageReference, out ulong insref)
+        {
+            bool ret = GetNextMessage(out ushort mref, out insref);
+            switch (ret)
+            {
+                case true:
+                    if (!s_messageReferences.Contains(mref))
+                        throw new InvalidOperationException($"{mref} is an unknown message reference.");
+                    messageReference = (MessageReference)mref;
+                    break;
+                default:
+                    messageReference = default;
                     break;
             }
             return ret;

@@ -9,6 +9,7 @@ namespace Millistream.Streaming.Interop
         void mdf_destroy(IntPtr handle);
         int mdf_consume(IntPtr handle, int timeout);
         int mdf_get_next_message(IntPtr handle, ref int mref, ref int mclass, ref ulong insref);
+        int mdf_get_next_message2(IntPtr handle, ref ushort mref, ref ulong insref);
         int mdf_get_next_field(IntPtr handle, ref uint tag, ref IntPtr value);
         int mdf_get_property(IntPtr handle, int option, ref IntPtr value);
         int mdf_get_property(IntPtr handle, int option, ref int value);
