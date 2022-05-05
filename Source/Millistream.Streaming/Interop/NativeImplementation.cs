@@ -18,6 +18,7 @@ namespace Millistream.Streaming.Interop
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, MDF_OPTION, ref long, int> mdf_get_long_property;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, MDF_OPTION, IntPtr, int> mdf_set_property;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, byte> mdf_get_delay;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, ulong> mdf_get_mclass;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, IntPtr, int> mdf_connect;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, void> mdf_disconnect;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr> mdf_message_create;
@@ -96,6 +97,8 @@ namespace Millistream.Streaming.Interop
 
             if (nativeLibrary.TryGetExport(lib, nameof(mdf_get_delay), out IntPtr address))
                 mdf_get_delay = (delegate* unmanaged[Cdecl]<IntPtr, byte>)address;
+            if (nativeLibrary.TryGetExport(lib, nameof(mdf_get_mclass), out address))
+                mdf_get_mclass = (delegate* unmanaged[Cdecl]<IntPtr, ulong>)address;
             if (nativeLibrary.TryGetExport(lib, nameof(mdf_message_add_int), out address))
                 mdf_message_add_int = (delegate* unmanaged[Cdecl]<IntPtr, uint, long, int, int>)address;
             if (nativeLibrary.TryGetExport(lib, nameof(mdf_message_add_uint), out address))

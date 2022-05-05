@@ -432,6 +432,22 @@ namespace Millistream.Streaming.UnitTests
         }
 
         [TestMethod]
+        public void GetMessageClassTest()
+        {
+            const ulong MessageClass = ulong.MaxValue;
+            Mock<INativeImplementation> nativeImplementation = new();
+            IntPtr feedHandle = new(123);
+            nativeImplementation.Setup(x => x.mdf_create()).Returns(feedHandle);
+            nativeImplementation
+                .Setup(x => x.mdf_get_mclass(feedHandle))
+                .Returns(MessageClass);
+            NativeImplementation.Implementation = nativeImplementation.Object;
+
+            using MarketDataFeed mdf = new();
+            Assert.AreEqual(MessageClass, mdf.MessageClass);
+        }
+
+        [TestMethod]
         public void GetAndSetDataCallbackTest()
         {
             Mock<INativeImplementation> nativeImplementation = new();
@@ -627,16 +643,18 @@ namespace Millistream.Streaming.UnitTests
             NativeImplementation nativeImplementation = new(default);
             nativeImplementation.mdf_get_delay = default;
 
-            using MarketDataFeed mdf = new(nativeImplementation);
-            try
-            {
-                _ = mdf.Delay;
-                Assert.Fail($"No expected {nameof(InvalidOperationException)} was thrown.");
-            }
-            catch (InvalidOperationException ex)
-            {
-                Assert.AreEqual($"The installed version of the native library doesn't include the {nameof(nativeImplementation.mdf_get_delay)} function.", ex.Message);
-            }
+            GetPropertyAndCatchInvalidOperationException(nativeImplementation, mdf => _ = mdf.Delay,
+                nameof(nativeImplementation.mdf_get_delay));
+        }
+
+        [TestMethod]
+        public unsafe void MessageClassThrowsWhenNativeFunctionIsMissingTest()
+        {
+            NativeImplementation nativeImplementation = new(default);
+            nativeImplementation.mdf_get_mclass = default;
+
+            GetPropertyAndCatchInvalidOperationException(nativeImplementation, mdf => _ = mdf.MessageClass, 
+                nameof(nativeImplementation.mdf_get_mclass));
         }
 
         [TestMethod]
@@ -762,6 +780,10 @@ namespace Millistream.Streaming.UnitTests
         [TestMethod]
         [ExpectedException(typeof(ObjectDisposedException))]
         public void CannotGetDelayAfterDisposeTest() => _ = GetDisposedMdf().Delay;
+
+        [TestMethod]
+        [ExpectedException(typeof(ObjectDisposedException))]
+        public void CannotGetMessageClassAfterDisposeTest() => _ = GetDisposedMdf().MessageClass;
 
         [TestMethod]
         [ExpectedException(typeof(ObjectDisposedException))]
@@ -970,6 +992,20 @@ namespace Millistream.Streaming.UnitTests
             byte[] bytes = new byte[expectedValue.Length];
             Marshal.Copy(actualValue, bytes, 0, expectedValue.Length);
             Assert.AreEqual(expectedValue, Encoding.UTF8.GetString(bytes));
+        }
+
+        private static void GetPropertyAndCatchInvalidOperationException(NativeImplementation nativeImplementation, Action<MarketDataFeed> action, string nativeFunctionName)
+        {
+            using MarketDataFeed mdf = new(nativeImplementation);
+            try
+            {
+                action(mdf);
+                Assert.Fail($"No expected {nameof(InvalidOperationException)} was thrown.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                Assert.AreEqual($"The installed version of the native library doesn't include the {nativeFunctionName} function.", ex.Message);
+            }
         }
     }
 }
