@@ -337,7 +337,7 @@ namespace Millistream.Streaming
         public int Timeout => GetInt32Property(MDF_OPTION.MDF_OPT_TIMEOUT);
 
         /// <summary>
-        /// Enables or disables delay-mode in where the server adds the intended delay to each message sent. This also enables the client to set the intended delay of the messages the client sends to the server. It's disabled by default.
+        /// Gets or sets a value indicating whether delay-mode is enabled on the connection. It's disabled by default.
         /// </summary>
         /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_HANDLE_DELAY"/> option cannot be fetched or modified.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>

@@ -33,6 +33,11 @@ namespace Millistream.Streaming
         bool Utf8Validation { get; set; }
 
         /// <summary>
+        /// Gets or sets the intended delay of the message.
+        /// </summary>
+        public byte Delay { get; set; }
+
+        /// <summary>
         /// Adds a new message to the message handle. If the current active message is empty it will be reused to carry this new message.
         /// </summary>
         /// <param name="insref">The reference for the instrument for which the message is created for.</param>
