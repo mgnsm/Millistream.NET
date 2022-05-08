@@ -95,6 +95,19 @@ namespace Millistream.Streaming.UnitTests
         }
 
         [TestMethod]
+        public void GetAndSetDelayTest()
+        {
+            _nativeImplementation.Setup(x => x.mdf_message_set_property(It.IsAny<IntPtr>(), (int)MDF_MSG_OPTION.MDF_MSG_OPT_DELAY, It.IsAny<int>())).Returns(1)
+                .Verifiable();
+            using Message message = new();
+            Assert.AreEqual(default, message.Delay);
+            const byte Delay = byte.MaxValue - 10;
+            message.Delay = Delay;
+            Assert.AreEqual(Delay, message.Delay);
+            _nativeImplementation.Verify();
+        }
+
+        [TestMethod]
         public void AddTest()
         {
             _nativeImplementation.Setup(x => x.mdf_message_add(It.IsAny<IntPtr>(), It.IsAny<ulong>(), It.IsAny<int>())).Returns(1);
@@ -439,6 +452,14 @@ namespace Millistream.Streaming.UnitTests
         public void CannotSetUtf8ValidationAfterDisposeTest() => GetDisposedMessage().Utf8Validation = false;
 
         [TestMethod]
+        [ExpectedException(typeof(ObjectDisposedException))]
+        public void CannotGetDelayAfterDisposeTest() => _ = GetDisposedMessage().Delay;
+
+        [TestMethod]
+        [ExpectedException(typeof(ObjectDisposedException))]
+        public void CannotSetDelayAfterDiposeTest() => GetDisposedMessage().Delay = 1;
+
+        [TestMethod]
         public void CannotCallMethodsAfterDisposeTest()
         {
             Message disposedMessage = GetDisposedMessage();
@@ -535,6 +556,7 @@ namespace Millistream.Streaming.UnitTests
             using Message message = new(nativeImplementation);
             CatchInvalidOperationException(() => message.CompressionLevel = CompressionLevel.Z_BEST_COMPRESSION, nameof(nativeImplementation.mdf_message_set_property));
             CatchInvalidOperationException(() => message.Utf8Validation = false, nameof(nativeImplementation.mdf_message_set_property));
+            CatchInvalidOperationException(() => message.Delay = 1, nameof(nativeImplementation.mdf_message_set_property));
             CatchInvalidOperationException(() => message.AddInt64(default(uint), default, default), nameof(nativeImplementation.mdf_message_add_int));
             CatchInvalidOperationException(() => message.AddInt64(default(Field), default, default), nameof(nativeImplementation.mdf_message_add_int));
             CatchInvalidOperationException(() => message.AddUInt64(default(uint), default, default), nameof(nativeImplementation.mdf_message_add_uint));
