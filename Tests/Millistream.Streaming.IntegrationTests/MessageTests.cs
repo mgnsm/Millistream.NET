@@ -50,6 +50,16 @@ namespace Millistream.Streaming.IntegrationTests
         }
 
         [TestMethod]
+        public void SetDelayTest()
+        {
+            using Message message = new Message();
+            Assert.AreEqual(default, message.Delay);
+            const byte Delay = byte.MaxValue;
+            message.Delay = Delay;
+            Assert.AreEqual(Delay, message.Delay);
+        }
+
+        [TestMethod]
         public void AddNumericTest()
         {
             string[] values =

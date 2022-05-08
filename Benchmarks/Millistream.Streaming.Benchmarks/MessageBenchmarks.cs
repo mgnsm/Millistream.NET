@@ -470,6 +470,9 @@ namespace Millistream.Streaming.Benchmarks
         public void SetUtf8Validation() => _message.Utf8Validation = false;
 
         [Benchmark]
+        public void SetDelay() => _message.Delay = 1;
+
+        [Benchmark]
         public void Destroy() => _message.Dispose();
 
         public void Dispose()

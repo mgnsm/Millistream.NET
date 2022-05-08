@@ -14,6 +14,7 @@ namespace Millistream.Streaming
         private readonly NativeImplementation _nativeImplementation;
         private CompressionLevel _compressionLevel = CompressionLevel.Z_BEST_SPEED;
         private bool _utf8Validation = true;
+        private byte _delay;
         private bool _isDisposed;
 
         /// <summary>
@@ -53,7 +54,6 @@ namespace Millistream.Streaming
         /// <summary>
         /// Gets or sets the zlib compression level used for the <see cref="AddString(uint, string)"/> and <see cref="AddString(uint, string, int)"/> methods.
         /// </summary>
-        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't support setting the zlib compression level.</exception>
         /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_set_property function.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
         public CompressionLevel CompressionLevel
@@ -131,6 +131,27 @@ namespace Millistream.Streaming
                 ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_set_property, nameof(_nativeImplementation.mdf_message_set_property));
                 if (_nativeImplementation.mdf_message_set_property(Handle, MDF_MSG_OPTION.MDF_MSG_OPT_UTF8, value ? 1 : 0) == 1)
                     _utf8Validation = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the intended delay of the message.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_set_property function.</exception>
+        /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
+        public byte Delay
+        {
+            get
+            {
+                ThrowIfDisposed();
+                return _delay;
+            }
+            set
+            {
+                ThrowIfDisposed();
+                ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_set_property, nameof(_nativeImplementation.mdf_message_set_property));
+                if (_nativeImplementation.mdf_message_set_property(Handle, MDF_MSG_OPTION.MDF_MSG_OPT_DELAY, value) == 1)
+                    _delay = value;
             }
         }
 
