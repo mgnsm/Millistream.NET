@@ -39,7 +39,8 @@ namespace Millistream.Streaming.UnitTests
         {
             _nativeImplementation.Setup(x => x.mdf_message_set_property(It.IsAny<IntPtr>(), It.IsAny<int>(), It.IsAny<int>())).Returns(1);
 
-            using Message message = new();
+            NativeImplementation nativeImplementation = new(default);
+            using Message message = new(nativeImplementation);
             //assert that the default value is Z_BEST_SPEED
             Assert.AreEqual(CompressionLevel.Z_BEST_SPEED, message.CompressionLevel);
 
@@ -48,6 +49,22 @@ namespace Millistream.Streaming.UnitTests
             {
                 message.CompressionLevel = compressionLevel;
                 _nativeImplementation.Verify(x => x.mdf_message_set_property(It.IsAny<IntPtr>(), (int)MDF_MSG_OPTION.MDF_MSG_OPT_COMPRESSION, (int)compressionLevel));
+                Assert.AreEqual(compressionLevel, message.CompressionLevel);
+            }
+
+            //assert that the libmdf-1.0.25 fallback is used as expected
+            _nativeImplementation.Reset();
+            _nativeImplementation.Setup(x => x.mdf_message_set_compression_level(It.IsAny<IntPtr>(), It.IsAny<int>())).Returns(1);
+            unsafe
+            {
+                nativeImplementation.mdf_message_set_property = default;
+            }
+
+            foreach (CompressionLevel compressionLevel in Enum.GetValues(typeof(CompressionLevel)))
+            {
+                message.CompressionLevel = compressionLevel;
+                _nativeImplementation.Verify(x => x.mdf_message_set_property(It.IsAny<IntPtr>(), (int)MDF_MSG_OPTION.MDF_MSG_OPT_COMPRESSION, (int)compressionLevel), Times.Never);
+                _nativeImplementation.Verify(x => x.mdf_message_set_compression_level(It.IsAny<IntPtr>(), (int)compressionLevel), Times.Once);
                 Assert.AreEqual(compressionLevel, message.CompressionLevel);
             }
         }
@@ -83,14 +100,29 @@ namespace Millistream.Streaming.UnitTests
         public void GetAndSetUtf8ValidationTest()
         {
             _nativeImplementation.Setup(x => x.mdf_message_set_property(It.IsAny<IntPtr>(), (int)MDF_MSG_OPTION.MDF_MSG_OPT_UTF8, 0)).Returns(1).Verifiable();
-            using Message message = new();
+            NativeImplementation nativeImplementation = new(default);
+            using Message message = new(nativeImplementation);
             Assert.AreEqual(true, message.Utf8Validation);
             message.Utf8Validation = false;
-            Assert.AreEqual(false, message.Utf8Validation);
+            Assert.IsFalse(message.Utf8Validation);
             _nativeImplementation.Verify();
             _nativeImplementation.Setup(x => x.mdf_message_set_property(It.IsAny<IntPtr>(), (int)MDF_MSG_OPTION.MDF_MSG_OPT_UTF8, 1)).Returns(1).Verifiable();
             message.Utf8Validation = true;
-            Assert.AreEqual(true, message.Utf8Validation);
+            Assert.IsTrue(message.Utf8Validation);
+            _nativeImplementation.Verify();
+            _nativeImplementation.Reset();
+
+            unsafe
+            {
+                nativeImplementation.mdf_message_set_property = default;
+            }
+            _nativeImplementation.Setup(x => x.mdf_message_set_utf8_validation(It.IsAny<IntPtr>(), 1)).Returns(1).Verifiable();
+            _nativeImplementation.Setup(x => x.mdf_message_set_utf8_validation(It.IsAny<IntPtr>(), 0)).Returns(1).Verifiable();
+
+            message.Utf8Validation = false;
+            Assert.IsFalse(message.Utf8Validation);
+            message.Utf8Validation = true;
+            Assert.IsTrue(message.Utf8Validation);
             _nativeImplementation.Verify();
         }
 
@@ -554,8 +586,6 @@ namespace Millistream.Streaming.UnitTests
             nativeImplementation.mdf_message_get_num_fields = default;
 
             using Message message = new(nativeImplementation);
-            CatchInvalidOperationException(() => message.CompressionLevel = CompressionLevel.Z_BEST_COMPRESSION, nameof(nativeImplementation.mdf_message_set_property));
-            CatchInvalidOperationException(() => message.Utf8Validation = false, nameof(nativeImplementation.mdf_message_set_property));
             CatchInvalidOperationException(() => message.Delay = 1, nameof(nativeImplementation.mdf_message_set_property));
             CatchInvalidOperationException(() => message.AddInt64(default(uint), default, default), nameof(nativeImplementation.mdf_message_add_int));
             CatchInvalidOperationException(() => message.AddInt64(default(Field), default, default), nameof(nativeImplementation.mdf_message_add_int));
@@ -576,6 +606,17 @@ namespace Millistream.Streaming.UnitTests
             CatchInvalidOperationException(() => message.Deserialize("..."), nameof(nativeImplementation.mdf_message_deserialize));
             CatchInvalidOperationException(() => message.Deserialize(default(ReadOnlySpan<byte>)), nameof(nativeImplementation.mdf_message_deserialize));
             CatchInvalidOperationException(() => _ = message.FieldCount, nameof(nativeImplementation.mdf_message_get_num_fields));
+
+            //The mdf_message_set_compression_level and mdf_message_set_utf8_validation in libmdf-1.0.25 should be used
+            message.CompressionLevel = CompressionLevel.Z_BEST_COMPRESSION;
+            message.Utf8Validation = false;
+            //...assuming they exist in the installed native library
+            nativeImplementation.mdf_message_set_compression_level = default;
+            nativeImplementation.mdf_message_set_utf8_validation = default;
+            CatchInvalidOperationException(() => message.CompressionLevel = CompressionLevel.Z_NO_COMPRESSION, 
+                $"{nameof(nativeImplementation.mdf_message_set_property)} or {nameof(nativeImplementation.mdf_message_set_compression_level)}");
+            CatchInvalidOperationException(() => message.Utf8Validation = true,
+                $"{nameof(nativeImplementation.mdf_message_set_property)} or {nameof(nativeImplementation.mdf_message_set_utf8_validation)}");
 
             static void CatchInvalidOperationException(Action action, string missingFunctionName)
             {
