@@ -45,6 +45,8 @@ namespace Millistream.Streaming.Interop
         internal delegate*<IntPtr, IntPtr, int> mdf_message_deserialize;
         internal delegate*<IntPtr, MDF_MSG_OPTION, int, int> mdf_message_set_property;
         internal delegate*<IntPtr, int> mdf_message_get_num_fields;
+        internal delegate*<IntPtr, int, int> mdf_message_set_compression_level;
+        internal delegate*<IntPtr, int, int> mdf_message_set_utf8_validation;
 
         internal static NativeImplementation Default => s_defaultImplementation ??= new(null);
         internal static INativeImplementation Implementation { get; set; }
@@ -93,6 +95,8 @@ namespace Millistream.Streaming.Interop
             mdf_message_deserialize = &MdfMessageDeserialize;
             mdf_message_set_property = &MdfMessageSetProperty;
             mdf_message_get_num_fields = &MdfMessageGetNumFields;
+            mdf_message_set_compression_level = &MdfMessageSetCompressionLevel;
+            mdf_message_set_utf8_validation = &MdfMessageSetUtf8Validation;
         }
 
         private static IntPtr MdfCreate() => Implementation.mdf_create();
@@ -134,5 +138,7 @@ namespace Millistream.Streaming.Interop
         private static int MdfMessageDeserialize(IntPtr message, IntPtr data) => Implementation.mdf_message_deserialize(message, data);
         private static int MdfMessageSetProperty(IntPtr message, MDF_MSG_OPTION option, int value) => Implementation.mdf_message_set_property(message, (int)option, value);
         private static int MdfMessageGetNumFields(IntPtr message) => Implementation.mdf_message_get_num_fields(message);
+        private static int MdfMessageSetCompressionLevel(IntPtr message, int level) => Implementation.mdf_message_set_compression_level(message, level);
+        private static int MdfMessageSetUtf8Validation(IntPtr message, int enable) => Implementation.mdf_message_set_utf8_validation(message, enable);
     }
 }
