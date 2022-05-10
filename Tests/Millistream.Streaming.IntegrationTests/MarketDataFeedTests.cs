@@ -48,7 +48,6 @@ namespace Millistream.Streaming.IntegrationTests
             //HandleDelay
             Assert.IsFalse(mdf.HandleDelay);
             mdf.HandleDelay = true;
-            //Assert.IsTrue(mdf.HandleDelay);
 
             //Delay
             _ = mdf.Delay;
@@ -57,6 +56,10 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.AreEqual(-1, mdf.FileDescriptor);
             Assert.IsTrue(mdf.Connect(GetTestRunParameter("host")));
             Assert.AreNotEqual(-1, mdf.FileDescriptor);
+
+            using Message message = new Message();
+            LogOn(mdf, message);
+            Assert.IsTrue(mdf.HandleDelay);
             mdf.Disconnect();
 
             //ErrorCode
