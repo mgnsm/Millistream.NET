@@ -54,7 +54,7 @@ namespace Millistream.Streaming
         /// <summary>
         /// Gets or sets the zlib compression level used for the <see cref="AddString(uint, string)"/> and <see cref="AddString(uint, string, int)"/> methods.
         /// </summary>
-        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_set_property function.</exception>
+        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_set_property or mdf_message_set_compression_level function.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
         public CompressionLevel CompressionLevel
         {
@@ -66,9 +66,18 @@ namespace Millistream.Streaming
             set
             {
                 ThrowIfDisposed();
-                ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_set_property, nameof(_nativeImplementation.mdf_message_set_property));
-                if (_nativeImplementation.mdf_message_set_property(Handle, MDF_MSG_OPTION.MDF_MSG_OPT_COMPRESSION, (int)value) == 1)
-                    _compressionLevel = value;
+                if (_nativeImplementation.mdf_message_set_property != default)
+                {
+                    if (_nativeImplementation.mdf_message_set_property(Handle, MDF_MSG_OPTION.MDF_MSG_OPT_COMPRESSION, (int)value) == 1)
+                        _compressionLevel = value;
+                }
+                else if (_nativeImplementation.mdf_message_set_compression_level != default)
+                {
+                    if (_nativeImplementation.mdf_message_set_compression_level(Handle, (int)value) == 1)
+                        _compressionLevel = value;
+                }
+                else
+                    throw new InvalidOperationException($"The installed version of the native library doesn't include the {nameof(_nativeImplementation.mdf_message_set_property)} or {nameof(_nativeImplementation.mdf_message_set_compression_level)} function.");
             }
         }
 
@@ -116,7 +125,7 @@ namespace Millistream.Streaming
         /// <summary>
         /// Enables or disables the UTF-8 validation performed in <see cref="AddString(uint, string)"/> and <see cref="AddString(uint, string, int)"/>. It's enabled by default.
         /// </summary>
-        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_set_property function.</exception>
+        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_set_property or mdf_message_set_utf8_validation function.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
         public bool Utf8Validation
         {
@@ -128,9 +137,18 @@ namespace Millistream.Streaming
             set
             {
                 ThrowIfDisposed();
-                ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_set_property, nameof(_nativeImplementation.mdf_message_set_property));
-                if (_nativeImplementation.mdf_message_set_property(Handle, MDF_MSG_OPTION.MDF_MSG_OPT_UTF8, value ? 1 : 0) == 1)
-                    _utf8Validation = value;
+                if (_nativeImplementation.mdf_message_set_property != default)
+                {
+                    if (_nativeImplementation.mdf_message_set_property(Handle, MDF_MSG_OPTION.MDF_MSG_OPT_UTF8, value ? 1 : 0) == 1)
+                        _utf8Validation = value;
+                }
+                else if (_nativeImplementation.mdf_message_set_utf8_validation != default)
+                {
+                    if (_nativeImplementation.mdf_message_set_utf8_validation(Handle, value ? 1 : 0) == 1)
+                        _utf8Validation = value;
+                }
+                else
+                    throw new InvalidOperationException($"The installed version of the native library doesn't include the {nameof(_nativeImplementation.mdf_message_set_property)} or {nameof(_nativeImplementation.mdf_message_set_utf8_validation)} function.");
             }
         }
 
