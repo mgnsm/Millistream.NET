@@ -655,7 +655,7 @@ namespace Millistream.Streaming.IntegrationTests
 
         private static long GetTotalAllocatedBytes()
         {
-#if NET45
+#if NET462
             //GC statistics are guaranteed to be accurate only after a full, blocking collection.
             GC.Collect();
             return AppDomain.CurrentDomain.MonitoringTotalAllocatedMemorySize;
