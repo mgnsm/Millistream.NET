@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-
+#if NETCOREAPP3_0_OR_GREATER
+using nativeLibrary = System.Runtime.InteropServices.NativeLibrary;
+#endif
 namespace Millistream.Streaming.Interop
 {
     unsafe internal sealed class NativeImplementation
@@ -52,21 +54,29 @@ namespace Millistream.Streaming.Interop
 
         internal NativeImplementation(string libraryPath)
         {
+#if !NETCOREAPP3_0_OR_GREATER
             NativeLibrary nativeLibrary;
+#endif
             IntPtr lib;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
+#if !NETCOREAPP3_0_OR_GREATER
                 nativeLibrary = new NativeUnixLibrary();
+#endif
                 lib = nativeLibrary.Load(libraryPath ?? "libmdf.so.0");
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
+#if !NETCOREAPP3_0_OR_GREATER
                 nativeLibrary = new NativeWindowsLibrary();
+#endif
                 lib = nativeLibrary.Load(libraryPath ?? "libmdf-0.dll");
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
+#if !NETCOREAPP3_0_OR_GREATER
                 nativeLibrary = new NativeUnixLibrary();
+#endif
                 lib = nativeLibrary.Load(libraryPath ?? "libmdf.0.dylib");
             }
             else

@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace Millistream.Streaming.Interop
 {
     internal abstract class NativeLibrary
     {
-        private static NativeLibrary _nativeLibrary;
-
         public IntPtr Load(string libraryPath)
         {
             if (string.IsNullOrEmpty(libraryPath))
@@ -34,18 +31,6 @@ namespace Millistream.Streaming.Interop
 
             address = handle != IntPtr.Zero ? DoGetExport(handle, name) : IntPtr.Zero;
             return address != IntPtr.Zero;
-        }
-
-        public static NativeLibrary GetDefault()
-        {
-            if (_nativeLibrary != null)
-                return _nativeLibrary;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                return _nativeLibrary = new NativeUnixLibrary();
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                return _nativeLibrary = new NativeWindowsLibrary();
-
-            throw new PlatformNotSupportedException();
         }
 
         protected abstract IntPtr DoLoad(string libraryPath);
