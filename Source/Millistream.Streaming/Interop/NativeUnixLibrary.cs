@@ -8,13 +8,11 @@ namespace Millistream.Streaming.Interop
         private const string DllName = "libdl";
         private const int RTLD_NOW = 0x002;
 
-#pragma warning disable IDE1006
         [DllImport(DllName, ExactSpelling = true)]
-        public static extern IntPtr dlopen(string filename, int flags);
+        private static extern IntPtr dlopen(string filename, int flags);
 
         [DllImport(DllName, ExactSpelling = true)]
-        public static extern IntPtr dlsym(IntPtr handle, string symbol);
-#pragma warning restore IDE1006
+        private static extern IntPtr dlsym(IntPtr handle, string symbol);
 
         protected override IntPtr DoGetExport(IntPtr handle, string name) =>
             dlsym(handle, name);
