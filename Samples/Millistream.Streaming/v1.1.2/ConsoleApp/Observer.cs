@@ -15,7 +15,7 @@ namespace ConsoleApp
             Console.WriteLine($"{DateTime.Now.ToShortTimeString()} - " +
                 $"Received a {message.MessageReference} message with the following fields:");
             foreach (var field in message.Fields)
-#if NET_CORE
+#if NETCOREAPP
                 Console.WriteLine($"{field.Key}: {Encoding.UTF8.GetString(field.Value.Span)}");
 #else
                 Console.WriteLine($"{field.Key}: {Encoding.UTF8.GetString(field.Value.ToArray())}");
