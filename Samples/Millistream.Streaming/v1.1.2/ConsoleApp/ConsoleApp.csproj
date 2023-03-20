@@ -2,15 +2,11 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net462;netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks>net462;net6.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Millistream.Streaming" Version="1.1.2" />
   </ItemGroup>
-
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1'">
-    <DefineConstants>NET_CORE</DefineConstants>
-  </PropertyGroup>
-
+	
 </Project>
