@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\Millistream.Streaming\Millistream.Streaming.csproj" />
+    <ProjectReference Include="..\..\..\Source\Millistream.Streaming\Millistream.Streaming.csproj" />
   </ItemGroup>
 
 </Project>
