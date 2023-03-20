@@ -16,11 +16,6 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Setup the .NET Core 3.1 SDK
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 3.1.x
-
     - name: Setup the .NET 6 SDK
       uses: actions/setup-dotnet@v1
       with:
@@ -30,9 +25,7 @@ jobs:
       if: ${{ matrix.os != 'windows-latest' }}
       run: |
         dotnet build Source/Millistream.Streaming/Millistream.Streaming.csproj -c Release -f netstandard1.4
-        dotnet build Tests/Millistream.Streaming.UnitTests/Millistream.Streaming.UnitTests.csproj -c Release -f netcoreapp3.1
         dotnet build Tests/Millistream.Streaming.UnitTests/Millistream.Streaming.UnitTests.csproj -c Release -f net6.0
-        dotnet build Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release -f netcoreapp3.1
         dotnet build Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release -f net6.0
 
     - name: Get Version From Tag
@@ -59,7 +52,6 @@ jobs:
     - name: Run Unit Tests on macOS/Linux
       if: ${{ matrix.os != 'windows-latest' }}
       run: |
-        dotnet test Tests/Millistream.Streaming.UnitTests/Millistream.Streaming.UnitTests.csproj -c Release -f netcoreapp3.1 --no-build --no-restore
         dotnet test Tests/Millistream.Streaming.UnitTests/Millistream.Streaming.UnitTests.csproj -c Release -f net6.0 --no-build --no-restore
 
     - name: Run Unit Tests on Windows
@@ -109,7 +101,6 @@ jobs:
     - name: Run Integration Tests on macOS/Linux
       if: ${{ matrix.os != 'windows-latest' }}
       run: |
-        dotnet test Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release -f netcoreapp3.1 --no-build --no-restore -s UpdatedTestSettings.runsettings
         dotnet test Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release -f net6.0 --no-build --no-restore -s UpdatedTestSettings.runsettings
 
     - name: Run Integration Tests on Windows
