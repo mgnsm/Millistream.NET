@@ -23,11 +23,11 @@ On **macOS** you download and install a `.pkg` file, for example in a Bash shell
 On **Linux**, the native API and the dependent libraries are available through your distribution repository. Below is an example of how to install everything needed using the `apt-get` command-line tool on Ubuntu:
 
     sudo wget "https://packages.millistream.com/apt/sources.list.d/`lsb_release -cs`.list" -O /etc/apt/sources.list.d/millistream.list 
-    wget -q "https://packages.millistream.com/D2FCCE35.gpg" -O- | sudo apt-key add - 
+    wget -O- "https://packages.millistream.com/D2FCCE35.gpg" | gpg --dearmor | sudo tee /usr/share/keyrings/millistream-archive-keyring.gpg > /dev/null 
     sudo apt update
     sudo apt-get install libmdf
 
-Instructions on how to install the API on other supported distributions can be found on the [FTP server](https://bit.ly/2wD2omK). You may also want to take a look at the [YAML build pipeline](.github/workflows/millistream.streaming.yml) in this repository. It installs the native binaries and runs integration tests against them on macOS, Ubuntu and Windows using the cloud-hosted runners in GitHub Actions.
+Instructions on how to install the API on other supported distributions can be found on the [here](https://packages.millistream.com/Linux/). You may also want to take a look at the [YAML build pipeline](.github/workflows/millistream.streaming.ci.yml) in this repository. It installs the native binaries and runs integration tests against them on macOS, Ubuntu and Windows using the cloud-hosted runners in GitHub Actions.
 ## Getting Started
 Once you have installed the native `libmdf` library on your computer, you can then [install](https://docs.microsoft.com/en-us/nuget/consume-packages/ways-to-install-a-package) Millistream.NET into your project using NuGet:
 
