@@ -207,27 +207,21 @@ namespace Millistream.Streaming.UnitTests
             _nativeImplementation.Verify(x => x.mdf_message_add_int(It.IsAny<IntPtr>(), (uint)Field, SignedValue, decimals), Times.Exactly(2));
             _nativeImplementation.Verify(x => x.mdf_message_add_uint(It.IsAny<IntPtr>(), (uint)Field, UnsignedValue, decimals), Times.Exactly(2));
 
-            TestWithAnInvalidNumberOfDecimals(Field, SignedValue, -1, message.AddInt64);
-            TestWithAnInvalidNumberOfDecimals((uint)Field, SignedValue, -1, message.AddInt64);
+            Expression<Func<int, bool>> match = i => i < 0 || i > 19;
+            _nativeImplementation.Setup(x => x.mdf_message_add_int(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<long>(), It.Is<int>(match))).Returns(0);
+            _nativeImplementation.Setup(x => x.mdf_message_add_uint(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<ulong>(), It.Is<int>(match))).Returns(0);
 
-            TestWithAnInvalidNumberOfDecimals(Field, UnsignedValue, -1, message.AddUInt64);
-            TestWithAnInvalidNumberOfDecimals((uint)Field, UnsignedValue, -1, message.AddUInt64);
+            Assert.IsFalse(message.AddInt64(Field, SignedValue, -1));
+            Assert.IsFalse(message.AddInt64((uint)Field, SignedValue, -1));
 
-            TestWithAnInvalidNumberOfDecimals(Field, SignedValue, 20, message.AddInt64);
-            TestWithAnInvalidNumberOfDecimals((uint)Field, SignedValue, 20, message.AddInt64);
+            Assert.IsFalse(message.AddUInt64(Field, UnsignedValue, -1));
+            Assert.IsFalse(message.AddUInt64((uint)Field, UnsignedValue, -1));
 
-            TestWithAnInvalidNumberOfDecimals(Field, UnsignedValue, 20, message.AddUInt64);
-            TestWithAnInvalidNumberOfDecimals((uint)Field, UnsignedValue, 20, message.AddUInt64);
+            Assert.IsFalse(message.AddInt64(Field, SignedValue, 20));
+            Assert.IsFalse(message.AddInt64((uint)Field, SignedValue, 20));
 
-            static void TestWithAnInvalidNumberOfDecimals<TField, TValue>(TField field, TValue value, int decimals, Func<TField, TValue, int, bool> method)
-            {
-                try
-                {
-                    method(field, value, decimals);
-                    Assert.Fail();
-                }
-                catch (ArgumentException) { }
-            }
+            Assert.IsFalse(message.AddUInt64(Field, UnsignedValue, 20));
+            Assert.IsFalse(message.AddUInt64((uint)Field, UnsignedValue, 20));
         }
 
         [TestMethod]

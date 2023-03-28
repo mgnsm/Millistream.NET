@@ -238,14 +238,11 @@ namespace Millistream.Streaming
         /// <param name="value">The scaled and signed 64-bit integer.</param>
         /// <param name="decimals">The number of decimals.</param>
         /// <returns><see langword = "true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="ArgumentException"><paramref name="decimals"/> is not between 0 and 19.</exception>
         /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_add_int function.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
         /// <remarks>The corresponding native function is mdf_message_add_int.</remarks>
         public bool AddInt64(uint tag, long value, int decimals)
         {
-            if (decimals < 0 || decimals > 19)
-                throw new ArgumentException($"{nameof(decimals)} cannot be smaller than 0 or greater than 19.", nameof(decimals));
             ThrowIfDisposed();
             ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_add_int, nameof(_nativeImplementation.mdf_message_add_int));
             return _nativeImplementation.mdf_message_add_int(Handle, tag, value, decimals) == 1;
@@ -258,7 +255,6 @@ namespace Millistream.Streaming
         /// <param name="value">The scaled and signed 64-bit integer.</param>
         /// <param name="decimals">The number of decimals.</param>
         /// <returns><see langword = "true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="ArgumentException"><paramref name="decimals"/> is not between 0 and 19.</exception>
         /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_add_int function.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
         /// <remarks>The corresponding native function is mdf_message_add_int.</remarks>
@@ -272,14 +268,11 @@ namespace Millistream.Streaming
         /// <param name="value">The scaled and unsigned 64-bit integer.</param>
         /// <param name="decimals">The number of decimals.</param>
         /// <returns><see langword = "true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="ArgumentException"><paramref name="decimals"/> is not between 0 and 19.</exception>
         /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_add_uint function.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
         /// <remarks>The corresponding native function is mdf_message_add_uint.</remarks>
         public bool AddUInt64(uint tag, ulong value, int decimals)
         {
-            if (decimals < 0 || decimals > 19)
-                throw new ArgumentException($"{nameof(decimals)} cannot be smaller than 0 or greater than 19.", nameof(decimals));
             ThrowIfDisposed();
             ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_add_uint, nameof(_nativeImplementation.mdf_message_add_uint));
             return _nativeImplementation.mdf_message_add_uint(Handle, tag, value, decimals) == 1;
@@ -292,7 +285,6 @@ namespace Millistream.Streaming
         /// <param name="value">The scaled and unsigned 64-bit integer.</param>
         /// <param name="decimals">The number of decimals.</param>
         /// <returns><see langword = "true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="ArgumentException"><paramref name="decimals"/> is not between 0 and 19.</exception>
         /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_add_uint function.</exception>
         /// <exception cref="ObjectDisposedException">The <see cref="Message"/> instance has been disposed.</exception>
         /// <remarks>The corresponding native function is mdf_message_add_uint.</remarks>
