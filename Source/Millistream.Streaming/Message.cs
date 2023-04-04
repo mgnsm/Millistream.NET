@@ -1,5 +1,6 @@
 ﻿using Millistream.Streaming.Interop;
 using System;
+using System.Buffers;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -32,7 +33,7 @@ namespace Millistream.Streaming
         /// <exception cref="ArgumentNullException"><paramref name="nativeLibraryPath"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
         /// <exception cref="DllNotFoundException">The native dependency can't be found.</exception>
         /// <remarks>The corresponding native function is mdf_message_create.</remarks>
-        public Message(string nativeLibraryPath) 
+        public Message(string nativeLibraryPath)
             : this(nativeLibraryPath, true) { }
 
         internal Message(NativeImplementation nativeImplementation)
@@ -214,10 +215,21 @@ namespace Millistream.Streaming
             if (value == null)
                 return _nativeImplementation.mdf_message_add_numeric(Handle, tag, IntPtr.Zero) == 1;
 
-            byte* bytes = stackalloc byte[value.Length + 1];
-            if (!TryGetAsciiBytes(value, bytes))
-                return false;
-            return _nativeImplementation.mdf_message_add_numeric(Handle, tag, (IntPtr)bytes) == 1;
+            byte[] bytes = ArrayPool<byte>.Shared.Rent(value.Length + 1);
+            try
+            {
+                fixed (byte* b = bytes)
+                {
+                    if (!TryGetAsciiBytes(value, b))
+                        return false;
+                    b[value.Length] = 0;
+                    return _nativeImplementation.mdf_message_add_numeric(Handle, tag, (IntPtr)b) == 1;
+                }
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(bytes);
+            }
         }
 
         /// <summary>
@@ -305,13 +317,21 @@ namespace Millistream.Streaming
             if (value == null)
                 return _nativeImplementation.mdf_message_add_string(Handle, tag, IntPtr.Zero) == 1;
 
-            fixed (char* c = value)
+            int length = Encoding.UTF8.GetMaxByteCount(value.Length);
+            byte[] bytes = ArrayPool<byte>.Shared.Rent(length + 1);
+            try
             {
-                int length = Encoding.UTF8.GetMaxByteCount(value.Length);
-                byte* b = stackalloc byte[length + 1];
-                int bytesWritten = Encoding.UTF8.GetBytes(c, value.Length, b, length);
-                b[bytesWritten] = 0;
-                return _nativeImplementation.mdf_message_add_string(Handle, tag, (IntPtr)b) == 1;
+                fixed (char* c = value)
+                fixed (byte* b = bytes)
+                {
+                    int bytesWritten = Encoding.UTF8.GetBytes(c, value.Length, b, length);
+                    b[bytesWritten] = 0;
+                    return _nativeImplementation.mdf_message_add_string(Handle, tag, (IntPtr)b) == 1;
+                }
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(bytes);
             }
         }
 
@@ -338,9 +358,19 @@ namespace Millistream.Streaming
             fixed (char* c = value)
             {
                 int byteCount = Encoding.UTF8.GetByteCount(c, length);
-                byte* b = stackalloc byte[byteCount + 1];
-                Encoding.UTF8.GetBytes(c, length, b, byteCount);
-                return _nativeImplementation.mdf_message_add_string2(Handle, tag, (IntPtr)b, byteCount) == 1;
+                byte[] bytes = ArrayPool<byte>.Shared.Rent(byteCount + 1);
+                try
+                {
+                    fixed (byte* b = bytes)
+                    {
+                        Encoding.UTF8.GetBytes(c, length, b, byteCount);
+                        return _nativeImplementation.mdf_message_add_string2(Handle, tag, (IntPtr)b, byteCount) == 1;
+                    }
+                }
+                finally
+                {
+                    ArrayPool<byte>.Shared.Return(bytes);
+                }
             }
         }
 
@@ -382,10 +412,21 @@ namespace Millistream.Streaming
             if (value == null)
                 return _nativeImplementation.mdf_message_add_date(Handle, tag, IntPtr.Zero) == 1;
 
-            byte* bytes = stackalloc byte[value.Length + 1];
-            if (!TryGetAsciiBytes(value, bytes))
-                return false;
-            return _nativeImplementation.mdf_message_add_date(Handle, tag, (IntPtr)bytes) == 1;
+            byte[] bytes = ArrayPool<byte>.Shared.Rent(value.Length + 1);
+            try
+            {
+                fixed (byte* b = bytes)
+                {
+                    if (!TryGetAsciiBytes(value, b))
+                        return false;
+                    b[value.Length] = 0;
+                    return _nativeImplementation.mdf_message_add_date(Handle, tag, (IntPtr)b) == 1;
+                }
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(bytes);
+            }
         }
 
         /// <summary>
@@ -445,10 +486,21 @@ namespace Millistream.Streaming
             if (string.IsNullOrEmpty(value))
                 return false;
 
-            byte* bytes = stackalloc byte[value.Length + 1];
-            if (!TryGetAsciiBytes(value, bytes))
-                return false;
-            return _nativeImplementation.mdf_message_add_time(Handle, tag, (IntPtr)bytes) == 1;
+            byte[] bytes = ArrayPool<byte>.Shared.Rent(value.Length + 1);
+            try
+            {
+                fixed (byte* b = bytes)
+                {
+                    if (!TryGetAsciiBytes(value, b))
+                        return false;
+                    b[value.Length] = 0;
+                    return _nativeImplementation.mdf_message_add_time(Handle, tag, (IntPtr)b) == 1;
+                }
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(bytes);
+            }
         }
 
         /// <summary>
@@ -548,10 +600,22 @@ namespace Millistream.Streaming
             if (value == null)
                 return _nativeImplementation.mdf_message_add_list(Handle, tag, IntPtr.Zero) == 1;
 
-            byte* bytes = stackalloc byte[value.Length + 1];
-            if (!TryGetAsciiBytes(value, bytes))
-                return false;
-            return _nativeImplementation.mdf_message_add_list(Handle, tag, (IntPtr)bytes) == 1;
+            byte[] bytes = ArrayPool<byte>.Shared.Rent(value.Length + 1);
+            try
+            {
+                fixed (byte* b = bytes)
+                {
+                    if (!TryGetAsciiBytes(value, b))
+                        return false;
+                    b[value.Length] = 0;
+                    return _nativeImplementation.mdf_message_add_list(Handle, tag, (IntPtr)b) == 1;
+
+                }
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(bytes);
+            }
         }
 
         /// <summary>
@@ -646,10 +710,23 @@ namespace Millistream.Streaming
 
             ThrowIfDisposed();
             ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_deserialize, nameof(_nativeImplementation.mdf_message_deserialize));
-            byte* bytes = stackalloc byte[data.Length + 1];
-            if (!TryGetAsciiBytes(data, bytes))
-                return false;
-            return _nativeImplementation.mdf_message_deserialize(Handle, (IntPtr)bytes) == 1;
+
+            byte[] bytes = ArrayPool<byte>.Shared.Rent(data.Length + 1);
+            try
+            {
+                fixed (byte* b = bytes)
+                {
+                    if (!TryGetAsciiBytes(data, b))
+                        return false;
+                    b[data.Length] = 0;
+                    return _nativeImplementation.mdf_message_deserialize(Handle, (IntPtr)b) == 1;
+
+                }
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(bytes);
+            }
         }
 
         /// <summary>
