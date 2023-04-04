@@ -1,5 +1,6 @@
 ﻿using Millistream.Streaming.Interop;
 using System;
+using System.Buffers;
 using System.Collections.Immutable;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -573,16 +574,25 @@ namespace Millistream.Streaming
                 throw new ArgumentNullException(nameof(servers));
 
             ThrowIfDisposed();
-            unsafe
+
+            int length = Encoding.UTF8.GetMaxByteCount(servers.Length);
+            byte[] bytes = ArrayPool<byte>.Shared.Rent(length + 1);
+            try
             {
-                fixed (char* c = servers)
+                unsafe
                 {
-                    int length = Encoding.UTF8.GetMaxByteCount(servers.Length);
-                    byte* b = stackalloc byte[length + 1];
-                    int bytesWritten = Encoding.UTF8.GetBytes(c, servers.Length, b, length);
-                    b[bytesWritten] = 0;
-                    return _nativeImplementation.mdf_connect(_feedHandle, (IntPtr)b) == 1;
+                    fixed (char* c = servers)
+                    fixed (byte* b = bytes)
+                    {
+                        int bytesWritten = Encoding.UTF8.GetBytes(c, servers.Length, b, length);
+                        b[bytesWritten] = 0;
+                        return _nativeImplementation.mdf_connect(_feedHandle, (IntPtr)b) == 1;
+                    }
                 }
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(bytes);
             }
         }
 
@@ -697,9 +707,19 @@ namespace Millistream.Streaming
                 int byteCount = 0;
                 while (*(p + byteCount++) != 0) ;
                 int charCount = Encoding.UTF8.GetCharCount(p, byteCount);
-                char* c = stackalloc char[charCount];
-                Encoding.UTF8.GetChars(p, byteCount, c, charCount);
-                return new string(c);
+                char[] chars = ArrayPool<char>.Shared.Rent(charCount);
+                try
+                {
+                    fixed (char* c = chars)
+                    {
+                        Encoding.UTF8.GetChars(p, byteCount, c, charCount);
+                        return new string(c);
+                    }
+                }
+                finally
+                {
+                    ArrayPool<char>.Shared.Return(chars);
+                }
             }
         }
 
@@ -740,16 +760,24 @@ namespace Millistream.Streaming
             int ret = 0;
             if (value != null)
             {
-                unsafe
+                int length = Encoding.UTF8.GetMaxByteCount(value.Length);
+                byte[] bytes = ArrayPool<byte>.Shared.Rent(length + 1);
+                try
                 {
-                    fixed (char* c = value)
+                    unsafe
                     {
-                        int length = Encoding.UTF8.GetMaxByteCount(value.Length);
-                        byte* b = stackalloc byte[length + 1];
-                        int bytesWritten = Encoding.UTF8.GetBytes(c, value.Length, b, length);
-                        b[bytesWritten] = 0;
-                        ret = _nativeImplementation.mdf_set_property(_feedHandle, option, (IntPtr)b);
+                        fixed (char* c = value)
+                        fixed (byte* b = bytes)
+                        {
+                            int bytesWritten = Encoding.UTF8.GetBytes(c, value.Length, b, length);
+                            b[bytesWritten] = 0;
+                            ret = _nativeImplementation.mdf_set_property(_feedHandle, option, (IntPtr)b);
+                        }
                     }
+                }
+                finally
+                {
+                    ArrayPool<byte>.Shared.Return(bytes);
                 }
             }
             else
