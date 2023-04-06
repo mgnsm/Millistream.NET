@@ -158,18 +158,22 @@ namespace Millistream.Streaming.UnitTests
             const Field Field = Field.MDF_F_REQUESTTYPE;
             const string Value = "1.1";
 
-            _nativeImplementation.Setup(x => x.mdf_message_add_numeric(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<IntPtr>()))
-                .Callback((IntPtr message, uint tag, IntPtr value) => Compare(Value, value))
+            _nativeImplementation.Setup(x => x.mdf_message_add_numeric_str(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<string>()))
+                .Callback((IntPtr message, uint tag, string value) => Assert.AreEqual(Value, value))
                 .Returns(1);
 
             using Message message = new();
             Assert.IsTrue(message.AddNumeric(Field, Value));
             Assert.IsTrue(message.AddNumeric((uint)Field, Value));
-            _nativeImplementation.Verify(x => x.mdf_message_add_numeric(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(2));
+            _nativeImplementation.Verify(x => x.mdf_message_add_numeric_str(message.Handle, (uint)Field, It.IsAny<string>()), Times.Exactly(2));
+
+            _nativeImplementation.Setup(x => x.mdf_message_add_numeric(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<IntPtr>()))
+                .Callback((IntPtr message, uint tag, IntPtr value) => Compare(Value, value))
+                .Returns(1);
             byte[] bytes = Encoding.UTF8.GetBytes(Value);
             Assert.IsTrue(message.AddNumeric(Field, bytes));
             Assert.IsTrue(message.AddNumeric((uint)Field, bytes));
-            _nativeImplementation.Verify(x => x.mdf_message_add_numeric(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(4));
+            _nativeImplementation.Verify(x => x.mdf_message_add_numeric(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -243,8 +247,8 @@ namespace Millistream.Streaming.UnitTests
             _nativeImplementation.Verify(x => x.mdf_message_add_string2(message.Handle, (uint)Field, It.IsAny<IntPtr>(), Value.Length), Times.Exactly(2));
 
             byte[] bytes = Encoding.UTF8.GetBytes(Value);
-            Assert.IsTrue(message.AddString(Field, Value));
-            Assert.IsTrue(message.AddString((uint)Field, Value));
+            Assert.IsTrue(message.AddString(Field, bytes));
+            Assert.IsTrue(message.AddString((uint)Field, bytes));
             _nativeImplementation.Verify(x => x.mdf_message_add_string(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(4));
 
             Assert.IsTrue(message.AddString(Field, bytes, bytes.Length));
@@ -252,30 +256,34 @@ namespace Millistream.Streaming.UnitTests
             _nativeImplementation.Verify(x => x.mdf_message_add_string2(message.Handle, (uint)Field, It.IsAny<IntPtr>(), Value.Length), Times.Exactly(4));
         }
 
-
         [TestMethod]
         public void AddDateTest()
         {
             const Field Field = Field.MDF_F_REQUESTID;
             const string Value = "2020-12-06";
 
-            _nativeImplementation.Setup(x => x.mdf_message_add_date(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<IntPtr>()))
-                .Callback((IntPtr message, uint tag, IntPtr value) => Compare(Value, value))
+            _nativeImplementation.Setup(x => x.mdf_message_add_date_str(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<string>()))
+                .Callback((IntPtr message, uint tag, string value) => Assert.AreEqual(Value, value))
                 .Returns(1);
-            _nativeImplementation.Setup(x => x.mdf_message_add_date2(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>())).Returns(1);
 
             using Message message = new();
             Assert.IsTrue(message.AddDate(Field, Value));
             Assert.IsTrue(message.AddDate((uint)Field, Value));
-            _nativeImplementation.Verify(x => x.mdf_message_add_date(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(2));
+            _nativeImplementation.Verify(x => x.mdf_message_add_date_str(message.Handle, (uint)Field, It.IsAny<string>()), Times.Exactly(2));
+
+            _nativeImplementation.Setup(x => x.mdf_message_add_date(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<IntPtr>()))
+                .Callback((IntPtr message, uint tag, IntPtr value) => Compare(Value, value))
+                .Returns(1);
+
             byte[] bytes = Encoding.UTF8.GetBytes(Value);
             Assert.IsTrue(message.AddDate(Field, bytes));
             Assert.IsTrue(message.AddDate((uint)Field, bytes));
-            _nativeImplementation.Verify(x => x.mdf_message_add_date(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(4));
+            _nativeImplementation.Verify(x => x.mdf_message_add_date(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(2));
 
             const int Year = 2020;
             const int Month = 12;
             const int Day = 6;
+            _nativeImplementation.Setup(x => x.mdf_message_add_date2(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>())).Returns(1);
             Assert.IsTrue(message.AddDate(Field, Year, Month, Day));
             Assert.IsTrue(message.AddDate((uint)Field, Year, Month, Day));
             _nativeImplementation.Verify(x => x.mdf_message_add_date2(message.Handle, (uint)Field, Year, Month, Day), Times.Exactly(2));
@@ -287,17 +295,24 @@ namespace Millistream.Streaming.UnitTests
             const Field Field = Field.MDF_F_TIME;
             const string Value = "11:11:11";
 
-            _nativeImplementation.Setup(x => x.mdf_message_add_time(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<IntPtr>()))
-                .Callback((IntPtr message, uint tag, IntPtr value) => Compare(Value, value))
+            _nativeImplementation.Setup(x => x.mdf_message_add_time_str(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<string>()))
+                .Callback((IntPtr message, uint tag, string value) => Assert.AreEqual(Value, value))
                 .Returns(1);
-            _nativeImplementation.Setup(x => x.mdf_message_add_time2(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>())).Returns(1);
-            _nativeImplementation.Setup(x => x.mdf_message_add_time3(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>())).Returns(1);
 
             using Message message = new();
             Assert.IsTrue(message.AddTime(Field, Value));
             Assert.IsTrue(message.AddTime((uint)Field, Value));
+            _nativeImplementation.Verify(x => x.mdf_message_add_time_str(message.Handle, (uint)Field, It.IsAny<string>()), Times.Exactly(2));
+
+            _nativeImplementation.Setup(x => x.mdf_message_add_time(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<IntPtr>()))
+                .Callback((IntPtr message, uint tag, IntPtr value) => Compare(Value, value))
+                .Returns(1);
+            byte[] bytes = Encoding.UTF8.GetBytes(Value);
+            Assert.IsTrue(message.AddTime(Field, bytes));
+            Assert.IsTrue(message.AddTime((uint)Field, bytes));
             _nativeImplementation.Verify(x => x.mdf_message_add_time(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(2));
 
+            _nativeImplementation.Setup(x => x.mdf_message_add_time2(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>())).Returns(1);
             int hour = 12;
             int minute = 13;
             int second = 14;
@@ -306,6 +321,7 @@ namespace Millistream.Streaming.UnitTests
             Assert.IsTrue(message.AddTime2((uint)Field, hour, minute, second, Millisecond));
             _nativeImplementation.Verify(x => x.mdf_message_add_time2(message.Handle, (uint)Field, hour, minute, second, Millisecond), Times.Exactly(2));
 
+            _nativeImplementation.Setup(x => x.mdf_message_add_time3(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>())).Returns(1);
             hour = 12;
             minute = 13;
             second = 14;
@@ -321,18 +337,23 @@ namespace Millistream.Streaming.UnitTests
             const Field Field = Field.MDF_F_INSREFLIST;
             const string Value = "1 4";
 
-            _nativeImplementation.Setup(x => x.mdf_message_add_list(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<IntPtr>()))
-                .Callback((IntPtr message, uint tag, IntPtr value) => Compare(Value, value))
+            _nativeImplementation.Setup(x => x.mdf_message_add_list_str(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<string>()))
+                .Callback((IntPtr message, uint tag, string value) => Assert.AreEqual(Value, value))
                 .Returns(1);
 
             using Message message = new();
             Assert.IsTrue(message.AddList(Field, Value));
             Assert.IsTrue(message.AddList((uint)Field, Value));
-            _nativeImplementation.Verify(x => x.mdf_message_add_list(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(2));
+            _nativeImplementation.Verify(x => x.mdf_message_add_list_str(message.Handle, (uint)Field, It.IsAny<string>()), Times.Exactly(2));
+
+            _nativeImplementation.Setup(x => x.mdf_message_add_list(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<IntPtr>()))
+                .Callback((IntPtr message, uint tag, IntPtr value) => Compare(Value, value))
+                .Returns(1);
+
             byte[] bytes = Encoding.UTF8.GetBytes(Value);
             Assert.IsTrue(message.AddList(Field, bytes));
             Assert.IsTrue(message.AddList((uint)Field, bytes));
-            _nativeImplementation.Verify(x => x.mdf_message_add_list(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(4));
+            _nativeImplementation.Verify(x => x.mdf_message_add_list(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -401,22 +422,27 @@ namespace Millistream.Streaming.UnitTests
             IntPtr messageHandle = new(123);
             _nativeImplementation.Setup(x => x.mdf_message_create()).Returns(messageHandle);
             const string Data = "ABC";
-            Expression<Func<INativeImplementation, int>> expression = x => x.mdf_message_deserialize(messageHandle, It.IsAny<IntPtr>());
-            _nativeImplementation.Setup(expression)
+            _nativeImplementation.Setup(x => x.mdf_message_deserialize_str(messageHandle, It.IsAny<string>()))
                 .Returns(1)
-                .Callback((IntPtr message, IntPtr data) => Compare(Data, data))
-                .Verifiable();
+                .Callback((IntPtr message, string data) => Assert.AreEqual(Data, data));
             using Message message = new();
             Assert.IsTrue(message.Deserialize(Data));
+            _nativeImplementation.Verify(x => x.mdf_message_deserialize_str(messageHandle, It.IsAny<string>()), Times.Once);
+
+            _nativeImplementation.Setup(x => x.mdf_message_deserialize(messageHandle, It.IsAny<IntPtr>()))
+                .Returns(1)
+                .Callback((IntPtr message, IntPtr data) => Compare(Data, data));
             IntPtr p = Marshal.StringToHGlobalAnsi(Data);
             Assert.IsTrue(message.Deserialize(p));
             Assert.IsTrue(message.Deserialize(Encoding.ASCII.GetBytes(Data)));
-            _nativeImplementation.Verify(expression, Times.Exactly(3));
+            _nativeImplementation.Verify(x => x.mdf_message_deserialize(messageHandle, It.IsAny<IntPtr>()), Times.Exactly(2));
 
-            _nativeImplementation.Setup(expression).Returns(0);
+            _nativeImplementation.Setup(x => x.mdf_message_deserialize_str(messageHandle, It.IsAny<string>())).Returns(0);
             Assert.IsFalse(message.Deserialize(Data));
+            _nativeImplementation.Verify(x => x.mdf_message_deserialize_str(messageHandle, It.IsAny<string>()), Times.Exactly(2));
+            _nativeImplementation.Setup(x => x.mdf_message_deserialize(messageHandle, It.IsAny<IntPtr>())).Returns(0);
             Assert.IsFalse(message.Deserialize(p));
-            _nativeImplementation.Verify(expression, Times.Exactly(5));
+            _nativeImplementation.Verify(x => x.mdf_message_deserialize(messageHandle, It.IsAny<IntPtr>()), Times.Exactly(3));
         }
 
         [TestMethod]

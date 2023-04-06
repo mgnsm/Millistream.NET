@@ -30,22 +30,27 @@ namespace Millistream.Streaming.Interop
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, int> mdf_message_del;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, ulong, int, int> mdf_message_add;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, uint, IntPtr, int> mdf_message_add_numeric;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, uint, string, int> mdf_message_add_numeric_str;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, uint, long, int, int> mdf_message_add_int;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, uint, ulong, int, int> mdf_message_add_uint;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, uint, IntPtr, int> mdf_message_add_string;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, uint, IntPtr, int, int> mdf_message_add_string2;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, uint, IntPtr, int> mdf_message_add_date;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, uint, string, int> mdf_message_add_date_str;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, uint, int, int, int, int> mdf_message_add_date2;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, uint, IntPtr, int> mdf_message_add_time;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, uint, string, int> mdf_message_add_time_str;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, uint, int, int, int, int, int> mdf_message_add_time2;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, uint, int, int, int, int, int> mdf_message_add_time3;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, uint, IntPtr, int> mdf_message_add_list;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, uint, string, int> mdf_message_add_list_str;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, IntPtr, int> mdf_message_send;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, int> mdf_message_get_num;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, int> mdf_message_get_num_active;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, IntPtr, ulong, ulong, int> mdf_message_move;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, ref IntPtr, int> mdf_message_serialize;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, IntPtr, int> mdf_message_deserialize;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, string, int> mdf_message_deserialize_str;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, MDF_MSG_OPTION, int, int> mdf_message_set_property;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, int> mdf_message_get_num_fields;
         // Removed in libmdf-1.0.26:
@@ -101,10 +106,14 @@ namespace Millistream.Streaming.Interop
             mdf_message_del = (delegate* unmanaged[Cdecl]<IntPtr, int>)nativeLibrary.GetExport(lib, nameof(mdf_message_del));
             mdf_message_add = (delegate* unmanaged[Cdecl]<IntPtr, ulong, int, int>)nativeLibrary.GetExport(lib, nameof(mdf_message_add));
             mdf_message_add_numeric = (delegate* unmanaged[Cdecl]<IntPtr, uint, IntPtr, int>)nativeLibrary.GetExport(lib, nameof(mdf_message_add_numeric));
+            mdf_message_add_numeric_str = (delegate* unmanaged[Cdecl]<IntPtr, uint, string, int>)nativeLibrary.GetExport(lib, nameof(mdf_message_add_numeric));
             mdf_message_add_string = (delegate* unmanaged[Cdecl]<IntPtr, uint, IntPtr, int>)nativeLibrary.GetExport(lib, nameof(mdf_message_add_string));
             mdf_message_add_date = (delegate* unmanaged[Cdecl]<IntPtr, uint, IntPtr, int>)nativeLibrary.GetExport(lib, nameof(mdf_message_add_date));
+            mdf_message_add_date_str = (delegate* unmanaged[Cdecl]<IntPtr, uint, string, int>)nativeLibrary.GetExport(lib, nameof(mdf_message_add_date));
             mdf_message_add_time = (delegate* unmanaged[Cdecl]<IntPtr, uint, IntPtr, int>)nativeLibrary.GetExport(lib, nameof(mdf_message_add_time));
+            mdf_message_add_time_str = (delegate* unmanaged[Cdecl]<IntPtr, uint, string, int>)nativeLibrary.GetExport(lib, nameof(mdf_message_add_time));
             mdf_message_add_list = (delegate* unmanaged[Cdecl]<IntPtr, uint, IntPtr, int>)nativeLibrary.GetExport(lib, nameof(mdf_message_add_list));
+            mdf_message_add_list_str = (delegate* unmanaged[Cdecl]<IntPtr, uint, string, int>)nativeLibrary.GetExport(lib, nameof(mdf_message_add_list));
             mdf_message_send = (delegate* unmanaged[Cdecl]<IntPtr, IntPtr, int>)nativeLibrary.GetExport(lib, nameof(mdf_message_send));
             mdf_message_get_num = (delegate* unmanaged[Cdecl]<IntPtr, int>)nativeLibrary.GetExport(lib, nameof(mdf_message_get_num));
             mdf_message_get_num_active = (delegate* unmanaged[Cdecl]<IntPtr, int>)nativeLibrary.GetExport(lib, nameof(mdf_message_get_num_active));
@@ -132,7 +141,10 @@ namespace Millistream.Streaming.Interop
             if (nativeLibrary.TryGetExport(lib, nameof(mdf_message_serialize), out address))
                 mdf_message_serialize = (delegate* unmanaged[Cdecl]<IntPtr, ref IntPtr, int>)address;
             if (nativeLibrary.TryGetExport(lib, nameof(mdf_message_deserialize), out address))
+            {
                 mdf_message_deserialize = (delegate* unmanaged[Cdecl]<IntPtr, IntPtr, int>)address;
+                mdf_message_deserialize_str = (delegate* unmanaged[Cdecl]<IntPtr, string, int>)address;
+            }
             if (nativeLibrary.TryGetExport(lib, nameof(mdf_message_set_property), out address))
                 mdf_message_set_property = (delegate* unmanaged[Cdecl]<IntPtr, MDF_MSG_OPTION, int, int>)address;
             if (nativeLibrary.TryGetExport(lib, nameof(mdf_message_get_num_fields), out address))
