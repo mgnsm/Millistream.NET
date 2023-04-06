@@ -212,24 +212,7 @@ namespace Millistream.Streaming
         public bool AddNumeric(uint tag, string value)
         {
             ThrowIfDisposed();
-            if (value == null)
-                return _nativeImplementation.mdf_message_add_numeric(Handle, tag, IntPtr.Zero) == 1;
-
-            byte[] bytes = ArrayPool<byte>.Shared.Rent(value.Length + 1);
-            try
-            {
-                fixed (byte* b = bytes)
-                {
-                    if (!TryGetAsciiBytes(value, b))
-                        return false;
-                    b[value.Length] = 0;
-                    return _nativeImplementation.mdf_message_add_numeric(Handle, tag, (IntPtr)b) == 1;
-                }
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(bytes);
-            }
+            return _nativeImplementation.mdf_message_add_numeric_str(Handle, tag, value) == 1;
         }
 
         /// <summary>
@@ -409,24 +392,7 @@ namespace Millistream.Streaming
         public bool AddDate(uint tag, string value)
         {
             ThrowIfDisposed();
-            if (value == null)
-                return _nativeImplementation.mdf_message_add_date(Handle, tag, IntPtr.Zero) == 1;
-
-            byte[] bytes = ArrayPool<byte>.Shared.Rent(value.Length + 1);
-            try
-            {
-                fixed (byte* b = bytes)
-                {
-                    if (!TryGetAsciiBytes(value, b))
-                        return false;
-                    b[value.Length] = 0;
-                    return _nativeImplementation.mdf_message_add_date(Handle, tag, (IntPtr)b) == 1;
-                }
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(bytes);
-            }
+            return _nativeImplementation.mdf_message_add_date_str(Handle, tag, value) == 1;
         }
 
         /// <summary>
@@ -483,24 +449,7 @@ namespace Millistream.Streaming
         public bool AddTime(uint tag, string value)
         {
             ThrowIfDisposed();
-            if (string.IsNullOrEmpty(value))
-                return false;
-
-            byte[] bytes = ArrayPool<byte>.Shared.Rent(value.Length + 1);
-            try
-            {
-                fixed (byte* b = bytes)
-                {
-                    if (!TryGetAsciiBytes(value, b))
-                        return false;
-                    b[value.Length] = 0;
-                    return _nativeImplementation.mdf_message_add_time(Handle, tag, (IntPtr)b) == 1;
-                }
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(bytes);
-            }
+            return _nativeImplementation.mdf_message_add_time_str(Handle, tag, value) == 1;
         }
 
         /// <summary>
@@ -597,25 +546,7 @@ namespace Millistream.Streaming
         public bool AddList(uint tag, string value)
         {
             ThrowIfDisposed();
-            if (value == null)
-                return _nativeImplementation.mdf_message_add_list(Handle, tag, IntPtr.Zero) == 1;
-
-            byte[] bytes = ArrayPool<byte>.Shared.Rent(value.Length + 1);
-            try
-            {
-                fixed (byte* b = bytes)
-                {
-                    if (!TryGetAsciiBytes(value, b))
-                        return false;
-                    b[value.Length] = 0;
-                    return _nativeImplementation.mdf_message_add_list(Handle, tag, (IntPtr)b) == 1;
-
-                }
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(bytes);
-            }
+            return _nativeImplementation.mdf_message_add_list_str(Handle, tag, value) == 1;
         }
 
         /// <summary>
@@ -710,23 +641,7 @@ namespace Millistream.Streaming
 
             ThrowIfDisposed();
             ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_deserialize, nameof(_nativeImplementation.mdf_message_deserialize));
-
-            byte[] bytes = ArrayPool<byte>.Shared.Rent(data.Length + 1);
-            try
-            {
-                fixed (byte* b = bytes)
-                {
-                    if (!TryGetAsciiBytes(data, b))
-                        return false;
-                    b[data.Length] = 0;
-                    return _nativeImplementation.mdf_message_deserialize(Handle, (IntPtr)b) == 1;
-
-                }
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(bytes);
-            }
+            return _nativeImplementation.mdf_message_deserialize_str(Handle, data) == 1;
         }
 
         /// <summary>
@@ -769,19 +684,6 @@ namespace Millistream.Streaming
         {
             if (_isDisposed)
                 throw new ObjectDisposedException(typeof(Message).FullName);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool TryGetAsciiBytes(string value, byte* bytes)
-        {
-            for (int i = 0; i < value.Length; ++i)
-            {
-                char c = value[i];
-                if (c > 127)
-                    return false;
-                bytes[i] = (byte)c;
-            }
-            return true;
         }
     }
 }
