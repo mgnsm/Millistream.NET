@@ -55,7 +55,7 @@ namespace Millistream.Streaming
         /// <summary>
         /// Gets or sets the zlib compression level used for the <see cref="AddString(uint, string)"/> and <see cref="AddString(uint, string, int)"/> methods.
         /// </summary>
-        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_set_property or mdf_message_set_compression_level function.</exception>
+        /// <remarks>The corresponding native function is mdf_message_set_property with an option of <see cref="MDF_MSG_OPTION.MDF_MSG_OPT_COMPRESSION"/> or mdf_message_set_compression_level.</remarks>
         public CompressionLevel CompressionLevel
         {
             get => _compressionLevel;
@@ -71,38 +71,32 @@ namespace Millistream.Streaming
                     if (_nativeImplementation.mdf_message_set_compression_level(_handle, (int)value) == 1)
                         _compressionLevel = value;
                 }
-                else
-                    throw new InvalidOperationException($"The installed version of the native library doesn't include the {nameof(_nativeImplementation.mdf_message_set_property)} or {nameof(_nativeImplementation.mdf_message_set_compression_level)} function.");
             }
         }
 
         /// <summary>
         /// Gets the total number of messages in the message handle (the number of active + the number of reused messages currently not used for active messages).
         /// </summary>
+        /// <remarks>The corresponding native function is mdf_message_get_num.</remarks>
         public int Count => _nativeImplementation.mdf_message_get_num(_handle);
 
         /// <summary>
         /// Gets the number of active messages in the message handle.
         /// </summary>
+        /// <remarks>The corresponding native function is mdf_message_get_num_active.</remarks>
         public int ActiveCount => _nativeImplementation.mdf_message_get_num_active(_handle);
 
         /// <summary>
         /// Gets the number of added fields to the current message.
         /// </summary>
-        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_get_num_fields function.</exception>
-        public int FieldCount
-        {
-            get
-            {
-                ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_get_num_fields, nameof(_nativeImplementation.mdf_message_get_num_fields));
-                return _nativeImplementation.mdf_message_get_num_fields(_handle);
-            }
-        }
+        /// <remarks>The corresponding native function is mdf_message_get_num_fields.</remarks>
+        public int FieldCount => _nativeImplementation.mdf_message_get_num_fields != default ? 
+            _nativeImplementation.mdf_message_get_num_fields(_handle) : default;
 
         /// <summary>
         /// Enables or disables the UTF-8 validation performed in <see cref="AddString(uint, string)"/> and <see cref="AddString(uint, string, int)"/>. It's enabled by default.
         /// </summary>
-        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_set_property or mdf_message_set_utf8_validation function.</exception>
+        /// <remarks>The corresponding native function is mdf_message_set_property with an option of <see cref="MDF_MSG_OPTION.MDF_MSG_OPT_UTF8"/> or mdf_message_set_utf8_validation.</remarks>
         public bool Utf8Validation
         {
             get => _utf8Validation;
@@ -118,22 +112,20 @@ namespace Millistream.Streaming
                     if (_nativeImplementation.mdf_message_set_utf8_validation(_handle, value ? 1 : 0) == 1)
                         _utf8Validation = value;
                 }
-                else
-                    throw new InvalidOperationException($"The installed version of the native library doesn't include the {nameof(_nativeImplementation.mdf_message_set_property)} or {nameof(_nativeImplementation.mdf_message_set_utf8_validation)} function.");
             }
         }
 
         /// <summary>
-        /// Gets or sets the intended delay of the message.
+        /// Gets or sets the intended delay of the message. The default value is 0.
         /// </summary>
-        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_set_property function.</exception>
+        /// <remarks>The corresponding native function for setting the value is mdf_message_set_property with an option of <see cref="MDF_MSG_OPTION.MDF_MSG_OPT_DELAY"/>.</remarks>
         public byte Delay
         {
             get => _delay;
             set
             {
-                ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_set_property, nameof(_nativeImplementation.mdf_message_set_property));
-                if (_nativeImplementation.mdf_message_set_property(_handle, MDF_MSG_OPTION.MDF_MSG_OPT_DELAY, value) == 1)
+                if (_nativeImplementation.mdf_message_set_property != default 
+                    && _nativeImplementation.mdf_message_set_property(_handle, MDF_MSG_OPTION.MDF_MSG_OPT_DELAY, value) == 1)
                     _delay = value;
             }
         }
@@ -193,13 +185,10 @@ namespace Millistream.Streaming
         /// <param name="value">The scaled and signed 64-bit integer.</param>
         /// <param name="decimals">The number of decimals.</param>
         /// <returns><see langword = "true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_add_int function.</exception>
         /// <remarks>The corresponding native function is mdf_message_add_int.</remarks>
-        public bool AddInt64(uint tag, long value, int decimals)
-        {
-            ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_add_int, nameof(_nativeImplementation.mdf_message_add_int));
-            return _nativeImplementation.mdf_message_add_int(_handle, tag, value, decimals) == 1;
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool AddInt64(uint tag, long value, int decimals) => 
+            _nativeImplementation.mdf_message_add_int != default && _nativeImplementation.mdf_message_add_int(_handle, tag, value, decimals) == 1;
 
         /// <summary>
         /// Adds a scaled and signed 64-bit integer field to the current active message. <paramref name="decimals"/> can be between 0 and 19. A value of 12345 with <paramref name="decimals"/> set to 2 will be encoded as "123.45".
@@ -208,7 +197,6 @@ namespace Millistream.Streaming
         /// <param name="value">The scaled and signed 64-bit integer.</param>
         /// <param name="decimals">The number of decimals.</param>
         /// <returns><see langword = "true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_add_int function.</exception>
         /// <remarks>The corresponding native function is mdf_message_add_int.</remarks>
         public bool AddInt64(Field tag, long value, int decimals) =>
             AddInt64((uint)tag, value, decimals);
@@ -220,13 +208,10 @@ namespace Millistream.Streaming
         /// <param name="value">The scaled and unsigned 64-bit integer.</param>
         /// <param name="decimals">The number of decimals.</param>
         /// <returns><see langword = "true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_add_uint function.</exception>
         /// <remarks>The corresponding native function is mdf_message_add_uint.</remarks>
-        public bool AddUInt64(uint tag, ulong value, int decimals)
-        {
-            ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_add_uint, nameof(_nativeImplementation.mdf_message_add_uint));
-            return _nativeImplementation.mdf_message_add_uint(_handle, tag, value, decimals) == 1;
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool AddUInt64(uint tag, ulong value, int decimals) =>
+            _nativeImplementation.mdf_message_add_uint != default && _nativeImplementation.mdf_message_add_uint(_handle, tag, value, decimals) == 1;
 
         /// <summary>
         /// Adds a scaled and unsigned 64-bit integer field to the current active message. <paramref name="decimals"/> can be between 0 and 19. A value of 12345 with <paramref name="decimals"/> set to 2 will be encoded as "123.45".
@@ -235,7 +220,6 @@ namespace Millistream.Streaming
         /// <param name="value">The scaled and unsigned 64-bit integer.</param>
         /// <param name="decimals">The number of decimals.</param>
         /// <returns><see langword = "true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_add_uint function.</exception>
         /// <remarks>The corresponding native function is mdf_message_add_uint.</remarks>
         public bool AddUInt64(Field tag, ulong value, int decimals) =>
             AddUInt64((uint)tag, value, decimals);
@@ -277,11 +261,12 @@ namespace Millistream.Streaming
         /// <param name="value">The UTF-8 string field value.</param>
         /// <param name="length">The number of characters in <paramref name="value"/> to be added to the message.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_add_string2 function.</exception>
         /// <remarks>The corresponding native function is mdf_message_add_string2.</remarks>
         public bool AddString(uint tag, string value, int length)
         {
-            ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_add_string2, nameof(_nativeImplementation.mdf_message_add_string2));
+            if (_nativeImplementation.mdf_message_add_string2 == default)
+                return false;
+
             if (value == null)
                 return _nativeImplementation.mdf_message_add_string2(_handle, tag, IntPtr.Zero, length) == 1;
 
@@ -324,7 +309,6 @@ namespace Millistream.Streaming
         /// <param name="value">The UTF-8 string field value.</param>
         /// <param name="length">The number of characters in <paramref name="value"/> to be added to the message.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_add_string2 function.</exception>
         /// <remarks>The corresponding native function is mdf_message_add_string2.</remarks>
         public bool AddString(Field tag, string value, int length) =>
             AddString((uint)tag, value, length);
@@ -358,13 +342,10 @@ namespace Millistream.Streaming
         /// <param name="month">The month of the date field value.</param>
         /// <param name="day">The day of the date field value.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_add_date2 function.</exception>
         /// <remarks>The corresponding native function is mdf_message_add_date2.</remarks>
-        public bool AddDate(uint tag, int year, int month, int day)
-        {
-            ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_add_date2, nameof(_nativeImplementation.mdf_message_add_date2));
-            return _nativeImplementation.mdf_message_add_date2(_handle, tag, year, month, day) == 1;
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool AddDate(uint tag, int year, int month, int day) =>
+            _nativeImplementation.mdf_message_add_date2 != default && _nativeImplementation.mdf_message_add_date2(_handle, tag, year, month, day) == 1;
 
         /// <summary>
         /// Adds a date field to the current active message. Please note that all dates and times are expressed in UTC.
@@ -374,7 +355,6 @@ namespace Millistream.Streaming
         /// <param name="month">The month of the date field value.</param>
         /// <param name="day">The day of the date field value.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_add_date2 function.</exception>
         /// <remarks>The corresponding native function is mdf_message_add_date2.</remarks>
         public bool AddDate(Field tag, int year, int month, int day) =>
             AddDate((uint)tag, year, month, day);
@@ -409,13 +389,10 @@ namespace Millistream.Streaming
         /// <param name="second">The second.</param>
         /// <param name="millisecond">The millisecond.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_add_time2 function.</exception>
         /// <remarks>The corresponding native function is mdf_message_add_time2.</remarks>
-        public bool AddTime2(uint tag, int hour, int minute, int second, int millisecond)
-        {
-            ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_add_time2, nameof(_nativeImplementation.mdf_message_add_time2));
-            return _nativeImplementation.mdf_message_add_time2(_handle, tag, hour, minute, second, millisecond) == 1;
-        }
+        public bool AddTime2(uint tag, int hour, int minute, int second, int millisecond) =>
+            _nativeImplementation.mdf_message_add_time2 != default
+                && _nativeImplementation.mdf_message_add_time2(_handle, tag, hour, minute, second, millisecond) == 1;
 
         /// <summary>
         /// Adds a time field to the current active message. Please note that all times and dates are expressed in UTC. If <paramref name="millisecond"/> is set to 0 the timestamp is encoded as "HH:MM:SS".
@@ -426,7 +403,6 @@ namespace Millistream.Streaming
         /// <param name="second">The second.</param>
         /// <param name="millisecond">The millisecond.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_add_time2 function.</exception>
         /// <remarks>The corresponding native function is mdf_message_add_time2.</remarks>
         public bool AddTime2(Field tag, int hour, int minute, int second, int millisecond) =>
             AddTime2((uint)tag, hour, minute, second, millisecond);
@@ -440,13 +416,11 @@ namespace Millistream.Streaming
         /// <param name="second">The second.</param>
         /// <param name="nanosecond">The nanosecond.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_add_time3 function.</exception>
         /// <remarks>The corresponding native function is mdf_message_add_time3.</remarks>
-        public bool AddTime3(uint tag, int hour, int minute, int second, int nanosecond)
-        {
-            ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_add_time3, nameof(_nativeImplementation.mdf_message_add_time3));
-            return _nativeImplementation.mdf_message_add_time3(_handle, tag, hour, minute, second, nanosecond) == 1;
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool AddTime3(uint tag, int hour, int minute, int second, int nanosecond) =>
+            _nativeImplementation.mdf_message_add_time3 != default
+                && _nativeImplementation.mdf_message_add_time3(_handle, tag, hour, minute, second, nanosecond) == 1;
 
         /// <summary>
         /// Adds a time field to the current active message. Please note that all times and dates are expressed in UTC. If <paramref name="nanosecond"/> is 1 – 999 the timstamp is encoded as "HH:MM:SS.mmm". If <paramref name="nanosecond"/> is set to 0 the timestamp is encoded as "HH:MM:SS".
@@ -457,7 +431,6 @@ namespace Millistream.Streaming
         /// <param name="second">The second.</param>
         /// <param name="nanosecond">The nanosecond.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_add_time3 function.</exception>
         /// <remarks>The corresponding native function is mdf_message_add_time3.</remarks>
         public bool AddTime3(Field tag, int hour, int minute, int second, int nanosecond) =>
             AddTime3((uint)tag, hour, minute, second, nanosecond);
@@ -516,16 +489,14 @@ namespace Millistream.Streaming
         /// <param name="destinationInsRef">The new instrument reference of the moved or modified messages.</param>
         /// <returns><see langword="true" /> if the operation was successfull, or <see langword="false" /> if it failed.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null" />.</exception>
-        /// <exception cref="InvalidOperationException">The installed version of the native library of <paramref name="source"/> doesn't include the mdf_message_move function.</exception>
         /// <remarks>The corresponding native function is mdf_message_move.</remarks>
         public static bool Move(Message source, Message destination, ulong sourceInsref, ulong destinationInsRef)
         {
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
 
-            ThrowIfNativeFunctionIsMissing(source._nativeImplementation.mdf_message_move, nameof(source._nativeImplementation.mdf_message_move));
-
-            return source._nativeImplementation.mdf_message_move(source._handle, destination?._handle ?? IntPtr.Zero, sourceInsref, destinationInsRef) == 1;
+            return source._nativeImplementation.mdf_message_move != default 
+                && source._nativeImplementation.mdf_message_move(source._handle, destination?._handle ?? IntPtr.Zero, sourceInsref, destinationInsRef) == 1;
         }
 
         /// <summary>
@@ -533,13 +504,12 @@ namespace Millistream.Streaming
         /// </summary>
         /// <param name="result">An unmanaged pointer to the base64 encoded string if the method returns <see langword="true" />, or <see cref="IntPtr.Zero"/> if the method returns <see langword="false" />.</param>
         /// <returns><see langword="true" /> if there existed a message chain and if it was successfully base64 encoded, or <see langword="false" /> if there existed no message chain or if the base64 encoding failed.</returns>
-        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_serialize function.</exception>
         /// <remarks>The corresponding native function is mdf_message_serialize.</remarks>
         public bool Serialize(out IntPtr result)
         {
-            ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_serialize, nameof(_nativeImplementation.mdf_message_serialize));
             result = IntPtr.Zero;
-            return _nativeImplementation.mdf_message_serialize(_handle, ref result) == 1;
+            return _nativeImplementation.mdf_message_serialize != default 
+                && _nativeImplementation.mdf_message_serialize(_handle, ref result) == 1;
         }
 
         /// <summary>
@@ -548,15 +518,14 @@ namespace Millistream.Streaming
         /// <param name="data">A base64 encoded (serialized) message chain.</param>
         /// <returns><see langword="true" /> if the message chain was successfully deserialized, or <see langword="false" /> if the deserialization failed (if so the current message chain in the message handler is left untouched).</returns>
         /// <exception cref="ArgumentNullException"><paramref name="data"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
-        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_deserialize function.</exception>
         /// <remarks>The corresponding native function is mdf_message_deserialize.</remarks>
         public bool Deserialize(string data)
         {
             if (string.IsNullOrEmpty(data))
                 throw new ArgumentNullException(nameof(data));
 
-            ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_deserialize, nameof(_nativeImplementation.mdf_message_deserialize));
-            return _nativeImplementation.mdf_message_deserialize_str(_handle, data) == 1;
+            return _nativeImplementation.mdf_message_deserialize_str != default &&
+                _nativeImplementation.mdf_message_deserialize_str(_handle, data) == 1;
         }
 
         /// <summary>
@@ -564,13 +533,10 @@ namespace Millistream.Streaming
         /// </summary>
         /// <param name="data">An unmanaged pointer to a base64 encoded (serialized) message chain.</param>
         /// <returns><see langword="true" /> if the message chain was successfully deserialized, or <see langword="false" /> if the deserialization failed (if so the current message chain in the message handler is left untouched).</returns>
-        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_deserialize function.</exception>
         /// <remarks>The corresponding native function is mdf_message_deserialize.</remarks>
-        public bool Deserialize(IntPtr data)
-        {
-            ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_deserialize, nameof(_nativeImplementation.mdf_message_deserialize));
-            return _nativeImplementation.mdf_message_deserialize(_handle, data) == 1;
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Deserialize(IntPtr data) => _nativeImplementation.mdf_message_deserialize != default 
+            && _nativeImplementation.mdf_message_deserialize(_handle, data) == 1;
 
         /// <summary>
         /// Destroys the message handle and frees all allocated memory.
@@ -578,15 +544,9 @@ namespace Millistream.Streaming
         /// <remarks>The corresponding native function is mdf_message_destroy.</remarks>
         public void Dispose()
         {
-            _nativeImplementation?.mdf_message_destroy(_handle);
+            _nativeImplementation.mdf_message_destroy(_handle);
             _handle = default;
             GC.SuppressFinalize(this);
-        }
-
-        internal static unsafe void ThrowIfNativeFunctionIsMissing(void* function, string name)
-        {
-            if (function == default)
-                throw new InvalidOperationException($"The installed version of the native library doesn't include the {name} function.");
         }
     }
 }

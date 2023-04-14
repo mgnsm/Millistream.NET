@@ -50,13 +50,12 @@ namespace Millistream.Streaming
         /// <param name="value">The field value as a memory span that contains a null-terminated sequence of UTF-8 encoded bytes.</param>
         /// <param name="length">The number of bytes in <paramref name="value"/> to be added to the message.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_add_string2 function.</exception>
         /// <remarks>The corresponding native function is mdf_message_add_string2.</remarks>
         public bool AddString(uint tag, ReadOnlySpan<byte> value, int length)
         {
-            if (value != null && length < 0)
+            if (_nativeImplementation.mdf_message_add_string2 == default || (value != null && length < 0))
                 return false;
-            ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_add_string2, nameof(_nativeImplementation.mdf_message_add_string2));
+
             fixed (byte* bytes = value)
                 return _nativeImplementation.mdf_message_add_string2(Handle, tag, (IntPtr)bytes, length) == 1;
         }
@@ -78,7 +77,6 @@ namespace Millistream.Streaming
         /// <param name="value">The field value as a memory span that contains a null-terminated sequence of UTF-8 encoded bytes.</param>
         /// <param name="length">The number of bytes in <paramref name="value"/> to be added to the message.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
-        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_add_string2 function.</exception>
         /// <remarks>The corresponding native function is mdf_message_add_string2.</remarks>
         public bool AddString(Field tag, ReadOnlySpan<byte> value, int length) =>
             AddString((uint)tag, value, length);
@@ -169,13 +167,12 @@ namespace Millistream.Streaming
         /// </summary>
         /// <param name="data">A memory span that contains a base64 encoded (serialized) message chain.</param>
         /// <returns><see langword="true" /> if the message chain was successfully deserialized, or <see langword="false" /> if the deserialization failed (if so the current message chain in the message handler is left untouched).</returns>
-        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_message_deserialize function.</exception>
         /// <remarks>The corresponding native function is mdf_message_deserialize.</remarks>
         public bool Deserialize(ReadOnlySpan<byte> data)
         {
-            ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_message_deserialize, nameof(_nativeImplementation.mdf_message_deserialize));
             fixed (byte* bytes = data)
-                return _nativeImplementation.mdf_message_deserialize(Handle, (IntPtr)bytes) == 1;
+                return _nativeImplementation.mdf_message_deserialize != default 
+                    && _nativeImplementation.mdf_message_deserialize(Handle, (IntPtr)bytes) == 1;
         }
     }
 }
