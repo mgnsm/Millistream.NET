@@ -2,6 +2,7 @@
 using System;
 using System.Buffers;
 using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -30,12 +31,11 @@ namespace Millistream.Streaming
         private static readonly ImmutableHashSet<int> s_messageReferences = ImmutableHashSet.Create((int[])Enum.GetValues(typeof(MessageReference)));
         private static readonly ImmutableHashSet<uint> s_fields = ImmutableHashSet.Create((uint[])Enum.GetValues(typeof(Field)));
         private readonly NativeImplementation _nativeImplementation;
-        private readonly IntPtr _feedHandle;
         private readonly mdf_status_callback _nativeStatusCallback;
         private readonly mdf_data_callback _nativeDataCallback;
         private readonly IntPtr _nativeDataCallbackPointer;
         private readonly IntPtr _nativeStatusCallbackPointer;
-        private bool _isDisposed;
+        private IntPtr _feedHandle;
         #endregion
 
         #region Constructors
@@ -81,14 +81,12 @@ namespace Millistream.Streaming
         /// Gets the file descriptor used by the connection. Will be -1 (or INVALID_SOCKET on Windows) if there is no connection.
         /// </summary>
         /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_FD"/> option cannot be fetched.</exception>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         public int FileDescriptor => GetInt32Property(MDF_OPTION.MDF_OPT_FD);
 
         /// <summary>
         /// Gets or sets the current API error code.
         /// </summary>
         /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_ERROR"/> option cannot be fetched or modified.</exception>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         public Error ErrorCode
         {
             get => (Error)GetInt32Property(MDF_OPTION.MDF_OPT_ERROR);
@@ -99,7 +97,6 @@ namespace Millistream.Streaming
         /// Gets or sets the number of bytes received by the server since the handle was created.
         /// </summary>
         /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_RCV_BYTES"/> option cannot be fetched or modified.</exception>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         public ulong ReceivedBytes
         {
             get => GetUInt64Property(MDF_OPTION.MDF_OPT_RCV_BYTES);
@@ -110,7 +107,6 @@ namespace Millistream.Streaming
         /// Gets or sets the number of bytes sent by the client since the handle was created.
         /// </summary>
         /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_SENT_BYTES"/> option cannot be fetched or modified.</exception>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         public ulong SentBytes
         {
             get => GetUInt64Property(MDF_OPTION.MDF_OPT_SENT_BYTES);
@@ -122,17 +118,11 @@ namespace Millistream.Streaming
         /// Gets or sets a callback function that will be called by the consume function if there are any messages to decode.
         /// </summary>
         /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_DATA_CALLBACK_FUNCTION"/> option cannot be fetched or modified.</exception>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         public DataCallback<TCallbackUserData, TStatusCallbackUserData> DataCallback
         {
-            get
-            {
-                ThrowIfDisposed();
-                return _dataCallback;
-            }
+            get => _dataCallback;
             set
             {
-                ThrowIfDisposed();
                 _dataCallback = value;
                 if (_nativeImplementation.mdf_set_property(_feedHandle, MDF_OPTION.MDF_OPT_DATA_CALLBACK_FUNCTION,
                     value != null ? _nativeDataCallbackPointer : IntPtr.Zero) != 1)
@@ -144,19 +134,10 @@ namespace Millistream.Streaming
         /// <summary>
         /// Gets or sets custom userdata that will be available to the data callback function.
         /// </summary>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         public TCallbackUserData CallbackUserData
         {
-            get
-            {
-                ThrowIfDisposed();
-                return _callbackUserData;
-            }
-            set
-            {
-                ThrowIfDisposed();
-                _callbackUserData = value;
-            }
+            get => _callbackUserData;
+            set => _callbackUserData = value;
         }
 
         private StatusCallback<TStatusCallbackUserData> _statusCallback;
@@ -164,17 +145,11 @@ namespace Millistream.Streaming
         /// Gets or sets a callback function that will be called whenever there is a change of the status of the connection.
         /// </summary>
         /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_STATUS_CALLBACK_FUNCTION"/> option cannot be fetched or modified.</exception>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         public StatusCallback<TStatusCallbackUserData> StatusCallback
         {
-            get
-            {
-                ThrowIfDisposed();
-                return _statusCallback;
-            }
+            get => _statusCallback;
             set
             {
-                ThrowIfDisposed();
                 _statusCallback = value;
                 if (_nativeImplementation.mdf_set_property(_feedHandle, MDF_OPTION.MDF_OPT_STATUS_CALLBACK_FUNCTION,
                     value != null ? _nativeStatusCallbackPointer : IntPtr.Zero) != 1)
@@ -186,19 +161,10 @@ namespace Millistream.Streaming
         /// <summary>
         /// Gets or sets custom userdata that will be available to the status callback function.
         /// </summary>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         public TStatusCallbackUserData StatusCallbackUserData
         {
-            get
-            {
-                ThrowIfDisposed();
-                return _statusCallbackUserData;
-            }
-            set
-            {
-                ThrowIfDisposed();
-                _statusCallbackUserData = value;
-            }
+            get => _statusCallbackUserData;
+            set => _statusCallbackUserData = value;
         }
 
         /// <summary>
@@ -206,7 +172,6 @@ namespace Millistream.Streaming
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">The value is less than 1 or greater than 60.</exception>
         /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_CONNECT_TIMEOUT"/> option cannot be fetched or modified.</exception>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         public int ConnectionTimeout
         {
             get => GetInt32Property(MDF_OPTION.MDF_OPT_CONNECT_TIMEOUT);
@@ -218,7 +183,6 @@ namespace Millistream.Streaming
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">The value is less than 1 or greater than 86400.</exception>
         /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_HEARTBEAT_INTERVAL"/> option cannot be fetched or modified.</exception>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         public int HeartbeatInterval
         {
             get => GetInt32Property(MDF_OPTION.MDF_OPT_HEARTBEAT_INTERVAL);
@@ -230,7 +194,6 @@ namespace Millistream.Streaming
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">The value is less than 1 or greater than 100.</exception>
         /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_HEARTBEAT_MAX_MISSED"/> option cannot be fetched or modified.</exception>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         public int MaximumMissedHeartbeats
         {
             get => GetInt32Property(MDF_OPTION.MDF_OPT_HEARTBEAT_MAX_MISSED);
@@ -241,7 +204,6 @@ namespace Millistream.Streaming
         /// Gets or sets a value indicating whether Nagle's algorithm is used on the TCP connection. It's enabled by default.
         /// </summary>
         /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_TCP_NODELAY"/> option cannot be fetched or modified.</exception>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         public bool NoDelay
         {
             get => Convert.ToBoolean(GetInt32Property(MDF_OPTION.MDF_OPT_TCP_NODELAY));
@@ -252,7 +214,6 @@ namespace Millistream.Streaming
         /// Used internally to enable or disable encryption.
         /// </summary>
         /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_NO_ENCRYPTION"/> option cannot be fetched or modified.</exception>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         public bool NoEncryption
         {
             get => Convert.ToBoolean(GetInt32Property(MDF_OPTION.MDF_OPT_NO_ENCRYPTION));
@@ -263,14 +224,12 @@ namespace Millistream.Streaming
         /// Gets the time difference in number of seconds between the client and the server. The value should be added to the current time on the client in order to get the server time. Please not that this value can be negative if the client clock is ahead of the server clock.
         /// </summary>
         /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_TIME_DIFFERENCE"/> option cannot be fetched.</exception>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         public int TimeDifference => GetInt32Property(MDF_OPTION.MDF_OPT_TIME_DIFFERENCE);
 
         /// <summary>
         /// Gets or sets a numerical address to which the API will bind before attempting to connect to a server in <see cref="Connect"/>. If the bind fails then <see cref="Connect"/> also fails. The string is copied by the API and a <see langword="NULL" /> value can be used in order to "unset" the bind address.
         /// </summary>
         /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_BIND_ADDRESS"/> option cannot be fetched or modified.</exception>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         public string BindAddress
         {
             get => GetStringProperty(MDF_OPTION.MDF_OPT_BIND_ADDRESS);
@@ -281,12 +240,10 @@ namespace Millistream.Streaming
         /// Gets the time difference in number of nanoseconds between the client and the server. The value should be added to the current time on the client in order to get the server time. Please not that this value can be negative if the client clock is ahead of the server clock.
         /// </summary>
         /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_TIME_DIFFERENCE_NS"/> option cannot be fetched.</exception>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         public long TimeDifferenceNs
         {
             get
             {
-                ThrowIfDisposed();
                 long value = default;
                 if (_nativeImplementation.mdf_get_long_property(_feedHandle, MDF_OPTION.MDF_OPT_TIME_DIFFERENCE_NS, ref value) != 1)
                     throw new InvalidOperationException();
@@ -298,7 +255,6 @@ namespace Millistream.Streaming
         /// Gets or sets a comma separated list of the message digests that the client will offer to the server upon connect.
         /// </summary>
         /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_CRYPT_DIGESTS"/> option cannot be fetched or modified.</exception>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         public string MessageDigests
         {
             get => GetStringProperty(MDF_OPTION.MDF_OPT_CRYPT_DIGESTS);
@@ -309,7 +265,6 @@ namespace Millistream.Streaming
         /// Gets or sets a comma separated list of the encryption ciphers that the client will offer to the server upon connect.
         /// </summary>
         /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_CRYPT_CIPHERS"/> option cannot be fetched or modified.</exception>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         public string Ciphers
         {
             get => GetStringProperty(MDF_OPTION.MDF_OPT_CRYPT_CIPHERS);
@@ -320,28 +275,24 @@ namespace Millistream.Streaming
         /// Gets the digest chosen by the server. Only available after <see cref="Connect"/> returns.
         /// </summary>
         /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_CRYPT_DIGEST"/> option cannot be fetched.</exception>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         public string MessageDigest => GetStringProperty(MDF_OPTION.MDF_OPT_CRYPT_DIGEST);
 
         /// <summary>
         /// Gets the cipher chosen by the server. Only available after <see cref="Connect"/> returns.
         /// </summary>
         /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_CRYPT_CIPHER"/> option cannot be fetched.</exception>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         public string Cipher => GetStringProperty(MDF_OPTION.MDF_OPT_CRYPT_CIPHER);
 
         /// <summary>
         /// Gets the number of seconds to wait before having to call <see cref="Consume(int)"/>.
         /// </summary>
         /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_TIMEOUT"/> option cannot be fetched.</exception>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         public int Timeout => GetInt32Property(MDF_OPTION.MDF_OPT_TIMEOUT);
 
         /// <summary>
         /// Gets or sets a value indicating whether delay-mode is enabled on the connection. It's disabled by default.
         /// </summary>
         /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_HANDLE_DELAY"/> option cannot be fetched or modified.</exception>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         /// <remarks>Must be set prior to calling <see cref="Connect(string)"/>.</remarks>
         public bool HandleDelay
         {
@@ -353,12 +304,10 @@ namespace Millistream.Streaming
         /// Gets the intended delay of the current message if delay-mode have been activated by setting the <see cref="HandleDelay"/> property. Note that this is the intended delay of the message and not necessarily the real delay, network latency, server latency and so on are not included.
         /// </summary>
         /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_get_delay function.</exception>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         public byte Delay
         {
             get
             {
-                ThrowIfDisposed();
                 Message.ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_get_delay, nameof(_nativeImplementation.mdf_get_delay));
                 return _nativeImplementation.mdf_get_delay(_feedHandle);
             }
@@ -368,12 +317,10 @@ namespace Millistream.Streaming
         /// Gets the message class of the current received message.
         /// </summary>
         /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_get_mclass function.</exception>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         public ulong MessageClass
         {
             get
             {
-                ThrowIfDisposed();
                 Message.ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_get_mclass, nameof(_nativeImplementation.mdf_get_mclass));
                 return _nativeImplementation.mdf_get_mclass(_feedHandle);
             }
@@ -386,13 +333,9 @@ namespace Millistream.Streaming
         /// </summary>
         /// <param name="timeout">The wait period in seconds if positive. If negative, the value is treated as the number of microseconds to wait instead of the number of seconds.</param>
         /// <returns>1 if data has been consumed that needs to be handled by <see cref="GetNextMessage(out ushort, out ulong)" /> and no callback function has been registered. The function returns 0 on timeout or if a callback function is registered and there was data. On errors, -1 will be returned (and the connection will be dropped).</returns>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         /// <remarks>The corresponding native function is mdf_consume.</remarks>
-        public int Consume(int timeout)
-        {
-            ThrowIfDisposed();
-            return _nativeImplementation.mdf_consume(_feedHandle, timeout);
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int Consume(int timeout) => _nativeImplementation.mdf_consume(_feedHandle, timeout);
 
         /// <summary>
         /// Fetches a message from the current consumed data if one is present and fills the output parameters with values representing the message fetched.
@@ -401,14 +344,12 @@ namespace Millistream.Streaming
         /// <param name="mclass">The fetched message class. This should match a <see cref="MessageClasses"/> value. The message class is normally only used internally and is supplied to the client for completeness and transparency. The client should under most circumstances only use the message reference in order to determine which message it has received.</param>
         /// <param name="insref">The fetched instrument reference, which is the unique id of an instrument.</param>
         /// <returns><see langword="true" /> if a message was returned (and the <paramref name="mref"/>, <paramref name="mclass"/> and <paramref name="insref"/> fields will be filled) or <see langword="false" /> if there are no more messages in the current consumed data (or an error occured).</returns>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         /// <remarks>The corresponding native function is mdf_get_next_message.</remarks>
         public bool GetNextMessage(out int mref, out int mclass, out ulong insref)
         {
             mref = default;
             mclass = default;
             insref = default;
-            ThrowIfDisposed();
             return _nativeImplementation.mdf_get_next_message(_feedHandle, ref mref, ref mclass, ref insref) == 1;
         }
 
@@ -418,13 +359,11 @@ namespace Millistream.Streaming
         /// <param name="mref">The fetched message reference. This should match a <see cref="MessageReference"/> value.</param>
         /// <param name="insref">The fetched instrument reference, which is the unique id of an instrument.</param>
         /// <returns><see langword="true" /> if a message was returned (and the <paramref name="mref"/> and <paramref name="insref"/> fields will be filled) or <see langword="false" /> if there are no more messages in the current consumed data (or an error occured).</returns>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         /// <remarks>The corresponding native function is mdf_get_next_message2. If this function isn't included in the installed version of the native library, the mdf_get_next_message function will be called instead.</remarks>
         public bool GetNextMessage(out ushort mref, out ulong insref)
         {
             mref = default;
             insref = default;
-            ThrowIfDisposed();
 
             if (_nativeImplementation.mdf_get_next_message2 == default)
             {
@@ -444,7 +383,6 @@ namespace Millistream.Streaming
         /// <param name="messageClasses">The fetched message class(es). The message class is normally only used internally and is supplied to the client for completeness and transparency. The client should under most circumstances only use the message reference in order to determine which message it has received.</param>
         /// <param name="insref">The fetched instrument reference, which is the unique id of an instrument.</param>
         /// <returns><see langword="true" /> if a message was returned (and the <paramref name="messageReference"/>, <paramref name="messageClasses"/> and <paramref name="insref"/> fields will be filled) or <see langword="false" /> if there are no more messages in the current consumed data (or an error occured).</returns>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         /// <exception cref="InvalidOperationException">An unknown/undefined message reference was fetched.</exception>
         /// <remarks>The corresponding native function is mdf_get_next_message.</remarks>
         public bool GetNextMessage(out MessageReference messageReference, out MessageClasses messageClasses, out ulong insref)
@@ -472,7 +410,6 @@ namespace Millistream.Streaming
         /// <param name="messageReference">The fetched message reference.</param>
         /// <param name="insref">The fetched instrument reference, which is the unique id of an instrument.</param>
         /// <returns><see langword="true" /> if a message was returned (and the <paramref name="messageReference"/> and <paramref name="insref"/> fields will be filled) or <see langword="false" /> if there are no more messages in the current consumed data (or an error occured).</returns>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         /// <exception cref="InvalidOperationException">An unknown/undefined message reference was fetched.</exception>
         /// <remarks>The corresponding native function is mdf_get_next_message.</remarks>
         public bool GetNextMessage(out MessageReference messageReference, out ulong insref)
@@ -498,12 +435,9 @@ namespace Millistream.Streaming
         /// <param name="tag">The field tag. This should match a <see cref="Field"/> value.</param>
         /// <param name="value">A memory span that contains the bytes of the UTF-8 string representation of the field value.</param>
         /// <returns><see langword="true" /> if a field was returned, or <see langword="false" /> if there are no more fields in the current message.</returns>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         /// <remarks>The corresponding native function is mdf_get_next_field.</remarks>
         public bool GetNextField(out uint tag, out ReadOnlySpan<byte> value)
         {
-            ThrowIfDisposed();
-
             tag = default;
             IntPtr pointer = default;
 
@@ -538,7 +472,6 @@ namespace Millistream.Streaming
         /// <param name="field">The field tag.</param>
         /// <param name="value">A memory span that contains the bytes of the UTF-8 string representation of the field value.</param>
         /// <returns><see langword="true" /> if a field was returned, or <see langword="false" /> if there are no more fields in the current message.</returns>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         /// <exception cref="InvalidOperationException">An unknown/undefined field tag was fetched.</exception>
         /// <remarks>The corresponding native function is mdf_get_next_field.</remarks>
         public bool GetNextField(out Field field, out ReadOnlySpan<byte> value)
@@ -566,14 +499,11 @@ namespace Millistream.Streaming
         /// <param name="servers">A comma separated list of 'host:port' pairs, where 'host' can be a DNS host name or an ip address (IPv6 addressed must be enclosed in brackets).</param>
         /// <returns><see langword="true" /> if a connection has been set up or <see langword="false" /> if a connection attempt failed with every server on the list.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="servers"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         /// <remarks>The corresponding native function is mdf_connect.</remarks>
         public bool Connect(string servers)
         {
             if (string.IsNullOrEmpty(servers))
                 throw new ArgumentNullException(nameof(servers));
-
-            ThrowIfDisposed();
 
             int length = Encoding.UTF8.GetMaxByteCount(servers.Length);
             byte[] bytes = ArrayPool<byte>.Shared.Rent(length + 1);
@@ -599,13 +529,9 @@ namespace Millistream.Streaming
         /// <summary>
         /// Disconnect a connected API handle. Safe to call even if the handle is already disconnected.
         /// </summary>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         /// <remarks>The corresponding native function is mdf_disconnect.</remarks>
-        public void Disconnect()
-        {
-            ThrowIfDisposed();
-            _nativeImplementation.mdf_disconnect(_feedHandle);
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Disconnect() => _nativeImplementation.mdf_disconnect(_feedHandle);
 
         /// <summary>
         /// Sends all the active messages in a managed message handle to the server. The message handle will not be reset, so this has to be performed manually by calling <see cref="Message.Reset()"/>.
@@ -613,14 +539,12 @@ namespace Millistream.Streaming
         /// <param name="message">The managed message handle.</param>
         /// <returns><see langword="true" /> if there were no errors detected when sending the data, or <see langword="false" /> if an error was detected (such as not connected to any server). Due to the nature of TCP/IP, a successful return code does not guarantee that the server has received the messages.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="message"/> is <see langword="null" />.</exception>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         /// <remarks>The corresponding native function is mdf_message_send.</remarks>
         public bool Send(Message message)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
-            ThrowIfDisposed();
             return _nativeImplementation.mdf_message_send(_feedHandle, message.Handle) == 1;
         }
 
@@ -630,13 +554,11 @@ namespace Millistream.Streaming
         /// <param name="message">An implementation of the managed message handle.</param>
         /// <returns><see langword="true" /> if <paramref name="message"/> is a <see cref="Message"/> and there were no errors detected when sending the data, or <see langword="false" /> if an error was detected or if <paramref name="message"/> is not a <see cref="Message"/>.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="message"/> is <see langword="null" />.</exception>
-        /// <exception cref="ObjectDisposedException">The <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance has been disposed.</exception>
         bool IMarketDataFeed<TCallbackUserData, TStatusCallbackUserData>.Send(IMessage message)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
-            ThrowIfDisposed();
             return message is Message messageWithHandle && Send(messageWithHandle);
         }
 
@@ -646,12 +568,9 @@ namespace Millistream.Streaming
         /// <remarks>The corresponding native function is mdf_destroy.</remarks>
         public void Dispose()
         {
-            if (!_isDisposed)
-            {
-                _nativeImplementation?.mdf_destroy(_feedHandle);
-                _isDisposed = true;
-                GC.SuppressFinalize(this);
-            }
+            _nativeImplementation?.mdf_destroy(_feedHandle);
+            _feedHandle = default;
+            GC.SuppressFinalize(this);
         }
 
         private void OnStatusChanged(IntPtr data, ConnectionStatus connectionStatus, IntPtr host, IntPtr ip)
@@ -675,7 +594,6 @@ namespace Millistream.Streaming
 
         private int GetInt32Property(MDF_OPTION option)
         {
-            ThrowIfDisposed();
             int value = default;
             if (_nativeImplementation.mdf_get_int_property(_feedHandle, option, ref value) != 1)
                 throw new InvalidOperationException(UnknownOptionMessage);
@@ -684,7 +602,6 @@ namespace Millistream.Streaming
 
         private ulong GetUInt64Property(MDF_OPTION option)
         {
-            ThrowIfDisposed();
             ulong value = default;
             if (_nativeImplementation.mdf_get_ulong_property(_feedHandle, option, ref value) != 1)
                 throw new InvalidOperationException(UnknownOptionMessage);
@@ -693,7 +610,6 @@ namespace Millistream.Streaming
 
         private string GetStringProperty(MDF_OPTION option)
         {
-            ThrowIfDisposed();
             IntPtr value = default;
             if (_nativeImplementation.mdf_get_property(_feedHandle, option, ref value) != 1)
                 throw new InvalidOperationException(UnknownOptionMessage);
@@ -725,7 +641,6 @@ namespace Millistream.Streaming
 
         private void SetProperty(MDF_OPTION option, int value)
         {
-            ThrowIfDisposed();
             unsafe
             {
                 int* p = &value;
@@ -736,7 +651,6 @@ namespace Millistream.Streaming
 
         private void SetProperty(MDF_OPTION option, ulong value)
         {
-            ThrowIfDisposed();
             unsafe
             {
                 ulong* p = &value;
@@ -755,8 +669,6 @@ namespace Millistream.Streaming
 
         private void SetProperty(MDF_OPTION option, string value)
         {
-            ThrowIfDisposed();
-
             int ret = 0;
             if (value != null)
             {
@@ -787,12 +699,6 @@ namespace Millistream.Streaming
 
             if (ret != 1)
                 throw new InvalidOperationException();
-        }
-
-        private void ThrowIfDisposed()
-        {
-            if (_isDisposed)
-                throw new ObjectDisposedException(typeof(MarketDataFeed<TCallbackUserData, TStatusCallbackUserData>).FullName);
         }
         #endregion
     }
