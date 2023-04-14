@@ -543,66 +543,69 @@ namespace Millistream.Streaming.UnitTests
         }
 
         [TestMethod]
-        public unsafe void MemberThrowsWhenNativeFunctionIsMissingTest()
+        public unsafe void MethodsReturnFalseWhenNativeFunctionIsMissingTest()
         {
-            NativeImplementation nativeImplementation = new(default);
-            nativeImplementation.mdf_message_set_property = default;
-            nativeImplementation.mdf_message_add_int = default;
-            nativeImplementation.mdf_message_add_uint = default;
-            nativeImplementation.mdf_message_add_string2 = default;
-            nativeImplementation.mdf_message_add_date2 = default;
-            nativeImplementation.mdf_message_add_time2 = default;
-            nativeImplementation.mdf_message_add_time3 = default;
-            nativeImplementation.mdf_message_move = default;
-            nativeImplementation.mdf_message_serialize = default;
-            nativeImplementation.mdf_message_deserialize = default;
-            nativeImplementation.mdf_message_get_num_fields = default;
+            NativeImplementation nativeImplementation = new(default)
+            {
+                mdf_message_add_int = default,
+                mdf_message_add_uint = default,
+                mdf_message_add_string2 = default,
+                mdf_message_add_date2 = default,
+                mdf_message_add_time2 = default,
+                mdf_message_add_time3 = default,
+                mdf_message_move = default,
+                mdf_message_serialize = default,
+                mdf_message_deserialize = default
+            };
 
             using Message message = new(nativeImplementation);
-            CatchInvalidOperationException(() => message.Delay = 1, nameof(nativeImplementation.mdf_message_set_property));
-            CatchInvalidOperationException(() => message.AddInt64(default(uint), default, default), nameof(nativeImplementation.mdf_message_add_int));
-            CatchInvalidOperationException(() => message.AddInt64(default(Field), default, default), nameof(nativeImplementation.mdf_message_add_int));
-            CatchInvalidOperationException(() => message.AddUInt64(default(uint), default, default), nameof(nativeImplementation.mdf_message_add_uint));
-            CatchInvalidOperationException(() => message.AddUInt64(default(Field), default, default), nameof(nativeImplementation.mdf_message_add_uint));
-            CatchInvalidOperationException(() => message.AddString(default(uint), default(string), default), nameof(nativeImplementation.mdf_message_add_string2));
-            CatchInvalidOperationException(() => message.AddString(default(Field), default(string), default), nameof(nativeImplementation.mdf_message_add_string2));
-            CatchInvalidOperationException(() => message.AddString(default(uint), default(ReadOnlySpan<byte>), default), nameof(nativeImplementation.mdf_message_add_string2));
-            CatchInvalidOperationException(() => message.AddString(default(Field), default(ReadOnlySpan<byte>), default), nameof(nativeImplementation.mdf_message_add_string2));
-            CatchInvalidOperationException(() => message.AddDate(default(uint), default, default, default), nameof(nativeImplementation.mdf_message_add_date2));
-            CatchInvalidOperationException(() => message.AddDate(default(Field), default, default, default), nameof(nativeImplementation.mdf_message_add_date2));
-            CatchInvalidOperationException(() => message.AddTime2(default(uint), default, default, default, default), nameof(nativeImplementation.mdf_message_add_time2));
-            CatchInvalidOperationException(() => message.AddTime2(default(Field), default, default, default, default), nameof(nativeImplementation.mdf_message_add_time2));
-            CatchInvalidOperationException(() => message.AddTime3(default(uint), default, default, default, default), nameof(nativeImplementation.mdf_message_add_time3));
-            CatchInvalidOperationException(() => message.AddTime3(default(Field), default, default, default, default), nameof(nativeImplementation.mdf_message_add_time3));
-            CatchInvalidOperationException(() => Message.Move(message, default, default, default), nameof(nativeImplementation.mdf_message_move));
-            CatchInvalidOperationException(() => message.Serialize(out _), nameof(nativeImplementation.mdf_message_serialize));
-            CatchInvalidOperationException(() => message.Deserialize("..."), nameof(nativeImplementation.mdf_message_deserialize));
-            CatchInvalidOperationException(() => message.Deserialize(default(ReadOnlySpan<byte>)), nameof(nativeImplementation.mdf_message_deserialize));
-            CatchInvalidOperationException(() => _ = message.FieldCount, nameof(nativeImplementation.mdf_message_get_num_fields));
+            Assert.IsFalse(message.AddInt64(default(uint), default, default));
+            Assert.IsFalse(message.AddInt64(default(Field), default, default));
+            Assert.IsFalse(message.AddUInt64(default(uint), default, default));
+            Assert.IsFalse(message.AddUInt64(default(Field), default, default));
+            Assert.IsFalse(message.AddString(default(uint), default(string), default));
+            Assert.IsFalse(message.AddString(default(Field), default(string), default));
+            Assert.IsFalse(message.AddString(default(uint), default(ReadOnlySpan<byte>), default));
+            Assert.IsFalse(message.AddString(default(Field), default(ReadOnlySpan<byte>), default));
+            Assert.IsFalse(message.AddDate(default(uint), default, default, default));
+            Assert.IsFalse(message.AddDate(default(Field), default, default, default));
+            Assert.IsFalse(message.AddTime2(default(uint), default, default, default, default));
+            Assert.IsFalse(message.AddTime2(default(Field), default, default, default, default));
+            Assert.IsFalse(message.AddTime3(default(uint), default, default, default, default));
+            Assert.IsFalse(message.AddTime3(default(Field), default, default, default, default));
+            Assert.IsFalse(Message.Move(message, default, default, default));
+            Assert.IsFalse(message.Serialize(out _));
+            Assert.IsFalse(message.Deserialize("..."));
+            Assert.IsFalse(message.Deserialize(default(ReadOnlySpan<byte>)));
+        }
+
+        [TestMethod]
+        public unsafe void PropertyDoesNotThrowWhenNativeFunctionIsMissingTest()
+        {
+            NativeImplementation nativeImplementation = new(default)
+            {
+                mdf_message_set_property = default,
+                mdf_message_get_num_fields = default
+            };
+
+            using Message message = new(nativeImplementation)
+            {
+                Delay = 1
+            };
+            Assert.AreEqual(default, message.Delay);
+            Assert.AreEqual(default, message.FieldCount);
 
             //The mdf_message_set_compression_level and mdf_message_set_utf8_validation in libmdf-1.0.25 should be used
-            message.CompressionLevel = CompressionLevel.Z_BEST_COMPRESSION;
+            const CompressionLevel CompressionLevel = CompressionLevel.Z_BEST_COMPRESSION;
+            message.CompressionLevel = CompressionLevel;
             message.Utf8Validation = false;
             //...assuming they exist in the installed native library
             nativeImplementation.mdf_message_set_compression_level = default;
             nativeImplementation.mdf_message_set_utf8_validation = default;
-            CatchInvalidOperationException(() => message.CompressionLevel = CompressionLevel.Z_NO_COMPRESSION, 
-                $"{nameof(nativeImplementation.mdf_message_set_property)} or {nameof(nativeImplementation.mdf_message_set_compression_level)}");
-            CatchInvalidOperationException(() => message.Utf8Validation = true,
-                $"{nameof(nativeImplementation.mdf_message_set_property)} or {nameof(nativeImplementation.mdf_message_set_utf8_validation)}");
-
-            static void CatchInvalidOperationException(Action action, string missingFunctionName)
-            {
-                try
-                {
-                    action();
-                    Assert.Fail($"No expected {nameof(InvalidOperationException)} was thrown.");
-                }
-                catch (InvalidOperationException ex)
-                {
-                    Assert.AreEqual($"The installed version of the native library doesn't include the {missingFunctionName} function.", ex.Message);
-                }
-            }
+            message.CompressionLevel = CompressionLevel.Z_NO_COMPRESSION;
+            message.Utf8Validation = true;
+            _nativeImplementation.Verify(x => x.mdf_message_set_compression_level(It.IsAny<IntPtr>(), (int)CompressionLevel), Times.Once);
+            _nativeImplementation.Verify(x => x.mdf_message_set_utf8_validation(It.IsAny<IntPtr>(), 0), Times.Once);
         }
 
         private static void Compare(string expectedValue, IntPtr actualValue)

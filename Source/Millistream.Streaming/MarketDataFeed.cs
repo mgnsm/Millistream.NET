@@ -303,28 +303,14 @@ namespace Millistream.Streaming
         /// <summary>
         /// Gets the intended delay of the current message if delay-mode have been activated by setting the <see cref="HandleDelay"/> property. Note that this is the intended delay of the message and not necessarily the real delay, network latency, server latency and so on are not included.
         /// </summary>
-        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_get_delay function.</exception>
-        public byte Delay
-        {
-            get
-            {
-                Message.ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_get_delay, nameof(_nativeImplementation.mdf_get_delay));
-                return _nativeImplementation.mdf_get_delay(_feedHandle);
-            }
-        }
+        /// <remarks>The corresponding native function is mdf_get_delay.</remarks>
+        public byte Delay => _nativeImplementation.mdf_get_delay != default ? _nativeImplementation.mdf_get_delay(_feedHandle) : default;
 
         /// <summary>
         /// Gets the message class of the current received message.
         /// </summary>
-        /// <exception cref="InvalidOperationException">The installed version of the native library doesn't include the mdf_get_mclass function.</exception>
-        public ulong MessageClass
-        {
-            get
-            {
-                Message.ThrowIfNativeFunctionIsMissing(_nativeImplementation.mdf_get_mclass, nameof(_nativeImplementation.mdf_get_mclass));
-                return _nativeImplementation.mdf_get_mclass(_feedHandle);
-            }
-        }
+        /// <remarks>The corresponding native function is mdf_get_mclass.</remarks>
+        public ulong MessageClass => _nativeImplementation.mdf_get_mclass != default ? _nativeImplementation.mdf_get_mclass(_feedHandle) : default;
         #endregion
 
         #region Methods
