@@ -476,117 +476,70 @@ namespace Millistream.Streaming.UnitTests
             new Message().Deserialize(string.Empty);
 
         [TestMethod]
-        [ExpectedException(typeof(ObjectDisposedException))]
-        public void CannotGetCompressionLevelAfterDisposeTest() => _ = GetDisposedMessage().CompressionLevel;
-
-        [TestMethod]
-        [ExpectedException(typeof(ObjectDisposedException))]
-        public void CannotSetCompressionLevelAfterDisposeTest() => GetDisposedMessage().CompressionLevel = CompressionLevel.Z_BEST_COMPRESSION;
-
-        [TestMethod]
-        [ExpectedException(typeof(ObjectDisposedException))]
-        public void CannotGetCountAfterDisposeTest() => _ = GetDisposedMessage().Count;
-
-        [TestMethod]
-        [ExpectedException(typeof(ObjectDisposedException))]
-        public void CannotGetActiveCountAfterDisposeTest() => _ = GetDisposedMessage().ActiveCount;
-
-        [TestMethod]
-        [ExpectedException(typeof(ObjectDisposedException))]
-        public void CannotGetFieldCountAfterDisposeTest() => _ = GetDisposedMessage().FieldCount;
-
-        [TestMethod]
-        [ExpectedException(typeof(ObjectDisposedException))]
-        public void CannotGetUtf8ValidationAfterDisposeTest() => _ = GetDisposedMessage().Utf8Validation;
-
-        [TestMethod]
-        [ExpectedException(typeof(ObjectDisposedException))]
-        public void CannotSetUtf8ValidationAfterDisposeTest() => GetDisposedMessage().Utf8Validation = false;
-
-        [TestMethod]
-        [ExpectedException(typeof(ObjectDisposedException))]
-        public void CannotGetDelayAfterDisposeTest() => _ = GetDisposedMessage().Delay;
-
-        [TestMethod]
-        [ExpectedException(typeof(ObjectDisposedException))]
-        public void CannotSetDelayAfterDiposeTest() => GetDisposedMessage().Delay = 1;
-
-        [TestMethod]
-        public void CannotCallMethodsAfterDisposeTest()
+        public void MethodsReturnFalseAfterDisposeTest()
         {
-            Message disposedMessage = GetDisposedMessage();
+            Message disposedMessage = new();
+            disposedMessage.Dispose();
 
-            CatchObjectDisposedException(() => disposedMessage.Add(1, 1));
-            CatchObjectDisposedException(() => disposedMessage.Add(1, MessageReference.MDF_M_REQUEST));
+            Assert.IsFalse(disposedMessage.Add(1, 1));
+            Assert.IsFalse(disposedMessage.Add(1, MessageReference.MDF_M_REQUEST));
 
-            CatchObjectDisposedException(() => disposedMessage.AddNumeric(1, StringConstants.RequestTypes.MDF_RT_IMAGE));
-            CatchObjectDisposedException(() => disposedMessage.AddNumeric(Field.MDF_F_AVERAGE, "1.1"));
+            Assert.IsFalse(disposedMessage.AddNumeric(1, StringConstants.RequestTypes.MDF_RT_IMAGE));
+            Assert.IsFalse(disposedMessage.AddNumeric(Field.MDF_F_AVERAGE, "1.1"));
             byte[] bytes = Encoding.UTF8.GetBytes("1.1");
-            CatchObjectDisposedException(() => disposedMessage.AddNumeric(1, bytes));
-            CatchObjectDisposedException(() => disposedMessage.AddNumeric(Field.MDF_F_AVERAGE, bytes));
+            Assert.IsFalse(disposedMessage.AddNumeric(1, bytes));
+            Assert.IsFalse(disposedMessage.AddNumeric(Field.MDF_F_AVERAGE, bytes));
 
-            CatchObjectDisposedException(() => disposedMessage.AddInt64(1, -12345, 2));
-            CatchObjectDisposedException(() => disposedMessage.AddInt64(Field.MDF_F_AVERAGE, -12345, 2));
+            Assert.IsFalse(disposedMessage.AddInt64(1, -12345, 2));
+            Assert.IsFalse(disposedMessage.AddInt64(Field.MDF_F_AVERAGE, -12345, 2));
 
-            CatchObjectDisposedException(() => disposedMessage.AddUInt64(1, 12345, 2));
-            CatchObjectDisposedException(() => disposedMessage.AddUInt64(Field.MDF_F_AVERAGE, 12345, 2));
+            Assert.IsFalse(disposedMessage.AddUInt64(1, 12345, 2));
+            Assert.IsFalse(disposedMessage.AddUInt64(Field.MDF_F_AVERAGE, 12345, 2));
 
-            CatchObjectDisposedException(() => disposedMessage.AddString(1, "abc"));
-            CatchObjectDisposedException(() => disposedMessage.AddString(1, "abc", 1));
-            CatchObjectDisposedException(() => disposedMessage.AddString(Field.MDF_F_REQUESTID, "abc"));
-            CatchObjectDisposedException(() => disposedMessage.AddString(Field.MDF_F_REQUESTID, "abc", 1));
+            Assert.IsFalse(disposedMessage.AddString(1, "abc"));
+            Assert.IsFalse(disposedMessage.AddString(1, "abc", 1));
+            Assert.IsFalse(disposedMessage.AddString(Field.MDF_F_REQUESTID, "abc"));
+            Assert.IsFalse(disposedMessage.AddString(Field.MDF_F_REQUESTID, "abc", 1));
             bytes = Encoding.UTF8.GetBytes("abc");
-            CatchObjectDisposedException(() => disposedMessage.AddString(1, bytes));
-            CatchObjectDisposedException(() => disposedMessage.AddString(1, bytes, 1));
-            CatchObjectDisposedException(() => disposedMessage.AddString(Field.MDF_F_REQUESTID, bytes));
-            CatchObjectDisposedException(() => disposedMessage.AddString(Field.MDF_F_REQUESTID, bytes, 1));
+            Assert.IsFalse(disposedMessage.AddString(1, bytes));
+            Assert.IsFalse(disposedMessage.AddString(1, bytes, 1));
+            Assert.IsFalse(disposedMessage.AddString(Field.MDF_F_REQUESTID, bytes));
+            Assert.IsFalse(disposedMessage.AddString(Field.MDF_F_REQUESTID, bytes, 1));
 
 
-            CatchObjectDisposedException(() => disposedMessage.AddDate(1, "2020-12-30"));
-            CatchObjectDisposedException(() => disposedMessage.AddDate(Field.MDF_F_DATE, "2020-12-30"));
-            CatchObjectDisposedException(() => disposedMessage.AddDate(1, 2020, 12, 30));
-            CatchObjectDisposedException(() => disposedMessage.AddDate(Field.MDF_F_DATE, 2020, 12, 30));
+            Assert.IsFalse(disposedMessage.AddDate(1, "2020-12-30"));
+            Assert.IsFalse(disposedMessage.AddDate(Field.MDF_F_DATE, "2020-12-30"));
+            Assert.IsFalse(disposedMessage.AddDate(1, 2020, 12, 30));
+            Assert.IsFalse(disposedMessage.AddDate(Field.MDF_F_DATE, 2020, 12, 30));
             bytes = Encoding.UTF8.GetBytes("2020-12-30");
-            CatchObjectDisposedException(() => disposedMessage.AddDate(1, bytes));
-            CatchObjectDisposedException(() => disposedMessage.AddDate(Field.MDF_F_DATE, bytes));
+            Assert.IsFalse(disposedMessage.AddDate(1, bytes));
+            Assert.IsFalse(disposedMessage.AddDate(Field.MDF_F_DATE, bytes));
 
-            CatchObjectDisposedException(() => disposedMessage.AddTime(1, "16:30:30"));
-            CatchObjectDisposedException(() => disposedMessage.AddTime(Field.MDF_F_TIME, "16:30:30"));
+            Assert.IsFalse(disposedMessage.AddTime(1, "16:30:30"));
+            Assert.IsFalse(disposedMessage.AddTime(Field.MDF_F_TIME, "16:30:30"));
             bytes = Encoding.UTF8.GetBytes("16:30:30");
-            CatchObjectDisposedException(() => disposedMessage.AddTime(1, bytes));
-            CatchObjectDisposedException(() => disposedMessage.AddTime(Field.MDF_F_TIME, bytes));
+            Assert.IsFalse(disposedMessage.AddTime(1, bytes));
+            Assert.IsFalse(disposedMessage.AddTime(Field.MDF_F_TIME, bytes));
 
-            CatchObjectDisposedException(() => disposedMessage.AddTime2(1, 16, 30, 30, 999));
-            CatchObjectDisposedException(() => disposedMessage.AddTime2(Field.MDF_F_TIME, 16, 30, 30, 999));
+            Assert.IsFalse(disposedMessage.AddTime2(1, 16, 30, 30, 999));
+            Assert.IsFalse(disposedMessage.AddTime2(Field.MDF_F_TIME, 16, 30, 30, 999));
 
-            CatchObjectDisposedException(() => disposedMessage.AddTime3(1, 16, 30, 30, 999999999));
-            CatchObjectDisposedException(() => disposedMessage.AddTime3(Field.MDF_F_TIME, 16, 30, 30, 999999999));
+            Assert.IsFalse(disposedMessage.AddTime3(1, 16, 30, 30, 999999999));
+            Assert.IsFalse(disposedMessage.AddTime3(Field.MDF_F_TIME, 16, 30, 30, 999999999));
 
-            CatchObjectDisposedException(() => disposedMessage.AddList(1, "1"));
-            CatchObjectDisposedException(() => disposedMessage.AddList(Field.MDF_F_INSREFLIST, "1"));
+            Assert.IsFalse(disposedMessage.AddList(1, "1"));
+            Assert.IsFalse(disposedMessage.AddList(Field.MDF_F_INSREFLIST, "1"));
             bytes = Encoding.UTF8.GetBytes("1");
-            CatchObjectDisposedException(() => disposedMessage.AddList(1, bytes));
-            CatchObjectDisposedException(() => disposedMessage.AddList(Field.MDF_F_INSREFLIST, bytes));
+            Assert.IsFalse(disposedMessage.AddList(1, bytes));
+            Assert.IsFalse(disposedMessage.AddList(Field.MDF_F_INSREFLIST, bytes));
 
-            CatchObjectDisposedException(() => disposedMessage.Reset());
+            Assert.IsFalse(disposedMessage.Delete());
 
-            CatchObjectDisposedException(() => disposedMessage.Delete());
+            Assert.IsFalse(disposedMessage.Serialize(out IntPtr _));
 
-            CatchObjectDisposedException(() => disposedMessage.Serialize(out IntPtr _));
-
-            CatchObjectDisposedException(() => disposedMessage.Deserialize("ABC"));
-            CatchObjectDisposedException(() => disposedMessage.Deserialize(new IntPtr(123)));
-            CatchObjectDisposedException(() => disposedMessage.Deserialize(Encoding.ASCII.GetBytes("ABC")));
-
-            static void CatchObjectDisposedException(Action action)
-            {
-                try
-                {
-                    action();
-                    Assert.Fail($"No expected {nameof(ObjectDisposedException)} was thrown.");
-                }
-                catch (ObjectDisposedException) { }
-            }
+            Assert.IsFalse(disposedMessage.Deserialize("ABC"));
+            Assert.IsFalse(disposedMessage.Deserialize(new IntPtr(123)));
+            Assert.IsFalse(disposedMessage.Deserialize(Encoding.ASCII.GetBytes("ABC")));
         }
 
         [TestMethod]
@@ -657,13 +610,6 @@ namespace Millistream.Streaming.UnitTests
             byte[] bytes = new byte[expectedValue.Length];
             Marshal.Copy(actualValue, bytes, 0, expectedValue.Length);
             Assert.AreEqual(expectedValue, Encoding.ASCII.GetString(bytes));
-        }
-
-        private static Message GetDisposedMessage()
-        {
-            Message message = new();
-            message.Dispose();
-            return message;
         }
     }
 }
