@@ -484,12 +484,11 @@ namespace Millistream.Streaming
         /// </summary>
         /// <param name="servers">A comma separated list of 'host:port' pairs, where 'host' can be a DNS host name or an ip address (IPv6 addressed must be enclosed in brackets).</param>
         /// <returns><see langword="true" /> if a connection has been set up or <see langword="false" /> if a connection attempt failed with every server on the list.</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="servers"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
         /// <remarks>The corresponding native function is mdf_connect.</remarks>
         public bool Connect(string servers)
         {
             if (string.IsNullOrEmpty(servers))
-                throw new ArgumentNullException(nameof(servers));
+                return false;
 
             int length = Encoding.UTF8.GetMaxByteCount(servers.Length);
             byte[] bytes = ArrayPool<byte>.Shared.Rent(length + 1);
@@ -524,29 +523,18 @@ namespace Millistream.Streaming
         /// </summary>
         /// <param name="message">The managed message handle.</param>
         /// <returns><see langword="true" /> if there were no errors detected when sending the data, or <see langword="false" /> if an error was detected (such as not connected to any server). Due to the nature of TCP/IP, a successful return code does not guarantee that the server has received the messages.</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="message"/> is <see langword="null" />.</exception>
         /// <remarks>The corresponding native function is mdf_message_send.</remarks>
-        public bool Send(Message message)
-        {
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
-
-            return _nativeImplementation.mdf_message_send(_feedHandle, message.Handle) == 1;
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Send(Message message) =>
+            message != null && _nativeImplementation.mdf_message_send(_feedHandle, message.Handle) == 1;
 
         /// <summary>
         /// Calls <see cref="Send(Message)"/> to send all the active messages in a managed message handle to the server if <paramref name="message"/> is a <see cref="Message"/>. For any other implementation of <see cref="IMessage" />, the method always returns <see langword="false" />.
         /// </summary>
         /// <param name="message">An implementation of the managed message handle.</param>
         /// <returns><see langword="true" /> if <paramref name="message"/> is a <see cref="Message"/> and there were no errors detected when sending the data, or <see langword="false" /> if an error was detected or if <paramref name="message"/> is not a <see cref="Message"/>.</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="message"/> is <see langword="null" />.</exception>
-        bool IMarketDataFeed<TCallbackUserData, TStatusCallbackUserData>.Send(IMessage message)
-        {
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
-
-            return message is Message messageWithHandle && Send(messageWithHandle);
-        }
+        bool IMarketDataFeed<TCallbackUserData, TStatusCallbackUserData>.Send(IMessage message) =>
+            message is Message messageWithHandle && Send(messageWithHandle);
 
         /// <summary>
         /// Releases any resources used by the <see cref="MarketDataFeed{TCallbackData,TStatusCallbackData}"/> instance.

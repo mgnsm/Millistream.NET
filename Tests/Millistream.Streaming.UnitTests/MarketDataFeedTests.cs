@@ -638,6 +638,9 @@ namespace Millistream.Streaming.UnitTests
             using MarketDataFeed mdf = new();
             Assert.IsTrue(mdf.Connect(Servers));
             nativeImplementation.Verify(expression, Times.Once);
+
+            Assert.IsFalse(mdf.Connect(default));
+            Assert.IsFalse(mdf.Connect(string.Empty));
         }
 
         [TestMethod]
@@ -674,6 +677,7 @@ namespace Millistream.Streaming.UnitTests
             using MarketDataFeed mdf = new();
             Assert.IsTrue(mdf.Send(message));
             nativeImplementation.Verify(expression, Times.Once);
+            Assert.IsFalse(mdf.Send(default));
 
             IMarketDataFeed<object, object> iMdf = mdf;
             Assert.IsTrue(iMdf.Send(message));
@@ -682,6 +686,7 @@ namespace Millistream.Streaming.UnitTests
             Assert.IsTrue(iMdf.Send(iMessage));
             nativeImplementation.Verify(expression, Times.Exactly(3));
             Assert.IsFalse(iMdf.Send(new Mock<IMessage>().Object));
+            Assert.IsFalse(iMdf.Send(default));
         }
 
         [TestMethod]

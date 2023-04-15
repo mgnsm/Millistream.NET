@@ -488,16 +488,11 @@ namespace Millistream.Streaming
         /// <param name="sourceInsref">The instrument reference of the messages to be moved.</param>
         /// <param name="destinationInsRef">The new instrument reference of the moved or modified messages.</param>
         /// <returns><see langword="true" /> if the operation was successfull, or <see langword="false" /> if it failed.</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="source"/> is <see langword="null" />.</exception>
         /// <remarks>The corresponding native function is mdf_message_move.</remarks>
-        public static bool Move(Message source, Message destination, ulong sourceInsref, ulong destinationInsRef)
-        {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
-
-            return source._nativeImplementation.mdf_message_move != default 
-                && source._nativeImplementation.mdf_message_move(source._handle, destination?._handle ?? IntPtr.Zero, sourceInsref, destinationInsRef) == 1;
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool Move(Message source, Message destination, ulong sourceInsref, ulong destinationInsRef) => source != null
+            && source._nativeImplementation.mdf_message_move != default
+            && source._nativeImplementation.mdf_message_move(source._handle, destination?._handle ?? IntPtr.Zero, sourceInsref, destinationInsRef) == 1;
 
         /// <summary>
         /// Serializes the message chain in the message handle and produces a base64 encoded string to the address pointed to by <paramref name="result"/>. It's the responsibility of the caller to free the produced unmanaged string.
@@ -517,16 +512,11 @@ namespace Millistream.Streaming
         /// </summary>
         /// <param name="data">A base64 encoded (serialized) message chain.</param>
         /// <returns><see langword="true" /> if the message chain was successfully deserialized, or <see langword="false" /> if the deserialization failed (if so the current message chain in the message handler is left untouched).</returns>
-        /// <exception cref="ArgumentNullException"><paramref name="data"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
         /// <remarks>The corresponding native function is mdf_message_deserialize.</remarks>
-        public bool Deserialize(string data)
-        {
-            if (string.IsNullOrEmpty(data))
-                throw new ArgumentNullException(nameof(data));
-
-            return _nativeImplementation.mdf_message_deserialize_str != default &&
-                _nativeImplementation.mdf_message_deserialize_str(_handle, data) == 1;
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Deserialize(string data) => !string.IsNullOrEmpty(data) 
+            && _nativeImplementation.mdf_message_deserialize_str != default
+            && _nativeImplementation.mdf_message_deserialize_str(_handle, data) == 1;
 
         /// <summary>
         /// Deserializes a base64 encoded message chain and replaces the existing (if any) message chain in the message handle.
