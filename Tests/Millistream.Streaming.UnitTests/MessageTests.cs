@@ -393,6 +393,8 @@ namespace Millistream.Streaming.UnitTests
             _nativeImplementation.Setup(x => x.mdf_message_move(source.Handle, destination.Handle, SourceInsref, DestinationInsref)).Returns(0).Verifiable();
             Assert.IsFalse(Message.Move(source, destination, SourceInsref, DestinationInsref));
             _nativeImplementation.Verify();
+
+            Assert.IsFalse(Message.Move(null, new(), 1, 2));
         }
 
         [TestMethod]
@@ -426,6 +428,8 @@ namespace Millistream.Streaming.UnitTests
                 .Returns(1)
                 .Callback((IntPtr message, string data) => Assert.AreEqual(Data, data));
             using Message message = new();
+            Assert.IsFalse(message.Deserialize(default(string)));
+            Assert.IsFalse(message.Deserialize(string.Empty));
             Assert.IsTrue(message.Deserialize(Data));
             _nativeImplementation.Verify(x => x.mdf_message_deserialize_str(messageHandle, It.IsAny<string>()), Times.Once);
 
@@ -459,21 +463,6 @@ namespace Millistream.Streaming.UnitTests
         [TestMethod]
         [ExpectedException(typeof(ArgumentNullException))]
         public void CreateMessageWithEmptyNativeLibraryPathTest() => new Message(string.Empty);
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void MoveNullReferenceTest() =>
-            Message.Move(null, new(), 1, 2);
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void DeserializeNullReferenceTest() =>
-            new Message().Deserialize(default(string));
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void DeserializeEmptyStringTest() =>
-            new Message().Deserialize(string.Empty);
 
         [TestMethod]
         public void MethodsReturnFalseAfterDisposeTest()
