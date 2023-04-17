@@ -17,7 +17,7 @@ Feature proposals are generally limited to the functionality of the wrapped API 
 
 When submitting pull requests, please do:
 
-- Follow the [coding style](https://github.com/mgnsm/Millistream.NET/wiki/Coding-Style).
+- Follow the [coding style](https://github.com/mgnsm/Millistream.NET/tree/main/Documentation/coding-style.md).
 - Include tests when adding new features or if otherwise applicable.
 - Include a reference to the issue number in the commit message.
 - Target the `master` branch.
