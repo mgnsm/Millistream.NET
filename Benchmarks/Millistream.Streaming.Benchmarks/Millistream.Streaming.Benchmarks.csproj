@@ -1,18 +1,33 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFrameworks>net48;net6.0</TargetFrameworks>
-	<LangVersion>9.0</LangVersion>
-	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFrameworks>net48;net6.0;net7.0</TargetFrameworks>
+		<LangVersion>9.0</LangVersion>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.13.5" />
-  </ItemGroup>
+	<PropertyGroup>
+		<IsLinux Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">true</IsLinux>
+		<IsOSX Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' == 'true'">true</IsOSX>
+		<IsWindows Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">true</IsWindows>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(IsLinux)'=='true'">
+		<DefineConstants>Linux</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(IsOSX)'=='true'">
+		<DefineConstants>OSX</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(IsWindows)'=='true'">
+		<DefineConstants>Windows</DefineConstants>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\Source\Millistream.Streaming\Millistream.Streaming.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="BenchmarkDotNet" Version="0.13.5" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\Source\Millistream.Streaming\Millistream.Streaming.csproj" />
+	</ItemGroup>
 
 </Project>
