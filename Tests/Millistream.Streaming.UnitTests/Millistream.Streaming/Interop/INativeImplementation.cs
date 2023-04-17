@@ -18,7 +18,7 @@ namespace Millistream.Streaming.Interop
         int mdf_set_property(IntPtr handle, int option, IntPtr value);
         byte mdf_get_delay(IntPtr handle);
         ulong mdf_get_mclass(IntPtr handle);
-        int mdf_connect(IntPtr handle, IntPtr server);
+        int mdf_connect(IntPtr handle, string server);
         void mdf_disconnect(IntPtr handle);
         IntPtr mdf_message_create();
         void mdf_message_destroy(IntPtr message);

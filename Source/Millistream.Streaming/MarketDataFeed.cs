@@ -485,31 +485,9 @@ namespace Millistream.Streaming
         /// <param name="servers">A comma separated list of 'host:port' pairs, where 'host' can be a DNS host name or an ip address (IPv6 addressed must be enclosed in brackets).</param>
         /// <returns><see langword="true" /> if a connection has been set up or <see langword="false" /> if a connection attempt failed with every server on the list.</returns>
         /// <remarks>The corresponding native function is mdf_connect.</remarks>
-        public bool Connect(string servers)
-        {
-            if (string.IsNullOrEmpty(servers))
-                return false;
-
-            int length = Encoding.UTF8.GetMaxByteCount(servers.Length);
-            byte[] bytes = ArrayPool<byte>.Shared.Rent(length + 1);
-            try
-            {
-                unsafe
-                {
-                    fixed (char* c = servers)
-                    fixed (byte* b = bytes)
-                    {
-                        int bytesWritten = Encoding.UTF8.GetBytes(c, servers.Length, b, length);
-                        b[bytesWritten] = 0;
-                        return _nativeImplementation.mdf_connect(_feedHandle, (IntPtr)b) == 1;
-                    }
-                }
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(bytes);
-            }
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Connect(string servers) => !string.IsNullOrEmpty(servers) 
+            && _nativeImplementation.mdf_connect(_feedHandle, servers) == 1;
 
         /// <summary>
         /// Disconnect a connected API handle. Safe to call even if the handle is already disconnected.

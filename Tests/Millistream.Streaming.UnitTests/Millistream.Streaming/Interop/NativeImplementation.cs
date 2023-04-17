@@ -19,7 +19,7 @@ namespace Millistream.Streaming.Interop
         internal delegate*<IntPtr, MDF_OPTION, IntPtr, int> mdf_set_property;
         internal delegate*<IntPtr, byte> mdf_get_delay;
         internal delegate*<IntPtr, ulong> mdf_get_mclass;
-        internal delegate*<IntPtr, IntPtr, int> mdf_connect;
+        internal delegate*<IntPtr, string, int> mdf_connect;
         internal delegate*<IntPtr, void> mdf_disconnect;
         internal delegate*<IntPtr> mdf_message_create;
         internal delegate*<IntPtr, void> mdf_message_destroy;
@@ -122,7 +122,7 @@ namespace Millistream.Streaming.Interop
         private static int MdfSetProperty(IntPtr handle, MDF_OPTION option, IntPtr value) => Implementation.mdf_set_property(handle, (int)option, value);
         private static byte MdfGetDelay(IntPtr handle) => Implementation.mdf_get_delay(handle);
         private static ulong MdfGetMClass(IntPtr handle) => Implementation.mdf_get_mclass(handle);
-        private static int MdfConnect(IntPtr handle, IntPtr server) => Implementation.mdf_connect(handle, server);
+        private static int MdfConnect(IntPtr handle, string server) => Implementation.mdf_connect(handle, server);
         private static void MdfDisconnect(IntPtr handle) => Implementation.mdf_disconnect(handle);
         private static IntPtr MdfMessageCreate() => Implementation.mdf_message_create();
         private static void MdfMessageDestroy(IntPtr message) => Implementation.mdf_message_destroy(message);
