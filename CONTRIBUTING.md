@@ -1,7 +1,7 @@
 # Contribute
 You can contribute to Millistream.NET with issues and pull requests.
 
-The [Wiki](https://github.com/mgnsm/Millistream.NET/wiki/Build-and-Test) contains instructions on how to build and test the source code.
+Instructions on how to build and test the source code can be found [here](https://github.com/mgnsm/Millistream.NET/tree/main/Documentation/build-and-test.md).
 
 ## Bug Reports
 If you have found a bug, please [create an issue](https://docs.github.com/en/github/managing-your-work-on-github/creating-an-issue) where you clearly describe the bug, the expected and actual behaviour, and how to reproduce it.
