@@ -22,7 +22,7 @@ namespace Millistream.Streaming.Interop
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, MDF_OPTION, IntPtr, int> mdf_set_property;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, byte> mdf_get_delay;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, ulong> mdf_get_mclass;
-        internal readonly delegate* unmanaged[Cdecl]<IntPtr, IntPtr, int> mdf_connect;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, string, int> mdf_connect;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, void> mdf_disconnect;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr> mdf_message_create;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, void> mdf_message_destroy;
@@ -98,7 +98,7 @@ namespace Millistream.Streaming.Interop
             mdf_get_ulong_property = (delegate* unmanaged[Cdecl]<IntPtr, MDF_OPTION, ref ulong, int>)nativeLibrary.GetExport(lib, nameof(mdf_get_property));
             mdf_get_long_property = (delegate* unmanaged[Cdecl]<IntPtr, MDF_OPTION, ref long, int>)nativeLibrary.GetExport(lib, nameof(mdf_get_property));
             mdf_set_property = (delegate* unmanaged[Cdecl]<IntPtr, MDF_OPTION, IntPtr, int>)nativeLibrary.GetExport(lib, nameof(mdf_set_property));
-            mdf_connect = (delegate* unmanaged[Cdecl]<IntPtr, IntPtr, int>)nativeLibrary.GetExport(lib, nameof(mdf_connect));
+            mdf_connect = (delegate* unmanaged[Cdecl]<IntPtr, string, int>)nativeLibrary.GetExport(lib, nameof(mdf_connect));
             mdf_disconnect = (delegate* unmanaged[Cdecl]<IntPtr, void>)nativeLibrary.GetExport(lib, nameof(mdf_disconnect));
             mdf_message_create = (delegate* unmanaged[Cdecl]<IntPtr>)nativeLibrary.GetExport(lib, nameof(mdf_message_create));
             mdf_message_destroy = (delegate* unmanaged[Cdecl]<IntPtr, void>)nativeLibrary.GetExport(lib, nameof(mdf_message_destroy));

@@ -629,9 +629,8 @@ namespace Millistream.Streaming.UnitTests
             IntPtr feedHandle = new(123);
             const string Servers = "host.server.com:9100";
             nativeImplementation.Setup(x => x.mdf_create()).Returns(feedHandle);
-            Expression<Func<INativeImplementation, int>> expression = x => x.mdf_connect(feedHandle, It.IsAny<IntPtr>());
+            Expression<Func<INativeImplementation, int>> expression = x => x.mdf_connect(feedHandle, Servers);
             nativeImplementation.Setup(expression)
-                .Callback((IntPtr handle, IntPtr server) => Compare(Servers, server))
                 .Returns(1);
             NativeImplementation.Implementation = nativeImplementation.Object;
 
