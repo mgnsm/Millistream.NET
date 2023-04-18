@@ -10,5 +10,9 @@ namespace Millistream.Streaming.Benchmarks.Message
         [Benchmark]
         public bool SetMessageDelayUsingDllImport() =>
             DllImports.mdf_message_set_property(_messageHandle, MDF_MSG_OPTION.MDF_MSG_OPT_DELAY, 1) == 1;
+
+        [Benchmark]
+        public unsafe bool SetMessageDelayUsingFunctionPointer() =>
+            FunctionPointers.mdf_message_set_property(_messageHandle, MDF_MSG_OPTION.MDF_MSG_OPT_DELAY, 1) == 1;
     }
 }

@@ -5,6 +5,7 @@
 		<TargetFrameworks>net48;net6.0;net7.0</TargetFrameworks>
 		<LangVersion>9.0</LangVersion>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 	</PropertyGroup>
 
 	<PropertyGroup>

@@ -12,5 +12,9 @@ namespace Millistream.Streaming.Benchmarks.Message
         [Benchmark]
         public void SetCompressionLevelUsingDllImport() =>
             DllImports.mdf_message_set_property(_messageHandle, MDF_MSG_OPTION.MDF_MSG_OPT_COMPRESSION, (int)Level);
+
+        [Benchmark]
+        public unsafe void SetCompressionLevelUsingFunctionPointer() =>
+            FunctionPointers.mdf_message_set_property(_messageHandle, MDF_MSG_OPTION.MDF_MSG_OPT_COMPRESSION, (int)Level);
     }
 }

@@ -10,5 +10,9 @@ namespace Millistream.Streaming.Benchmarks.Message
         [Benchmark]
         public bool SetUtf8ValidationUsingDllImport() => 
             DllImports.mdf_message_set_property(_messageHandle, MDF_MSG_OPTION.MDF_MSG_OPT_UTF8, 0) == 1;
+
+        [Benchmark]
+        public unsafe bool SetUtf8ValidationUsingFunctionPointer() =>
+            FunctionPointers.mdf_message_set_property(_messageHandle, MDF_MSG_OPTION.MDF_MSG_OPT_UTF8, 0) == 1;
     }
 }

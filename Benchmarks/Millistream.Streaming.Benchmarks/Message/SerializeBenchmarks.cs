@@ -3,6 +3,7 @@ using System;
 
 namespace Millistream.Streaming.Benchmarks.Message
 {
+    [ReturnValueValidator]
     public class SerializeBenchmarks : MessageBenchmarks
     {
         [Benchmark(Baseline = true)]
@@ -13,6 +14,13 @@ namespace Millistream.Streaming.Benchmarks.Message
         {
             IntPtr result = IntPtr.Zero;
             return DllImports.mdf_message_serialize(_messageHandle, ref result) == 1;
+        }
+
+        [Benchmark]
+        public unsafe bool SerializeUsingFunctionPointer()
+        {
+            IntPtr result = IntPtr.Zero;
+            return FunctionPointers.mdf_message_serialize(_messageHandle, ref result) == 1;
         }
     }
 }

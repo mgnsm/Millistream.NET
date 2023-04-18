@@ -36,11 +36,25 @@ namespace Millistream.Streaming.Benchmarks.Message
             _ = DllImports.mdf_message_add_string(_messageHandle, Tag, "åäöÅÄÖæß") == 1;
             _ = DllImports.mdf_message_add_string(_messageHandle, Tag, "12-------P----") == 1;
             _ = DllImports.mdf_message_add_string(_messageHandle, Tag, "46--X-B--P-3--") == 1;
-            _ = DllImports.mdf_message_add_string(_messageHandle, Tag, default) == 1;
+            _ = DllImports.mdf_message_add_string(_messageHandle, Tag, default(string)) == 1;
             DllImports.mdf_message_reset(_messageHandle);
         }
 
         [Benchmark(OperationsPerInvoke = 7)]
+        public unsafe void AddStringUsingFunctionPointer()
+        {
+            _ = FunctionPointers.mdf_message_add(_messageHandle, 0, 0) == 1;
+            _ = FunctionPointers.mdf_message_add_string_str(_messageHandle, Tag, "Foo Bar") == 1;
+            _ = FunctionPointers.mdf_message_add_string_str(_messageHandle, Tag, "aaaBBBccc") == 1;
+            _ = FunctionPointers.mdf_message_add_string_str(_messageHandle, Tag, "SE0000108656") == 1;
+            _ = FunctionPointers.mdf_message_add_string_str(_messageHandle, Tag, "åäöÅÄÖæß") == 1;
+            _ = FunctionPointers.mdf_message_add_string_str(_messageHandle, Tag, "12-------P----") == 1;
+            _ = FunctionPointers.mdf_message_add_string_str(_messageHandle, Tag, "46--X-B--P-3--") == 1;
+            _ = FunctionPointers.mdf_message_add_string_str(_messageHandle, Tag, default) == 1;
+            FunctionPointers.mdf_message_reset(_messageHandle);
+        }
+
+        [Benchmark(Baseline = true, OperationsPerInvoke = 7)]
         public void AddStringBytes()
         {
             _ = _message.Add(0, 0);
@@ -52,6 +66,48 @@ namespace Millistream.Streaming.Benchmarks.Message
             _ = _message.AddString(Tag, s_46XBP3);
             _ = _message.AddString(Tag, default(ReadOnlySpan<byte>));
             _message.Reset();
+        }
+
+        [Benchmark(OperationsPerInvoke = 7)]
+        public unsafe void AddStringBytesUsingDllImport()
+        {
+            _ = DllImports.mdf_message_add(_messageHandle, 0, 0) == 1;
+            fixed (byte* ptr = s_FooBar)
+                _ = DllImports.mdf_message_add_string(_messageHandle, Tag, (IntPtr)ptr);
+            fixed (byte* ptr = s_aaaBBBccc)
+                _ = DllImports.mdf_message_add_string(_messageHandle, Tag, (IntPtr)ptr);
+            fixed (byte* ptr = s_SE0000108656)
+                _ = DllImports.mdf_message_add_string(_messageHandle, Tag, (IntPtr)ptr);
+            fixed (byte* ptr = s_åäöÅÄÖ)
+                _ = DllImports.mdf_message_add_string(_messageHandle, Tag, (IntPtr)ptr);
+            fixed (byte* ptr = s_12P)
+                _ = DllImports.mdf_message_add_string(_messageHandle, Tag, (IntPtr)ptr);
+            fixed (byte* ptr = s_46XBP3)
+                _ = DllImports.mdf_message_add_string(_messageHandle, Tag, (IntPtr)ptr);
+            fixed (byte* ptr = default(ReadOnlySpan<byte>))
+                _ = DllImports.mdf_message_add_string(_messageHandle, Tag, (IntPtr)ptr);
+            DllImports.mdf_message_reset(_messageHandle);
+        }
+
+        [Benchmark(OperationsPerInvoke = 7)]
+        public unsafe void AddStringBytesUsingFunctionPointer()
+        {
+            _ = FunctionPointers.mdf_message_add(_messageHandle, 0, 0) == 1;
+            fixed (byte* ptr = s_FooBar)
+                _ = FunctionPointers.mdf_message_add_string(_messageHandle, Tag, (IntPtr)ptr);
+            fixed (byte* ptr = s_aaaBBBccc)
+                _ = FunctionPointers.mdf_message_add_string(_messageHandle, Tag, (IntPtr)ptr);
+            fixed (byte* ptr = s_SE0000108656)
+                _ = FunctionPointers.mdf_message_add_string(_messageHandle, Tag, (IntPtr)ptr);
+            fixed (byte* ptr = s_åäöÅÄÖ)
+                _ = FunctionPointers.mdf_message_add_string(_messageHandle, Tag, (IntPtr)ptr);
+            fixed (byte* ptr = s_12P)
+                _ = FunctionPointers.mdf_message_add_string(_messageHandle, Tag, (IntPtr)ptr);
+            fixed (byte* ptr = s_46XBP3)
+                _ = FunctionPointers.mdf_message_add_string(_messageHandle, Tag, (IntPtr)ptr);
+            fixed (byte* ptr = default(ReadOnlySpan<byte>))
+                _ = FunctionPointers.mdf_message_add_string(_messageHandle, Tag, (IntPtr)ptr);
+            FunctionPointers.mdf_message_reset(_messageHandle);
         }
 
         [Benchmark(OperationsPerInvoke = 7)]
@@ -78,11 +134,25 @@ namespace Millistream.Streaming.Benchmarks.Message
             _ = DllImports.mdf_message_add_string2(_messageHandle, Tag, "åäöÅÄÖæß", 8);
             _ = DllImports.mdf_message_add_string2(_messageHandle, Tag, "12-------P----", 14);
             _ = DllImports.mdf_message_add_string2(_messageHandle, Tag, "46--X-B--P-3--", 14);
-            _ = DllImports.mdf_message_add_string2(_messageHandle, Tag, default, 10);
+            _ = DllImports.mdf_message_add_string2(_messageHandle, Tag, default(string), 10);
             DllImports.mdf_message_reset(_messageHandle);
         }
 
-        [Benchmark(Baseline = true, OperationsPerInvoke = 7)]
+        [Benchmark(OperationsPerInvoke = 7)]
+        public unsafe void AddString2UsingFunctionPointer()
+        {
+            _ = FunctionPointers.mdf_message_add(_messageHandle, 0, 0) == 1;
+            _ = FunctionPointers.mdf_message_add_string2_str(_messageHandle, Tag, "Foo Bar", 7);
+            _ = FunctionPointers.mdf_message_add_string2_str(_messageHandle, Tag, "aaaBBBccc", 9);
+            _ = FunctionPointers.mdf_message_add_string2_str(_messageHandle, Tag, "SE0000108656", 12);
+            _ = FunctionPointers.mdf_message_add_string2_str(_messageHandle, Tag, "åäöÅÄÖæß", 8);
+            _ = FunctionPointers.mdf_message_add_string2_str(_messageHandle, Tag, "12-------P----", 14);
+            _ = FunctionPointers.mdf_message_add_string2_str(_messageHandle, Tag, "46--X-B--P-3--", 14);
+            _ = FunctionPointers.mdf_message_add_string2_str(_messageHandle, Tag, default, 10);
+            FunctionPointers.mdf_message_reset(_messageHandle);
+        }
+
+        [Benchmark(OperationsPerInvoke = 6)]
         public void AddString2Bytes()
         {
             _ = _message.Add(0, 0);
@@ -92,8 +162,45 @@ namespace Millistream.Streaming.Benchmarks.Message
             _ = _message.AddString(Tag, s_åäöÅÄÖ, 21);
             _ = _message.AddString(Tag, s_12P, 14);
             _ = _message.AddString(Tag, s_46XBP3, 14);
-            _ = _message.AddString(Tag, default(ReadOnlySpan<byte>));
             _message.Reset();
+        }
+
+        [Benchmark(OperationsPerInvoke = 6)]
+        public unsafe void AddString2BytesUsingDllImport()
+        {
+            _ = DllImports.mdf_message_add(_messageHandle, 0, 0) == 1;
+            fixed (byte* ptr = s_FooBar)
+                _ = DllImports.mdf_message_add_string2(_messageHandle, Tag, (IntPtr)ptr, 7);
+            fixed (byte* ptr = s_aaaBBBccc)
+                _ = DllImports.mdf_message_add_string2(_messageHandle, Tag, (IntPtr)ptr, 9);
+            fixed (byte* ptr = s_SE0000108656)
+                _ = DllImports.mdf_message_add_string2(_messageHandle, Tag, (IntPtr)ptr, 12);
+            fixed (byte* ptr = s_åäöÅÄÖ)
+                _ = DllImports.mdf_message_add_string2(_messageHandle, Tag, (IntPtr)ptr, 21);
+            fixed (byte* ptr = s_12P)
+                _ = DllImports.mdf_message_add_string2(_messageHandle, Tag, (IntPtr)ptr, 14);
+            fixed (byte* ptr = s_46XBP3)
+                _ = DllImports.mdf_message_add_string2(_messageHandle, Tag, (IntPtr)ptr, 14);
+            DllImports.mdf_message_reset(_messageHandle);
+        }
+
+        [Benchmark(OperationsPerInvoke = 6)]
+        public unsafe void AddString2BytesUsingFunctionPointer()
+        {
+            _ = FunctionPointers.mdf_message_add(_messageHandle, 0, 0) == 1;
+            fixed (byte* ptr = s_FooBar)
+                _ = FunctionPointers.mdf_message_add_string2(_messageHandle, Tag, (IntPtr)ptr, 7);
+            fixed (byte* ptr = s_aaaBBBccc)
+                _ = FunctionPointers.mdf_message_add_string2(_messageHandle, Tag, (IntPtr)ptr, 9);
+            fixed (byte* ptr = s_SE0000108656)
+                _ = FunctionPointers.mdf_message_add_string2(_messageHandle, Tag, (IntPtr)ptr, 12);
+            fixed (byte* ptr = s_åäöÅÄÖ)
+                _ = FunctionPointers.mdf_message_add_string2(_messageHandle, Tag, (IntPtr)ptr, 21);
+            fixed (byte* ptr = s_12P)
+                _ = FunctionPointers.mdf_message_add_string2(_messageHandle, Tag, (IntPtr)ptr, 14);
+            fixed (byte* ptr = s_46XBP3)
+                _ = FunctionPointers.mdf_message_add_string2(_messageHandle, Tag, (IntPtr)ptr, 14);
+            FunctionPointers.mdf_message_reset(_messageHandle);
         }
     }
 }
