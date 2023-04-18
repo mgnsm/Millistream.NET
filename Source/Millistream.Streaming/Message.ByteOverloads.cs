@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace Millistream.Streaming
 {
-    public unsafe sealed partial class Message
+    public sealed unsafe partial class Message
     {
         /// <summary>
         /// Adds a numeric field to the current active message.
@@ -53,7 +53,7 @@ namespace Millistream.Streaming
         /// <remarks>The corresponding native function is mdf_message_add_string2.</remarks>
         public bool AddString(uint tag, ReadOnlySpan<byte> value, int length)
         {
-            if (_nativeImplementation.mdf_message_add_string2 == default || (value != null && length < 0))
+            if (_nativeImplementation.mdf_message_add_string2 == default || value != null && length < 0)
                 return false;
 
             fixed (byte* bytes = value)
@@ -161,7 +161,6 @@ namespace Millistream.Streaming
         public bool AddList(Field tag, ReadOnlySpan<byte> value) =>
             AddList((uint)tag, value);
 
-
         /// <summary>
         /// Deserializes a base64 encoded message chain and replaces the existing (if any) message chain in the message handle.
         /// </summary>
@@ -171,7 +170,7 @@ namespace Millistream.Streaming
         public bool Deserialize(ReadOnlySpan<byte> data)
         {
             fixed (byte* bytes = data)
-                return _nativeImplementation.mdf_message_deserialize != default 
+                return _nativeImplementation.mdf_message_deserialize != default
                     && _nativeImplementation.mdf_message_deserialize(Handle, (IntPtr)bytes) == 1;
         }
     }

@@ -17,7 +17,7 @@
             public const string MDF_RC_ORDER = "3";
             public const string MDF_RC_BASICDATA = "4";
             public const string MDF_RC_PRICEHISTORY = "5";
-            public const string MDF_RC_FIELDSREFERENCE ="6";
+            public const string MDF_RC_FIELDSREFERENCE = "6";
             public const string MDF_RC_INSREF = "7";
             public const string MDF_RC_NEWSCONTENT = "8";
             public const string MDF_RC_CORPORATEACTION = "9";
@@ -26,7 +26,7 @@
             public const string MDF_RC_PERFORMANCE = "12";
             public const string MDF_RC_KEYRATIOS = "13";
             public const string MDF_RC_ESTIMATES = "14";
-            public const string MDF_RC_ESTIMATESHISTORY ="15";
+            public const string MDF_RC_ESTIMATESHISTORY = "15";
             public const string MDF_RC_NETORDERIMBALANCE = "16";
             public const string MDF_RC_L10N = "17";
             public const string MDF_RC_CI = "18";

@@ -17,7 +17,7 @@ namespace Millistream.Streaming.Interop
         protected override IntPtr DoGetExport(IntPtr handle, string name) =>
             dlsym(handle, name);
 
-        protected override IntPtr DoLoad(string libraryPath) => 
+        protected override IntPtr DoLoad(string libraryPath) =>
             dlopen(libraryPath, RTLD_NOW);
     }
 }

@@ -14,7 +14,7 @@ namespace Millistream.Streaming
     /// <typeparam name="TCallbackUserData">The type of the custom user data that will be available to the data callback function.</typeparam>
     /// <typeparam name="TStatusCallbackUserData">The type of the custom user data that will be available to the status callback function.</typeparam>
     /// <remarks>Handles are not thread-safe. If multiple threads will share access to a single handle, the accesses has to be serialized using a mutex or other forms of locking mechanisms. The API as such is thread-safe so multiple threads can have local handles without the need for locks.</remarks>
-    public unsafe sealed class MarketDataFeed<TCallbackUserData, TStatusCallbackUserData> : IMarketDataFeed<TCallbackUserData, TStatusCallbackUserData>, IDisposable
+    public sealed unsafe class MarketDataFeed<TCallbackUserData, TStatusCallbackUserData> : IMarketDataFeed<TCallbackUserData, TStatusCallbackUserData>, IDisposable
     {
         #region Constants
         internal const int MinConnectionTimeout = 1;
@@ -54,7 +54,7 @@ namespace Millistream.Streaming
         /// <exception cref="ArgumentNullException"><paramref name="nativeLibraryPath"/> is <see langword="null" /> or <see cref="string.Empty"/>.</exception>
         /// <exception cref="DllNotFoundException">The native dependency can't be found.</exception>
         /// <remarks>The corresponding native function is mdf_create.</remarks>
-        public MarketDataFeed(string nativeLibraryPath) 
+        public MarketDataFeed(string nativeLibraryPath)
             : this(nativeLibraryPath, true) { }
 
         internal MarketDataFeed(NativeImplementation nativeImplementation)
@@ -486,7 +486,7 @@ namespace Millistream.Streaming
         /// <returns><see langword="true" /> if a connection has been set up or <see langword="false" /> if a connection attempt failed with every server on the list.</returns>
         /// <remarks>The corresponding native function is mdf_connect.</remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Connect(string servers) => !string.IsNullOrEmpty(servers) 
+        public bool Connect(string servers) => !string.IsNullOrEmpty(servers)
             && _nativeImplementation.mdf_connect(_feedHandle, servers) == 1;
 
         /// <summary>
@@ -580,7 +580,7 @@ namespace Millistream.Streaming
                 {
                     fixed (char* c = chars)
                     {
-                        Encoding.UTF8.GetChars(p, byteCount, c, charCount);
+                        _ = Encoding.UTF8.GetChars(p, byteCount, c, charCount);
                         return new string(c);
                     }
                 }

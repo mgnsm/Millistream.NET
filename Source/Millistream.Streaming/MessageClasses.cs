@@ -8,7 +8,7 @@ namespace Millistream.Streaming
     [Flags]
     public enum MessageClasses : uint
     {
-        MDF_MC_UNDEF, 
+        MDF_MC_UNDEF,
         MDF_MC_NEWSHEADLINE,
         MDF_MC_QUOTE,
         MDF_MC_TRADE = 4,
