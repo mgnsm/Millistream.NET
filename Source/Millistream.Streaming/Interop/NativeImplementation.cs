@@ -5,7 +5,7 @@ using nativeLibrary = System.Runtime.InteropServices.NativeLibrary;
 #endif
 namespace Millistream.Streaming.Interop
 {
-    unsafe internal sealed class NativeImplementation
+    internal sealed unsafe class NativeImplementation
     {
         private static NativeImplementation s_defaultImplementation;
 
@@ -86,7 +86,6 @@ namespace Millistream.Streaming.Interop
             }
             else
                 throw new PlatformNotSupportedException();
-
 
             mdf_create = (delegate* unmanaged[Cdecl]<IntPtr>)nativeLibrary.GetExport(lib, nameof(mdf_create));
             mdf_destroy = (delegate* unmanaged[Cdecl]<IntPtr, void>)nativeLibrary.GetExport(lib, nameof(mdf_destroy));

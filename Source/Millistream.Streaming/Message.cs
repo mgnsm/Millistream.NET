@@ -10,7 +10,7 @@ namespace Millistream.Streaming
     /// Represents a managed message handle (mdf_message_t) that can contain several messages for efficiency.
     /// </summary>
     /// <remarks>Handles are not thread-safe. If multiple threads will share access to a single handle, the accesses has to be serialized using a mutex or other forms of locking mechanisms. The API as such is thread-safe so multiple threads can have local handles without the need for locks.</remarks>
-    public unsafe sealed partial class Message : IMessage, IDisposable
+    public sealed unsafe partial class Message : IMessage, IDisposable
     {
         private readonly NativeImplementation _nativeImplementation;
         private CompressionLevel _compressionLevel = CompressionLevel.Z_BEST_SPEED;
@@ -90,7 +90,7 @@ namespace Millistream.Streaming
         /// Gets the number of added fields to the current message.
         /// </summary>
         /// <remarks>The corresponding native function is mdf_message_get_num_fields.</remarks>
-        public int FieldCount => _nativeImplementation.mdf_message_get_num_fields != default ? 
+        public int FieldCount => _nativeImplementation.mdf_message_get_num_fields != default ?
             _nativeImplementation.mdf_message_get_num_fields(_handle) : default;
 
         /// <summary>
@@ -124,7 +124,7 @@ namespace Millistream.Streaming
             get => _delay;
             set
             {
-                if (_nativeImplementation.mdf_message_set_property != default 
+                if (_nativeImplementation.mdf_message_set_property != default
                     && _nativeImplementation.mdf_message_set_property(_handle, MDF_MSG_OPTION.MDF_MSG_OPT_DELAY, value) == 1)
                     _delay = value;
             }
@@ -187,7 +187,7 @@ namespace Millistream.Streaming
         /// <returns><see langword = "true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         /// <remarks>The corresponding native function is mdf_message_add_int.</remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool AddInt64(uint tag, long value, int decimals) => 
+        public bool AddInt64(uint tag, long value, int decimals) =>
             _nativeImplementation.mdf_message_add_int != default && _nativeImplementation.mdf_message_add_int(_handle, tag, value, decimals) == 1;
 
         /// <summary>
@@ -281,7 +281,7 @@ namespace Millistream.Streaming
                 {
                     fixed (byte* b = bytes)
                     {
-                        Encoding.UTF8.GetBytes(c, length, b, byteCount);
+                        _ = Encoding.UTF8.GetBytes(c, length, b, byteCount);
                         return _nativeImplementation.mdf_message_add_string2(_handle, tag, (IntPtr)b, byteCount) == 1;
                     }
                 }
@@ -447,7 +447,7 @@ namespace Millistream.Streaming
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         /// <remarks>The corresponding native function is mdf_message_add_list.</remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool AddList(uint tag, string value) => 
+        public bool AddList(uint tag, string value) =>
             _nativeImplementation.mdf_message_add_list_str(_handle, tag, value) == 1;
 
         /// <summary>
@@ -503,7 +503,7 @@ namespace Millistream.Streaming
         public bool Serialize(out IntPtr result)
         {
             result = IntPtr.Zero;
-            return _nativeImplementation.mdf_message_serialize != default 
+            return _nativeImplementation.mdf_message_serialize != default
                 && _nativeImplementation.mdf_message_serialize(_handle, ref result) == 1;
         }
 
@@ -514,7 +514,7 @@ namespace Millistream.Streaming
         /// <returns><see langword="true" /> if the message chain was successfully deserialized, or <see langword="false" /> if the deserialization failed (if so the current message chain in the message handler is left untouched).</returns>
         /// <remarks>The corresponding native function is mdf_message_deserialize.</remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Deserialize(string data) => !string.IsNullOrEmpty(data) 
+        public bool Deserialize(string data) => !string.IsNullOrEmpty(data)
             && _nativeImplementation.mdf_message_deserialize_str != default
             && _nativeImplementation.mdf_message_deserialize_str(_handle, data) == 1;
 
@@ -525,7 +525,7 @@ namespace Millistream.Streaming
         /// <returns><see langword="true" /> if the message chain was successfully deserialized, or <see langword="false" /> if the deserialization failed (if so the current message chain in the message handler is left untouched).</returns>
         /// <remarks>The corresponding native function is mdf_message_deserialize.</remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Deserialize(IntPtr data) => _nativeImplementation.mdf_message_deserialize != default 
+        public bool Deserialize(IntPtr data) => _nativeImplementation.mdf_message_deserialize != default
             && _nativeImplementation.mdf_message_deserialize(_handle, data) == 1;
 
         /// <summary>
