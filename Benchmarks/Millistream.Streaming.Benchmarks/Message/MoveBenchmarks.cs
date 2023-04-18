@@ -4,6 +4,7 @@ using System;
 namespace Millistream.Streaming.Benchmarks.Message
 {
     [MemoryDiagnoser]
+    [ReturnValueValidator]
     public class MoveBenchmarks : IDisposable
     {
         private Streaming.Message _source;
@@ -33,7 +34,12 @@ namespace Millistream.Streaming.Benchmarks.Message
         public bool Move() => Streaming.Message.Move(_source, _destination, 1, 2);
 
         [Benchmark]
-        public bool MoveUsingDllImport() => DllImports.mdf_message_move(_sourceHandle, _destinationHandle, 1, 2) == 1;
+        public bool MoveUsingDllImport() => 
+            DllImports.mdf_message_move(_sourceHandle, _destinationHandle, 1, 2) == 1;
+
+        [Benchmark]
+        public unsafe bool MoveUsingFunctionPointer() => 
+            FunctionPointers.mdf_message_move(_sourceHandle, _destinationHandle, 1, 2) == 1;
 
         public void Dispose()
         {

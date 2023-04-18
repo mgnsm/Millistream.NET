@@ -2,6 +2,7 @@
 
 namespace Millistream.Streaming.Benchmarks.Message
 {
+    [ReturnValueValidator]
     public class CountBenchmarks : MessageBenchmarks
     {
         [Benchmark]
@@ -21,5 +22,14 @@ namespace Millistream.Streaming.Benchmarks.Message
 
         [Benchmark]
         public int GetMessageNumFieldsUsingDllImport() => DllImports.mdf_message_get_num_fields(_messageHandle);
+
+        [Benchmark]
+        public unsafe int GetMessageNumUsingFunctionPointer() => FunctionPointers.mdf_message_get_num(_messageHandle);
+
+        [Benchmark]
+        public unsafe int GetMessageNumActiveUsingFunctionPointer() => FunctionPointers.mdf_message_get_num_active(_messageHandle);
+
+        [Benchmark]
+        public unsafe int GetMessageNumFieldsUsingFunctionPointer() => FunctionPointers.mdf_message_get_num_fields(_messageHandle);
     }
 }

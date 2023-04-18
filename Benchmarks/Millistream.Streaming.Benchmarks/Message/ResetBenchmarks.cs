@@ -17,5 +17,12 @@ namespace Millistream.Streaming.Benchmarks.Message
             _ = DllImports.mdf_message_add(_messageHandle, 0, 0) == 1;
             DllImports.mdf_message_reset(_messageHandle);
         }
+
+        [Benchmark]
+        public unsafe void ResetUsingFunctionPointer()
+        {
+            _ = FunctionPointers.mdf_message_add(_messageHandle, 0, 0) == 1;
+            FunctionPointers.mdf_message_reset(_messageHandle);
+        }
     }
 }

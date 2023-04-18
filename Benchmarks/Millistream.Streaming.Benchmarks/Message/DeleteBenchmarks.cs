@@ -2,6 +2,7 @@
 
 namespace Millistream.Streaming.Benchmarks.Message
 {
+    [ReturnValueValidator]
     public class DeleteBenchmarks : MessageBenchmarks
     {
         [Benchmark(Baseline = true)]
@@ -16,6 +17,13 @@ namespace Millistream.Streaming.Benchmarks.Message
         {
             _ = DllImports.mdf_message_add(_messageHandle, 0, 0) == 1;
             return DllImports.mdf_message_del(_messageHandle) == 1;
+        }
+
+        [Benchmark]
+        public unsafe bool DeleteUsingFunctionPointer()
+        {
+            _ = FunctionPointers.mdf_message_add(_messageHandle, 0, 0) == 1;
+            return FunctionPointers.mdf_message_del(_messageHandle) == 1;
         }
     }
 }

@@ -57,5 +57,32 @@ namespace Millistream.Streaming.Benchmarks.Message
             _ = DllImports.mdf_message_add_int(_messageHandle, Tag, 1L, 15) == 1;
             DllImports.mdf_message_reset(_messageHandle);
         }
+
+        [Benchmark(OperationsPerInvoke = 20)]
+        public unsafe void AddInt64UsingFunctionPointer()
+        {
+            _ = FunctionPointers.mdf_message_add(_messageHandle, 0, 0) == 1;
+            _ = FunctionPointers.mdf_message_add_int(_messageHandle, Tag, -12345L, 2) == 1;
+            _ = FunctionPointers.mdf_message_add_int(_messageHandle, Tag, 28L, 0) == 1;
+            _ = FunctionPointers.mdf_message_add_int(_messageHandle, Tag, 283L, 0) == 1;
+            _ = FunctionPointers.mdf_message_add_int(_messageHandle, Tag, 0L, 0) == 1;
+            _ = FunctionPointers.mdf_message_add_int(_messageHandle, Tag, 27L, 0) == 1;
+            _ = FunctionPointers.mdf_message_add_int(_messageHandle, Tag, 99L, 2) == 1;
+            _ = FunctionPointers.mdf_message_add_int(_messageHandle, Tag, 25599L, 2) == 1;
+            _ = FunctionPointers.mdf_message_add_int(_messageHandle, Tag, 1001L, 2) == 1;
+            _ = FunctionPointers.mdf_message_add_int(_messageHandle, Tag, 1030001L, 4) == 1;
+            _ = FunctionPointers.mdf_message_add_int(_messageHandle, Tag, 104857L, 3) == 1;
+            _ = FunctionPointers.mdf_message_add_int(_messageHandle, Tag, 1048576L, 4) == 1;
+            _ = FunctionPointers.mdf_message_add_int(_messageHandle, Tag, 1L, 4) == 1;
+            _ = FunctionPointers.mdf_message_add_int(_messageHandle, Tag, 1074176L, 2) == 1;
+            _ = FunctionPointers.mdf_message_add_int(_messageHandle, Tag, 25601L, 2) == 1;
+            _ = FunctionPointers.mdf_message_add_int(_messageHandle, Tag, 284L, 0) == 1;
+            _ = FunctionPointers.mdf_message_add_int(_messageHandle, Tag, 2000L, 0) == 1;
+            _ = FunctionPointers.mdf_message_add_int(_messageHandle, Tag, 20000000000000000L, 0) == 1;
+            _ = FunctionPointers.mdf_message_add_int(_messageHandle, Tag, -10000001L, 7) == 1;
+            _ = FunctionPointers.mdf_message_add_int(_messageHandle, Tag, 10000001L, 7) == 1;
+            _ = FunctionPointers.mdf_message_add_int(_messageHandle, Tag, 1L, 15) == 1;
+            FunctionPointers.mdf_message_reset(_messageHandle);
+        }
     }
 }

@@ -13,12 +13,12 @@ namespace Millistream.Streaming.Benchmarks
         private const string Password = "sandbox";
         
         private static readonly DataCallback<object, object> s_dataCallback = DataCallback;
-        private static readonly mdf_data_callback s_dllImportDataCallback = DataCallbackUsingDllImport;
-        private static readonly IntPtr s_ptrToDllImportDataCallback = Marshal.GetFunctionPointerForDelegate(s_dllImportDataCallback);
+        private static readonly mdf_data_callback s_functionPointerDataCallback = DataCallbackUsingFunctionPointer;
+        private static readonly IntPtr s_ptrToFunctionPointerDataCallback = Marshal.GetFunctionPointerForDelegate(s_functionPointerDataCallback);
 
         private static readonly StatusCallback<object> s_statusCallback = StatusCallback;
-        private static readonly mdf_status_callback s_dllImportStatusCallback = StatusCallbackUsingDllImport;
-        private static readonly IntPtr s_ptrToDllImportStatusCallback = Marshal.GetFunctionPointerForDelegate(s_dllImportStatusCallback);
+        private static readonly mdf_status_callback s_functionPointerStatusCallback = StatusCallbackUsingFunctionPointer;
+        private static readonly IntPtr s_ptrToFunctionPointerStatusCallback = Marshal.GetFunctionPointerForDelegate(s_functionPointerStatusCallback);
 
         private static volatile bool s_dataCallbackInvoked;
         private static int s_statusCallbacks;
@@ -28,23 +28,23 @@ namespace Millistream.Streaming.Benchmarks
         private IntPtr _messageHandle;
 
         [IterationSetup]
-        public void IterationSetup()
+        public unsafe void IterationSetup()
         {
             _mdf = new();
-            _mdfHandle = DllImports.mdf_create();
+            _mdfHandle = FunctionPointers.mdf_create();
             _message = new();
-            _messageHandle = DllImports.mdf_message_create();
+            _messageHandle = FunctionPointers.mdf_message_create();
             s_dataCallbackInvoked = false;
             s_statusCallbacks = 0;
         }
 
         [IterationCleanup]
-        public void IterationCleanup()
+        public unsafe void IterationCleanup()
         {
             _message.Dispose();
-            DllImports.mdf_message_destroy(_messageHandle);
+            FunctionPointers.mdf_message_destroy(_messageHandle);
             _mdf.Dispose();
-            DllImports.mdf_destroy(_mdfHandle);
+            FunctionPointers.mdf_destroy(_mdfHandle);
         }
 
         [Benchmark]
@@ -61,16 +61,16 @@ namespace Millistream.Streaming.Benchmarks
         }
 
         [Benchmark]
-        public void ConsumeUsingDllImport()
+        public unsafe void ConsumeUsingFunctionPointer()
         {
-            LogonUsingDllImport();
+            LogonUsingFunctionPointer();
 
-            RequestUsingDllImport();
+            RequestUsingFunctionPointer();
 
-            if (!ConsumeUsingDllImport(10, 90))
+            if (!ConsumeUsingFunctionPointer(10, 90))
                 throw new InvalidOperationException("Failed to consume.");
 
-            DllImports.mdf_disconnect(_mdfHandle);
+            FunctionPointers.mdf_disconnect(_mdfHandle);
         }
 
         [Benchmark]
@@ -93,24 +93,24 @@ namespace Millistream.Streaming.Benchmarks
         }
 
         [Benchmark]
-        public void ConsumeWithDataCallbackUsingDllImport()
+        public unsafe void ConsumeWithDataCallbackUsingFunctionPointer()
         {
-            LogonUsingDllImport();
+            LogonUsingFunctionPointer();
 
-            if (DllImports.mdf_set_property(_mdfHandle, MDF_OPTION.MDF_OPT_DATA_CALLBACK_FUNCTION,
-                s_ptrToDllImportDataCallback) != 1)
+            if (FunctionPointers.mdf_set_property(_mdfHandle, MDF_OPTION.MDF_OPT_DATA_CALLBACK_FUNCTION,
+                s_ptrToFunctionPointerDataCallback) != 1)
                 throw new InvalidOperationException("Could not set data callback.");
 
-            RequestUsingDllImport();
+            RequestUsingFunctionPointer();
 
             while (!s_dataCallbackInvoked)
-                if (DllImports.mdf_consume(_mdfHandle, 1) == -1)
+                if (FunctionPointers.mdf_consume(_mdfHandle, 1) == -1)
                     break;
 
             if (!s_dataCallbackInvoked)
                 throw new InvalidOperationException("Data callback was not invoked.");
 
-            DllImports.mdf_disconnect(_mdfHandle);
+            FunctionPointers.mdf_disconnect(_mdfHandle);
         }
 
         [Benchmark]
@@ -130,18 +130,18 @@ namespace Millistream.Streaming.Benchmarks
         }
 
         [Benchmark]
-        public void StatusCallbackUsingDllImport()
+        public unsafe void StatusCallbackUsingFunctionPointer()
         {
-            if (DllImports.mdf_set_property(_mdfHandle, MDF_OPTION.MDF_OPT_STATUS_CALLBACK_FUNCTION,
-                s_ptrToDllImportStatusCallback) != 1)
+            if (FunctionPointers.mdf_set_property(_mdfHandle, MDF_OPTION.MDF_OPT_STATUS_CALLBACK_FUNCTION,
+                s_ptrToFunctionPointerStatusCallback) != 1)
                 throw new InvalidOperationException("Could not set status callback.");
 
-            LogonUsingDllImport();
+            LogonUsingFunctionPointer();
 
             if (s_statusCallbacks < 4)
                 throw new InvalidOperationException("Status callback was not invoked as expected.");
 
-            DllImports.mdf_disconnect(_mdfHandle);
+            FunctionPointers.mdf_disconnect(_mdfHandle);
 
             if (s_statusCallbacks < 5)
                 throw new InvalidOperationException("Status callback was not invoked as expected.");
@@ -173,17 +173,17 @@ namespace Millistream.Streaming.Benchmarks
                 throw new InvalidOperationException("Failed to logon.");
         }
 
-        private void LogonUsingDllImport()
+        private unsafe void LogonUsingFunctionPointer()
         {
-            if (DllImports.mdf_connect(_mdfHandle, Server) != 1)
+            if (FunctionPointers.mdf_connect(_mdfHandle, Server) != 1)
                 throw new InvalidOperationException("Failed to connect.");
 
-            _ = DllImports.mdf_message_add(_messageHandle, 0, (int)MessageReference.MDF_M_LOGON);
-            _ = DllImports.mdf_message_add_string(_messageHandle, (int)Field.MDF_F_USERNAME, Username);
-            _ = DllImports.mdf_message_add_string(_messageHandle, (int)Field.MDF_F_PASSWORD, Password);
-            _ = DllImports.mdf_message_send(_mdfHandle, _messageHandle);
-            DllImports.mdf_message_reset(_messageHandle);
-            if (!ConsumeUsingDllImport(1, 10))
+            _ = FunctionPointers.mdf_message_add(_messageHandle, 0, (int)MessageReference.MDF_M_LOGON);
+            _ = FunctionPointers.mdf_message_add_string_str(_messageHandle, (int)Field.MDF_F_USERNAME, Username);
+            _ = FunctionPointers.mdf_message_add_string_str(_messageHandle, (int)Field.MDF_F_PASSWORD, Password);
+            _ = FunctionPointers.mdf_message_send(_mdfHandle, _messageHandle);
+            FunctionPointers.mdf_message_reset(_messageHandle);
+            if (!ConsumeUsingFunctionPointer(1, 10))
                 throw new InvalidOperationException("Failed to logon.");
         }
 
@@ -198,15 +198,15 @@ namespace Millistream.Streaming.Benchmarks
             _message.Reset();
         }
 
-        private void RequestUsingDllImport()
+        private unsafe void RequestUsingFunctionPointer()
         {
-            _ = DllImports.mdf_message_add(_messageHandle, 0, (int)MessageReference.MDF_M_REQUEST);
-            _ = DllImports.mdf_message_add_list(_messageHandle, (uint)Field.MDF_F_REQUESTCLASS, StringConstants.RequestClasses.MDF_RC_BASICDATA);
-            _ = DllImports.mdf_message_add_numeric(_messageHandle, (uint)Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE);
-            _ = DllImports.mdf_message_add_list(_messageHandle, (uint)Field.MDF_F_INSREFLIST, "772");
-            _ = DllImports.mdf_message_add_string(_messageHandle, (uint)Field.MDF_F_REQUESTID, "rid");
-            _ = DllImports.mdf_message_send(_mdfHandle, _messageHandle);
-            DllImports.mdf_message_reset(_messageHandle);
+            _ = FunctionPointers.mdf_message_add(_messageHandle, 0, (int)MessageReference.MDF_M_REQUEST);
+            _ = FunctionPointers.mdf_message_add_list_str(_messageHandle, (uint)Field.MDF_F_REQUESTCLASS, StringConstants.RequestClasses.MDF_RC_BASICDATA);
+            _ = FunctionPointers.mdf_message_add_numeric_str(_messageHandle, (uint)Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE);
+            _ = FunctionPointers.mdf_message_add_list_str(_messageHandle, (uint)Field.MDF_F_INSREFLIST, "772");
+            _ = FunctionPointers.mdf_message_add_string_str(_messageHandle, (uint)Field.MDF_F_REQUESTID, "rid");
+            _ = FunctionPointers.mdf_message_send(_mdfHandle, _messageHandle);
+            FunctionPointers.mdf_message_reset(_messageHandle);
         }
 
         private bool Consume(int consumeTimeout, int waitTimeout)
@@ -235,12 +235,12 @@ namespace Millistream.Streaming.Benchmarks
             return false;
         }
 
-        private bool ConsumeUsingDllImport(int consumeTimeout, int waitTimeout)
+        private unsafe bool ConsumeUsingFunctionPointer(int consumeTimeout, int waitTimeout)
         {
             DateTime time = DateTime.UtcNow;
             do
             {
-                int ret = DllImports.mdf_consume(_mdfHandle, consumeTimeout);
+                int ret = FunctionPointers.mdf_consume(_mdfHandle, consumeTimeout);
                 if (ret == -1)
                     break;
 
@@ -248,15 +248,15 @@ namespace Millistream.Streaming.Benchmarks
                 {
                     int mref = default;
                     int mclass = default;
-                    uint insref = default;
-                    while (DllImports.mdf_get_next_message(_mdfHandle, ref mref, ref mclass, ref insref) == 1)
+                    ulong insref = default;
+                    while (FunctionPointers.mdf_get_next_message(_mdfHandle, ref mref, ref mclass, ref insref) == 1)
                     {
                         if (mref == (int)MessageReference.MDF_M_LOGONGREETING)
                             return true;
 
                         uint tag = default;
                         IntPtr value = default;
-                        while (DllImports.mdf_get_next_field(_mdfHandle, ref tag, ref value) == 1)
+                        while (FunctionPointers.mdf_get_next_field(_mdfHandle, ref tag, ref value) == 1)
                         {
                             ReadOnlySpan<byte> span;
                             if (value != IntPtr.Zero)
@@ -292,16 +292,16 @@ namespace Millistream.Streaming.Benchmarks
                         s_dataCallbackInvoked = true;
         }
 
-        private static void DataCallbackUsingDllImport(IntPtr userdata, IntPtr handle)
+        private static unsafe void DataCallbackUsingFunctionPointer(IntPtr userdata, IntPtr handle)
         {
             int mref = default;
             int mclass = default;
-            uint insref = default;
-            while (DllImports.mdf_get_next_message(handle, ref mref, ref mclass, ref insref) == 1)
+            ulong insref = default;
+            while (FunctionPointers.mdf_get_next_message(handle, ref mref, ref mclass, ref insref) == 1)
             {
                 uint tag = default;
                 IntPtr pointer = default;
-                while (DllImports.mdf_get_next_field(handle, ref tag, ref pointer) == 1)
+                while (FunctionPointers.mdf_get_next_field(handle, ref tag, ref pointer) == 1)
                 {
                     ReadOnlySpan<byte> value;
                     if (pointer != IntPtr.Zero)
@@ -328,7 +328,7 @@ namespace Millistream.Streaming.Benchmarks
         private static void StatusCallback(object userData, ConnectionStatus connectionStatus, ReadOnlySpan<byte> host, ReadOnlySpan<byte> ip) =>
             s_statusCallbacks++;
 
-        private static void StatusCallbackUsingDllImport(IntPtr userdata, ConnectionStatus status, IntPtr host, IntPtr ip) =>
+        private static void StatusCallbackUsingFunctionPointer(IntPtr userdata, ConnectionStatus status, IntPtr host, IntPtr ip) =>
             s_statusCallbacks++;
     }
 }
