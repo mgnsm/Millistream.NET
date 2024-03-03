@@ -48,7 +48,7 @@ namespace Millistream.Streaming
             _handle = _nativeImplementation.mdf_message_create();
         }
 
-        ~Message() => Dispose();
+        ~Message() => _nativeImplementation?.mdf_message_destroy(_handle);
 
         /// <summary>
         /// Gets or sets the zlib compression level used for the <see cref="AddString(uint, string)"/> and <see cref="AddString(uint, string, int)"/> methods.
@@ -155,7 +155,7 @@ namespace Millistream.Streaming
         /// <remarks>The corresponding native function is mdf_message_destroy.</remarks>
         public void Dispose()
         {
-            _nativeImplementation?.mdf_message_destroy(_handle);
+            _nativeImplementation.mdf_message_destroy(_handle);
             _handle = default;
             GC.SuppressFinalize(this);
         }
