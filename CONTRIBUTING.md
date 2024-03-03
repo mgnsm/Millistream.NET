@@ -20,7 +20,7 @@ When submitting pull requests, please do:
 - Follow the [coding style](https://github.com/mgnsm/Millistream.NET/tree/main/Documentation/coding-style.md).
 - Include tests when adding new features or if otherwise applicable.
 - Include a reference to the issue number in the commit message.
-- Target the `master` branch.
+- Target the `main` branch.
 - Provide a description that clearly describes the problem and solution.
 
 ## General Questions
