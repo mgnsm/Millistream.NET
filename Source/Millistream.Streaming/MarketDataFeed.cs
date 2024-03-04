@@ -74,7 +74,7 @@ namespace Millistream.Streaming
                 : new NativeImplementation(nativeLibraryPath))
         { }
 
-        ~MarketDataFeed() => Dispose();
+        ~MarketDataFeed() => _nativeImplementation?.mdf_destroy(_feedHandle);
         #endregion
 
         #region Properties
@@ -321,7 +321,7 @@ namespace Millistream.Streaming
         /// <remarks>The corresponding native function is mdf_destroy.</remarks>
         public void Dispose()
         {
-            _nativeImplementation?.mdf_destroy(_feedHandle);
+            _nativeImplementation.mdf_destroy(_feedHandle);
             _feedHandle = default;
             GC.SuppressFinalize(this);
         }
