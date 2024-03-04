@@ -44,7 +44,8 @@ namespace Millistream.Streaming.IntegrationTests
 
             Assert.AreEqual(0UL, mdf.ReceivedBytes);
             Assert.AreEqual(0UL, mdf.SentBytes);
-            Assert.AreEqual(2048UL, mdf.ReadBufferMaxSize);
+            Assert.AreEqual(0U, mdf.ReadBufferSize);
+            Assert.AreEqual(2048U, mdf.ReadBufferMaxSize);
 
             //HandleDelay
             Assert.IsFalse(mdf.HandleDelay);
