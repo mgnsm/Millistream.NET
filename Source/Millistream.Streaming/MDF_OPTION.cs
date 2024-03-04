@@ -23,6 +23,8 @@
         MDF_OPT_CRYPT_DIGEST,
         MDF_OPT_CRYPT_CIPHER,
         MDF_OPT_TIMEOUT,
-        MDF_OPT_HANDLE_DELAY
+        MDF_OPT_HANDLE_DELAY,
+        MDF_OPT_RBUF_SIZE,
+        MDF_OPT_RBUF_MAXSIZE
     };
 }

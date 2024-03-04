@@ -44,6 +44,7 @@ namespace Millistream.Streaming.IntegrationTests
 
             Assert.AreEqual(0UL, mdf.ReceivedBytes);
             Assert.AreEqual(0UL, mdf.SentBytes);
+            Assert.AreEqual(2048UL, mdf.ReadBufferMaxSize);
 
             //HandleDelay
             Assert.IsFalse(mdf.HandleDelay);
@@ -123,6 +124,10 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.AreEqual(bindAddress, mdf.BindAddress);
 
             _ = mdf.TimeDifferenceNs;
+
+            //ReadBufferMaxSize
+            mdf.ReadBufferMaxSize = uint.MaxValue;
+            Assert.AreEqual(uint.MaxValue, mdf.ReadBufferMaxSize);
 
             //Allocations
             long allocatedBytes = GetTotalAllocatedBytes();

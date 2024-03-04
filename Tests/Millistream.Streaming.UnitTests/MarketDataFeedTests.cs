@@ -79,7 +79,7 @@ namespace Millistream.Streaming.UnitTests
         }
 
         [TestMethod]
-        public void GetAndSetReceivedBytesTest() => 
+        public void GetReceivedBytesTest() => 
             GetUInt64Property(MDF_OPTION.MDF_OPT_RCV_BYTES, mdf => mdf.ReceivedBytes);
 
         [TestMethod]
@@ -97,7 +97,7 @@ namespace Millistream.Streaming.UnitTests
         }
 
         [TestMethod]
-        public void GetAndSetSentBytesTest() => GetUInt64Property(MDF_OPTION.MDF_OPT_SENT_BYTES, mdf => mdf.SentBytes);
+        public void GetSentBytesTest() => GetUInt64Property(MDF_OPTION.MDF_OPT_SENT_BYTES, mdf => mdf.SentBytes);
 
         [TestMethod]
         public void SetSentBytesTest()
@@ -446,6 +446,23 @@ namespace Millistream.Streaming.UnitTests
 
             using MarketDataFeed mdf = new();
             Assert.AreEqual(MessageClass, mdf.MessageClass);
+        }
+
+        [TestMethod]
+        public void GetReadBufferMaxSizeTest() => GetUInt64Property(MDF_OPTION.MDF_OPT_RBUF_MAXSIZE, mdf => mdf.ReadBufferMaxSize);
+
+        [TestMethod]
+        public void SetReadBufferMaxSizeTest()
+        {
+            const uint ReadBufferMaxSize = 5000;
+            Mock<INativeImplementation> nativeImplementation = new();
+            Setup(nativeImplementation, MDF_OPTION.MDF_OPT_RBUF_MAXSIZE, ReadBufferMaxSize);
+
+            using MarketDataFeed mdf = new()
+            {
+                ReadBufferMaxSize = ReadBufferMaxSize
+            };
+            nativeImplementation.Verify();
         }
 
         [TestMethod]
