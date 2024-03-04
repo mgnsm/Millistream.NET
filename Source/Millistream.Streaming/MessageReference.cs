@@ -1,8 +1,11 @@
-﻿namespace Millistream.Streaming
+﻿using System;
+
+namespace Millistream.Streaming
 {
     /// <summary>
     /// Message References
     /// </summary>
+    [Obsolete("This enumeration is deprecated and has been replaced by the constants in the MessageReferences class.")]
     public enum MessageReference
     {
         MDF_M_MESSAGESREFERENCE = 0,

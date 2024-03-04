@@ -42,6 +42,7 @@ namespace Millistream.Streaming.UnitTests
             NativeImplementation nativeImplementation = new(default);
             using Message message = new(nativeImplementation);
             //assert that the default value is Z_BEST_SPEED
+#pragma warning disable CS0618
             Assert.AreEqual(CompressionLevel.Z_BEST_SPEED, message.CompressionLevel);
 
             //assert that the property uses the native implementation to set the compression level
@@ -67,6 +68,7 @@ namespace Millistream.Streaming.UnitTests
                 _nativeImplementation.Verify(x => x.mdf_message_set_compression_level(It.IsAny<IntPtr>(), (int)compressionLevel), Times.Once);
                 Assert.AreEqual(compressionLevel, message.CompressionLevel);
             }
+#pragma warning restore CS0618
         }
 
         [TestMethod]
@@ -145,9 +147,11 @@ namespace Millistream.Streaming.UnitTests
             _nativeImplementation.Setup(x => x.mdf_message_add(It.IsAny<IntPtr>(), It.IsAny<ulong>(), It.IsAny<int>())).Returns(1);
 
             const ulong instrumentReference = 10;
+#pragma warning disable CS0618
             MessageReference messageReference = MessageReference.MDF_M_REQUEST;
             using Message message = new();
             Assert.IsTrue(message.Add(instrumentReference, messageReference));
+#pragma warning restore CS0618
             Assert.IsTrue(message.Add(instrumentReference, (int)messageReference));
             _nativeImplementation.Verify(x => x.mdf_message_add(It.IsAny<IntPtr>(), instrumentReference, (int)messageReference), Times.Exactly(2));
         }
@@ -155,7 +159,7 @@ namespace Millistream.Streaming.UnitTests
         [TestMethod]
         public void AddNumericTest()
         {
-            const Field Field = Field.MDF_F_REQUESTTYPE;
+            const uint Field = Fields.MDF_F_REQUESTTYPE;
             const string Value = "1.1";
 
             _nativeImplementation.Setup(x => x.mdf_message_add_numeric_str(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<string>()))
@@ -164,7 +168,7 @@ namespace Millistream.Streaming.UnitTests
 
             using Message message = new();
             Assert.IsTrue(message.AddNumeric(Field, Value));
-            Assert.IsTrue(message.AddNumeric((uint)Field, Value));
+            Assert.IsTrue(message.AddNumeric(Field, Value));
             _nativeImplementation.Verify(x => x.mdf_message_add_numeric_str(message.Handle, (uint)Field, It.IsAny<string>()), Times.Exactly(2));
 
             _nativeImplementation.Setup(x => x.mdf_message_add_numeric(It.IsAny<IntPtr>(), It.IsAny<uint>(), It.IsAny<IntPtr>()))
@@ -172,10 +176,11 @@ namespace Millistream.Streaming.UnitTests
                 .Returns(1);
             byte[] bytes = Encoding.UTF8.GetBytes(Value);
             Assert.IsTrue(message.AddNumeric(Field, bytes));
-            Assert.IsTrue(message.AddNumeric((uint)Field, bytes));
+            Assert.IsTrue(message.AddNumeric(Field, bytes));
             _nativeImplementation.Verify(x => x.mdf_message_add_numeric(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(2));
         }
 
+#pragma warning disable CS0618
         [TestMethod]
         public void AddInt64AndUInt64Test()
         {
@@ -355,6 +360,7 @@ namespace Millistream.Streaming.UnitTests
             Assert.IsTrue(message.AddList((uint)Field, bytes));
             _nativeImplementation.Verify(x => x.mdf_message_add_list(message.Handle, (uint)Field, It.IsAny<IntPtr>()), Times.Exactly(2));
         }
+#pragma warning restore CS0618
 
         [TestMethod]
         public void ResetTest()
@@ -471,56 +477,56 @@ namespace Millistream.Streaming.UnitTests
             disposedMessage.Dispose();
 
             Assert.IsFalse(disposedMessage.Add(1, 1));
-            Assert.IsFalse(disposedMessage.Add(1, MessageReference.MDF_M_REQUEST));
+            Assert.IsFalse(disposedMessage.Add(1, MessageReferences.MDF_M_REQUEST));
 
-            Assert.IsFalse(disposedMessage.AddNumeric(1, StringConstants.RequestTypes.MDF_RT_IMAGE));
-            Assert.IsFalse(disposedMessage.AddNumeric(Field.MDF_F_AVERAGE, "1.1"));
+            Assert.IsFalse(disposedMessage.AddNumeric(1, RequestTypes.MDF_RT_IMAGE));
+            Assert.IsFalse(disposedMessage.AddNumeric(Fields.MDF_F_AVERAGE, "1.1"));
             byte[] bytes = Encoding.UTF8.GetBytes("1.1");
             Assert.IsFalse(disposedMessage.AddNumeric(1, bytes));
-            Assert.IsFalse(disposedMessage.AddNumeric(Field.MDF_F_AVERAGE, bytes));
+            Assert.IsFalse(disposedMessage.AddNumeric(Fields.MDF_F_AVERAGE, bytes));
 
             Assert.IsFalse(disposedMessage.AddInt64(1, -12345, 2));
-            Assert.IsFalse(disposedMessage.AddInt64(Field.MDF_F_AVERAGE, -12345, 2));
+            Assert.IsFalse(disposedMessage.AddInt64(Fields.MDF_F_AVERAGE, -12345, 2));
 
             Assert.IsFalse(disposedMessage.AddUInt64(1, 12345, 2));
-            Assert.IsFalse(disposedMessage.AddUInt64(Field.MDF_F_AVERAGE, 12345, 2));
+            Assert.IsFalse(disposedMessage.AddUInt64(Fields.MDF_F_AVERAGE, 12345, 2));
 
             Assert.IsFalse(disposedMessage.AddString(1, "abc"));
             Assert.IsFalse(disposedMessage.AddString(1, "abc", 1));
-            Assert.IsFalse(disposedMessage.AddString(Field.MDF_F_REQUESTID, "abc"));
-            Assert.IsFalse(disposedMessage.AddString(Field.MDF_F_REQUESTID, "abc", 1));
+            Assert.IsFalse(disposedMessage.AddString(Fields.MDF_F_REQUESTID, "abc"));
+            Assert.IsFalse(disposedMessage.AddString(Fields.MDF_F_REQUESTID, "abc", 1));
             bytes = Encoding.UTF8.GetBytes("abc");
             Assert.IsFalse(disposedMessage.AddString(1, bytes));
             Assert.IsFalse(disposedMessage.AddString(1, bytes, 1));
-            Assert.IsFalse(disposedMessage.AddString(Field.MDF_F_REQUESTID, bytes));
-            Assert.IsFalse(disposedMessage.AddString(Field.MDF_F_REQUESTID, bytes, 1));
+            Assert.IsFalse(disposedMessage.AddString(Fields.MDF_F_REQUESTID, bytes));
+            Assert.IsFalse(disposedMessage.AddString(Fields.MDF_F_REQUESTID, bytes, 1));
 
 
             Assert.IsFalse(disposedMessage.AddDate(1, "2020-12-30"));
-            Assert.IsFalse(disposedMessage.AddDate(Field.MDF_F_DATE, "2020-12-30"));
+            Assert.IsFalse(disposedMessage.AddDate(Fields.MDF_F_DATE, "2020-12-30"));
             Assert.IsFalse(disposedMessage.AddDate(1, 2020, 12, 30));
-            Assert.IsFalse(disposedMessage.AddDate(Field.MDF_F_DATE, 2020, 12, 30));
+            Assert.IsFalse(disposedMessage.AddDate(Fields.MDF_F_DATE, 2020, 12, 30));
             bytes = Encoding.UTF8.GetBytes("2020-12-30");
             Assert.IsFalse(disposedMessage.AddDate(1, bytes));
-            Assert.IsFalse(disposedMessage.AddDate(Field.MDF_F_DATE, bytes));
+            Assert.IsFalse(disposedMessage.AddDate(Fields.MDF_F_DATE, bytes));
 
             Assert.IsFalse(disposedMessage.AddTime(1, "16:30:30"));
-            Assert.IsFalse(disposedMessage.AddTime(Field.MDF_F_TIME, "16:30:30"));
+            Assert.IsFalse(disposedMessage.AddTime(Fields.MDF_F_TIME, "16:30:30"));
             bytes = Encoding.UTF8.GetBytes("16:30:30");
             Assert.IsFalse(disposedMessage.AddTime(1, bytes));
-            Assert.IsFalse(disposedMessage.AddTime(Field.MDF_F_TIME, bytes));
+            Assert.IsFalse(disposedMessage.AddTime(Fields.MDF_F_TIME, bytes));
 
             Assert.IsFalse(disposedMessage.AddTime2(1, 16, 30, 30, 999));
-            Assert.IsFalse(disposedMessage.AddTime2(Field.MDF_F_TIME, 16, 30, 30, 999));
+            Assert.IsFalse(disposedMessage.AddTime2(Fields.MDF_F_TIME, 16, 30, 30, 999));
 
             Assert.IsFalse(disposedMessage.AddTime3(1, 16, 30, 30, 999999999));
-            Assert.IsFalse(disposedMessage.AddTime3(Field.MDF_F_TIME, 16, 30, 30, 999999999));
+            Assert.IsFalse(disposedMessage.AddTime3(Fields.MDF_F_TIME, 16, 30, 30, 999999999));
 
             Assert.IsFalse(disposedMessage.AddList(1, "1"));
-            Assert.IsFalse(disposedMessage.AddList(Field.MDF_F_INSREFLIST, "1"));
+            Assert.IsFalse(disposedMessage.AddList(Fields.MDF_F_INSREFLIST, "1"));
             bytes = Encoding.UTF8.GetBytes("1");
             Assert.IsFalse(disposedMessage.AddList(1, bytes));
-            Assert.IsFalse(disposedMessage.AddList(Field.MDF_F_INSREFLIST, bytes));
+            Assert.IsFalse(disposedMessage.AddList(Fields.MDF_F_INSREFLIST, bytes));
 
             Assert.IsFalse(disposedMessage.Delete());
 
@@ -549,6 +555,7 @@ namespace Millistream.Streaming.UnitTests
 
             using Message message = new(nativeImplementation);
             Assert.IsFalse(message.AddInt64(default(uint), default, default));
+#pragma warning disable CS0618
             Assert.IsFalse(message.AddInt64(default(Field), default, default));
             Assert.IsFalse(message.AddUInt64(default(uint), default, default));
             Assert.IsFalse(message.AddUInt64(default(Field), default, default));
@@ -562,6 +569,7 @@ namespace Millistream.Streaming.UnitTests
             Assert.IsFalse(message.AddTime2(default(Field), default, default, default, default));
             Assert.IsFalse(message.AddTime3(default(uint), default, default, default, default));
             Assert.IsFalse(message.AddTime3(default(Field), default, default, default, default));
+#pragma warning restore CS0618
             Assert.IsFalse(Message.Move(message, default, default, default));
             Assert.IsFalse(message.Serialize(out _));
             Assert.IsFalse(message.Deserialize("..."));
@@ -585,6 +593,7 @@ namespace Millistream.Streaming.UnitTests
             Assert.AreEqual(default, message.FieldCount);
 
             //The mdf_message_set_compression_level and mdf_message_set_utf8_validation in libmdf-1.0.25 should be used
+#pragma warning disable CS0618
             const CompressionLevel CompressionLevel = CompressionLevel.Z_BEST_COMPRESSION;
             message.CompressionLevel = CompressionLevel;
             message.Utf8Validation = false;
@@ -592,6 +601,7 @@ namespace Millistream.Streaming.UnitTests
             nativeImplementation.mdf_message_set_compression_level = default;
             nativeImplementation.mdf_message_set_utf8_validation = default;
             message.CompressionLevel = CompressionLevel.Z_NO_COMPRESSION;
+#pragma warning restore CS0618
             message.Utf8Validation = true;
             _nativeImplementation.Verify(x => x.mdf_message_set_compression_level(It.IsAny<IntPtr>(), (int)CompressionLevel), Times.Once);
             _nativeImplementation.Verify(x => x.mdf_message_set_utf8_validation(It.IsAny<IntPtr>(), 0), Times.Once);

@@ -223,19 +223,19 @@ namespace Millistream.Streaming.IntegrationTests
         {
             using MarketDataFeed mdf = new MarketDataFeed();
             using Message message = new Message();
-            Assert.IsTrue(message.Add(0, MessageReference.MDF_M_REQUEST));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTCLASS, StringConstants.RequestClasses.MDF_RC_BASICDATA));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE));
-            Assert.IsTrue(message.AddString(Field.MDF_F_INSREFLIST, "772"));
+            Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_REQUEST));
+            Assert.IsTrue(message.AddNumeric(Fields.MDF_F_REQUESTCLASS, RequestClasses.MDF_RC_BASICDATA));
+            Assert.IsTrue(message.AddNumeric(Fields.MDF_F_REQUESTTYPE, RequestTypes.MDF_RT_IMAGE));
+            Assert.IsTrue(message.AddString(Fields.MDF_F_INSREFLIST, "772"));
             Assert.IsFalse(mdf.Send(message));
             //connect
             Assert.IsTrue(mdf.Connect(GetTestRunParameter("host")));
             //log on
             Assert.IsTrue(LogOn(mdf, message));
             //log off
-            Assert.IsTrue(message.Add(0, MessageReference.MDF_M_LOGOFF));
+            Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_LOGOFF));
             Assert.IsTrue(mdf.Send(message));
-            Assert.IsTrue(Consume(mdf, MessageReference.MDF_M_LOGOFF));
+            Assert.IsTrue(Consume(mdf, MessageReferences.MDF_M_LOGOFF));
             mdf.Disconnect();
             mdf.Disconnect();
             mdf.Disconnect();
@@ -258,27 +258,27 @@ namespace Millistream.Streaming.IntegrationTests
                 Guid.NewGuid().ToString(),
                 Guid.NewGuid().ToString()
             };
-            Assert.IsTrue(message.Add(0, MessageReference.MDF_M_REQUEST));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTCLASS, StringConstants.RequestClasses.MDF_RC_BASICDATA));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE));
-            Assert.IsTrue(message.AddString(Field.MDF_F_INSREFLIST, "772"));
-            Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTID, requestIds[0]));
+            Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_REQUEST));
+            Assert.IsTrue(message.AddNumeric(Fields.MDF_F_REQUESTCLASS, RequestClasses.MDF_RC_BASICDATA));
+            Assert.IsTrue(message.AddNumeric(Fields.MDF_F_REQUESTTYPE, RequestTypes.MDF_RT_IMAGE));
+            Assert.IsTrue(message.AddString(Fields.MDF_F_INSREFLIST, "772"));
+            Assert.IsTrue(message.AddString(Fields.MDF_F_REQUESTID, requestIds[0]));
             Assert.AreEqual(1, message.ActiveCount);
             Assert.AreEqual(4, message.FieldCount);
 
-            Assert.IsTrue(message.Add(0, MessageReference.MDF_M_REQUEST));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTCLASS, StringConstants.RequestClasses.MDF_RC_QUOTE));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE));
-            Assert.IsTrue(message.AddString(Field.MDF_F_INSREFLIST, "1146"));
-            Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTID, requestIds[1]));
+            Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_REQUEST));
+            Assert.IsTrue(message.AddNumeric(Fields.MDF_F_REQUESTCLASS, RequestClasses.MDF_RC_QUOTE));
+            Assert.IsTrue(message.AddNumeric(Fields.MDF_F_REQUESTTYPE, RequestTypes.MDF_RT_IMAGE));
+            Assert.IsTrue(message.AddString(Fields.MDF_F_INSREFLIST, "1146"));
+            Assert.IsTrue(message.AddString(Fields.MDF_F_REQUESTID, requestIds[1]));
             Assert.AreEqual(2, message.ActiveCount);
             Assert.AreEqual(4, message.FieldCount);
 
-            Assert.IsTrue(message.Add(0, MessageReference.MDF_M_REQUEST));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTCLASS, StringConstants.RequestClasses.MDF_RC_TRADE));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE));
-            Assert.IsTrue(message.AddString(Field.MDF_F_INSREFLIST, "105"));
-            Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTID, requestIds[2]));
+            Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_REQUEST));
+            Assert.IsTrue(message.AddNumeric(Fields.MDF_F_REQUESTCLASS, RequestClasses.MDF_RC_TRADE));
+            Assert.IsTrue(message.AddNumeric(Fields.MDF_F_REQUESTTYPE, RequestTypes.MDF_RT_IMAGE));
+            Assert.IsTrue(message.AddString(Fields.MDF_F_INSREFLIST, "105"));
+            Assert.IsTrue(message.AddString(Fields.MDF_F_REQUESTID, requestIds[2]));
             Assert.AreEqual(3, message.ActiveCount);
             Assert.AreEqual(4, message.FieldCount);
 
@@ -291,12 +291,12 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.AreEqual(0, message.ActiveCount);
             Assert.AreEqual(0, message.FieldCount);
 
-            Assert.IsTrue(message.Add(0, MessageReference.MDF_M_REQUEST));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTCLASS, StringConstants.RequestClasses.MDF_RC_ORDER));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE));
-            Assert.IsTrue(message.AddString(Field.MDF_F_INSREFLIST, "354"));
+            Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_REQUEST));
+            Assert.IsTrue(message.AddNumeric(Fields.MDF_F_REQUESTCLASS, RequestClasses.MDF_RC_ORDER));
+            Assert.IsTrue(message.AddNumeric(Fields.MDF_F_REQUESTTYPE, RequestTypes.MDF_RT_IMAGE));
+            Assert.IsTrue(message.AddString(Fields.MDF_F_INSREFLIST, "354"));
             string requestId = Guid.NewGuid().ToString();
-            Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTID, requestId));
+            Assert.IsTrue(message.AddString(Fields.MDF_F_REQUESTID, requestId));
             Assert.AreEqual(1, message.ActiveCount);
             Assert.AreEqual(4, message.FieldCount);
 
@@ -330,18 +330,18 @@ namespace Millistream.Streaming.IntegrationTests
                 while (mdf.GetNextMessage(out int _, out int mclass, out ulong _))
                 {
                     Assert.AreEqual((ulong)mclass, mdf.MessageClass);
-                    while (mdf.GetNextField(out Field field, out ReadOnlySpan<byte> value))
-                        if (field == Field.MDF_F_REQUESTID && Encoding.UTF8.GetString(value.ToArray()) == RequestId)
+                    while (mdf.GetNextField(out uint field, out ReadOnlySpan<byte> value))
+                        if (field == Fields.MDF_F_REQUESTID && Encoding.UTF8.GetString(value.ToArray()) == RequestId)
                             requestFinished = true;
                 }
             }
             mdf.DataCallback = OnDataReceived;
             //request some data
-            Assert.IsTrue(message.Add(0, MessageReference.MDF_M_REQUEST));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTCLASS, StringConstants.RequestClasses.MDF_RC_BASICDATA));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE));
-            Assert.IsTrue(message.AddString(Field.MDF_F_INSREFLIST, "772"));
-            Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTID, RequestId));
+            Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_REQUEST));
+            Assert.IsTrue(message.AddNumeric(Fields.MDF_F_REQUESTCLASS, RequestClasses.MDF_RC_BASICDATA));
+            Assert.IsTrue(message.AddNumeric(Fields.MDF_F_REQUESTTYPE, RequestTypes.MDF_RT_IMAGE));
+            Assert.IsTrue(message.AddString(Fields.MDF_F_INSREFLIST, "772"));
+            Assert.IsTrue(message.AddString(Fields.MDF_F_REQUESTID, RequestId));
             Assert.IsTrue(mdf.Send(message));
 
             //invoke the callback by consuming
@@ -407,22 +407,22 @@ namespace Millistream.Streaming.IntegrationTests
             //subscribe to basic data and quotes for instrument 772 (ERIC B)
             string requestId = "rid";
             const string RequestClasses = "4 1";
-            Assert.IsTrue(message.Add(0, MessageReference.MDF_M_REQUEST));
-            Assert.IsTrue(message.AddList(Field.MDF_F_REQUESTCLASS, RequestClasses));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_FULL));
+            Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_REQUEST));
+            Assert.IsTrue(message.AddList(Fields.MDF_F_REQUESTCLASS, RequestClasses));
+            Assert.IsTrue(message.AddNumeric(Fields.MDF_F_REQUESTTYPE, RequestTypes.MDF_RT_FULL));
             const string InsRef = "772";
-            Assert.IsTrue(message.AddList(Field.MDF_F_INSREFLIST, InsRef));
-            Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTID, requestId));
+            Assert.IsTrue(message.AddList(Fields.MDF_F_INSREFLIST, InsRef));
+            Assert.IsTrue(message.AddString(Fields.MDF_F_REQUESTID, requestId));
             Assert.IsTrue(mdf.Send(message));
             message.Reset();
             //consume the request
             Assert.IsTrue(Consume(mdf, new string[1] { requestId }));
             //unsubscribe
             requestId = "rid2";
-            Assert.IsTrue(message.Add(0, MessageReference.MDF_M_UNSUBSCRIBE));
-            Assert.IsTrue(message.AddList(Field.MDF_F_REQUESTCLASS, RequestClasses));
-            Assert.IsTrue(message.AddList(Field.MDF_F_INSREFLIST, InsRef));
-            Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTID, requestId));
+            Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_UNSUBSCRIBE));
+            Assert.IsTrue(message.AddList(Fields.MDF_F_REQUESTCLASS, RequestClasses));
+            Assert.IsTrue(message.AddList(Fields.MDF_F_INSREFLIST, InsRef));
+            Assert.IsTrue(message.AddString(Fields.MDF_F_REQUESTID, requestId));
             Assert.IsTrue(mdf.Send(message));
             message.Reset();
             //consume
@@ -442,12 +442,12 @@ namespace Millistream.Streaming.IntegrationTests
             //subscribe to a specific request class (MDF_RC_BASICDATA) for a couple of instruments
             string requestId = "rid";
             const string RequestClass = "4";
-            Assert.IsTrue(message.Add(0, MessageReference.MDF_M_REQUEST));
-            Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTCLASS, RequestClass));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE));
-            Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTID, requestId));
+            Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_REQUEST));
+            Assert.IsTrue(message.AddString(Fields.MDF_F_REQUESTCLASS, RequestClass));
+            Assert.IsTrue(message.AddNumeric(Fields.MDF_F_REQUESTTYPE, RequestTypes.MDF_RT_IMAGE));
+            Assert.IsTrue(message.AddString(Fields.MDF_F_REQUESTID, requestId));
             string instrumentReferences = "354 772 928 1168";
-            Assert.IsTrue(message.AddList(Field.MDF_F_INSREFLIST, instrumentReferences));
+            Assert.IsTrue(message.AddList(Fields.MDF_F_INSREFLIST, instrumentReferences));
             Assert.IsTrue(mdf.Send(message));
             message.Reset();
             //consume
@@ -471,11 +471,11 @@ namespace Millistream.Streaming.IntegrationTests
                         {
                             while (mdf.GetNextField(out uint field, out ReadOnlySpan<byte> value))
                             {
-                                if (field == (uint)Field.MDF_F_REQUESTID && Encoding.UTF8.GetString(value.ToArray()) == requestId)
+                                if (field == Fields.MDF_F_REQUESTID && Encoding.UTF8.GetString(value.ToArray()) == requestId)
                                     requestFinished = true;
                             }
 
-                            if (mref != (int)MessageReference.MDF_M_REQUESTFINISHED)
+                            if (mref != MessageReferences.MDF_M_REQUESTFINISHED)
                             {
                                 static void IncreaseCount<T>(Dictionary<T, int> dictionary, T key)
                                 {
@@ -499,12 +499,12 @@ namespace Millistream.Streaming.IntegrationTests
             void UnsubscribeAndClear(string requestClass, string instrumentReferences)
             {
                 string requestId = Guid.NewGuid().ToString();
-                Assert.IsTrue(message.Add(0, MessageReference.MDF_M_UNSUBSCRIBE));
+                Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_UNSUBSCRIBE));
                 if (!string.IsNullOrEmpty(requestClass))
-                    Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTCLASS, requestClass));
+                    Assert.IsTrue(message.AddString(Fields.MDF_F_REQUESTCLASS, requestClass));
                 if (!string.IsNullOrEmpty(instrumentReferences))
-                    Assert.IsTrue(message.AddList(Field.MDF_F_INSREFLIST, instrumentReferences));
-                Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTID, requestId));
+                    Assert.IsTrue(message.AddList(Fields.MDF_F_INSREFLIST, instrumentReferences));
+                Assert.IsTrue(message.AddString(Fields.MDF_F_REQUESTID, requestId));
                 Assert.IsTrue(mdf.Send(message));
                 message.Reset();
                 Assert.IsTrue(Consume(mdf, new string[1] { requestId }));
@@ -518,11 +518,11 @@ namespace Millistream.Streaming.IntegrationTests
             //subscribe to all messages for a particular instrument
             requestId = "rid2";
             instrumentReferences = "772";
-            Assert.IsTrue(message.Add(0, MessageReference.MDF_M_REQUEST));
-            Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTCLASS, StringConstants.RequestClasses.All));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE));
-            Assert.IsTrue(message.AddList(Field.MDF_F_INSREFLIST, instrumentReferences));
-            Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTID, requestId));
+            Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_REQUEST));
+            Assert.IsTrue(message.AddString(Fields.MDF_F_REQUESTCLASS, RequestClasses.All));
+            Assert.IsTrue(message.AddNumeric(Fields.MDF_F_REQUESTTYPE, RequestTypes.MDF_RT_IMAGE));
+            Assert.IsTrue(message.AddList(Fields.MDF_F_INSREFLIST, instrumentReferences));
+            Assert.IsTrue(message.AddString(Fields.MDF_F_REQUESTID, requestId));
             Assert.IsTrue(mdf.Send(message));
             message.Reset();
             Assert.IsTrue(ConsumeAndCount(requestId));
@@ -541,10 +541,10 @@ namespace Millistream.Streaming.IntegrationTests
             //log on
             Assert.IsTrue(LogOn(mdf, message));
             //send request
-            Assert.IsTrue(message.Add(0, MessageReference.MDF_M_REQUEST));
-            Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTCLASS, StringConstants.RequestClasses.MDF_RC_INSREF));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_STREAM));
-            Assert.IsTrue(message.AddString(Field.MDF_F_REQUESTID, "rid"));
+            Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_REQUEST));
+            Assert.IsTrue(message.AddString(Fields.MDF_F_REQUESTCLASS, RequestClasses.MDF_RC_INSREF));
+            Assert.IsTrue(message.AddNumeric(Fields.MDF_F_REQUESTTYPE, RequestTypes.MDF_RT_STREAM));
+            Assert.IsTrue(message.AddString(Fields.MDF_F_REQUESTID, "rid"));
             Assert.IsTrue(mdf.Send(message));
             message.Reset();
             //consume
@@ -559,15 +559,15 @@ namespace Millistream.Streaming.IntegrationTests
 
                 if (ret == 1)
                 {
-                    while (mdf.GetNextMessage(out MessageReference messageReference, out MessageClasses _, out ulong instrumentReference))
+                    while (mdf.GetNextMessage(out int mref, out _, out ulong instrumentReference))
                     {
-                        if (messageReference == MessageReference.MDF_M_INSREF)
+                        if (mref == MessageReferences.MDF_M_INSREF)
                             succeeded = true;
 
                         while (mdf.GetNextField(out uint field, out ReadOnlySpan<byte> value))
                         {
                             //no permissions to create instruments
-                            if (field == (uint)Field.MDF_F_REQUESTSTATUS
+                            if (field == (uint)Fields.MDF_F_REQUESTSTATUS
                                 && Utf8Parser.TryParse(value, out uint @uint, out int _)
                                 && @uint == 101)
                                 succeeded = true;
@@ -592,15 +592,15 @@ namespace Millistream.Streaming.IntegrationTests
 
         private bool LogOn(MarketDataFeed mdf, Message message)
         {
-            Assert.IsTrue(message.Add(0, MessageReference.MDF_M_LOGON));
-            Assert.IsTrue(message.AddString(Field.MDF_F_USERNAME, GetTestRunParameter("username")));
-            Assert.IsTrue(message.AddString(Field.MDF_F_PASSWORD, GetTestRunParameter("password")));
+            Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_LOGON));
+            Assert.IsTrue(message.AddString(Fields.MDF_F_USERNAME, GetTestRunParameter("username")));
+            Assert.IsTrue(message.AddString(Fields.MDF_F_PASSWORD, GetTestRunParameter("password")));
             Assert.IsTrue(mdf.Send(message));
             message.Reset();
-            return Consume(mdf, MessageReference.MDF_M_LOGONGREETING);
+            return Consume(mdf, MessageReferences.MDF_M_LOGONGREETING);
         }
 
-        private static bool Consume(MarketDataFeed mdf, MessageReference messageReference)
+        private static bool Consume(MarketDataFeed mdf, ushort messageReference)
         {
             if (mdf == null)
                 throw new ArgumentNullException(nameof(mdf));
@@ -613,7 +613,7 @@ namespace Millistream.Streaming.IntegrationTests
                 switch (ret)
                 {
                     case 1:
-                        while (mdf.GetNextMessage(out MessageReference mref, out ulong _))
+                        while (mdf.GetNextMessage(out ushort mref, out ulong _))
                             if (mref == messageReference)
                                 return true;
                         break;
@@ -645,8 +645,8 @@ namespace Millistream.Streaming.IntegrationTests
 
                 if (ret == 1)
                     while (mdf.GetNextMessage(out int _, out int _, out ulong _))
-                        while (mdf.GetNextField(out Field field, out ReadOnlySpan<byte> value))
-                            if (field == Field.MDF_F_REQUESTID && requestIds.Contains(Encoding.UTF8.GetString(value.ToArray())))
+                        while (mdf.GetNextField(out uint field, out ReadOnlySpan<byte> value))
+                            if (field == Fields.MDF_F_REQUESTID && requestIds.Contains(Encoding.UTF8.GetString(value.ToArray())))
                                 numberOfFinishedRequests++;
             } while (numberOfFinishedRequests < requestIds.Count && DateTime.UtcNow.Subtract(time).TotalSeconds < TimeoutInSeconds);
 

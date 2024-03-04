@@ -1,8 +1,11 @@
-﻿namespace Millistream.Streaming
+﻿using System;
+
+namespace Millistream.Streaming
 {
     /// <summary>
     /// Fields / Tags
     /// </summary>
+    [Obsolete("This enumeration is deprecated and has been replaced by the constants in the Fields class.")]
     public enum Field : uint
     {
         MDF_F_LANGUAGE = 0,

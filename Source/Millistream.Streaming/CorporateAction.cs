@@ -1,8 +1,11 @@
-﻿namespace Millistream.Streaming
+﻿using System;
+
+namespace Millistream.Streaming
 {
     /// <summary>
     /// Corporate Action Types
     /// </summary>
+    [Obsolete("This enumeration is deprecated and will be removed in a future version.")]
     public enum CorporateAction : uint
     {
         MDF_CA_DIVIDEND,

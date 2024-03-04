@@ -11,7 +11,9 @@ namespace Millistream.Streaming
     public sealed unsafe partial class Message : IMessage, IDisposable
     {
         private readonly NativeImplementation _nativeImplementation;
+#pragma warning disable CS0618
         private CompressionLevel _compressionLevel = CompressionLevel.Z_BEST_SPEED;
+#pragma warning restore CS0618
         private bool _utf8Validation = true;
         private byte _delay;
         private IntPtr _handle;
@@ -54,6 +56,7 @@ namespace Millistream.Streaming
         /// Gets or sets the zlib compression level used for the <see cref="AddString(uint, string)"/> and <see cref="AddString(uint, string, int)"/> methods.
         /// </summary>
         /// <remarks>The corresponding native function is mdf_message_set_property with an option of <see cref="MDF_MSG_OPTION.MDF_MSG_OPT_COMPRESSION"/> or mdf_message_set_compression_level.</remarks>
+        [Obsolete("The CompressionLevel enumeration is deprecated and will be removed in a future version. The type of this property will then be changed to System.Byte.")]
         public CompressionLevel CompressionLevel
         {
             get => _compressionLevel;

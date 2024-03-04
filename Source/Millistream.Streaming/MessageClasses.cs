@@ -6,6 +6,7 @@ namespace Millistream.Streaming
     /// Message Classes
     /// </summary>
     [Flags]
+    [Obsolete("This enumeration is deprecated and will be removed in a future version.")]
     public enum MessageClasses : uint
     {
         MDF_MC_UNDEF,

@@ -23,6 +23,7 @@ namespace Millistream.Streaming
         /// <param name="value">The numeric field value.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false"/> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         /// <remarks>The corresponding native function is mdf_message_add_numeric.</remarks>
+        [Obsolete("This overload is deprecated and will be removed in a future version. Use the AddNumeric(uint tag, string value) overload instead.")]
         public bool AddNumeric(Field tag, string value) =>
             AddNumeric((uint)tag, value);
 
@@ -47,6 +48,7 @@ namespace Millistream.Streaming
         /// <param name="value">The numeric field value as a memory span that contains a null-terminated sequence of UTF-8 encoded bytes.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false"/> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         /// <remarks>The corresponding native function is mdf_message_add_numeric.</remarks>
+        [Obsolete("This overload is deprecated and will be removed in a future version. Use the AddNumeric(uint tag, ReadOnlySpan<byte> value) overload instead.")]
         public unsafe bool AddNumeric(Field tag, ReadOnlySpan<byte> value) =>
             AddNumeric((uint)tag, value);
     }

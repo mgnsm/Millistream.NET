@@ -164,9 +164,9 @@ namespace Millistream.Streaming.Benchmarks
             if (!_mdf.Connect(Server))
                 throw new InvalidOperationException("Failed to connect.");
 
-            _ = _message.Add(0, (int)MessageReference.MDF_M_LOGON);
-            _ = _message.AddString((int)Field.MDF_F_USERNAME, Username);
-            _ = _message.AddString((int)Field.MDF_F_PASSWORD, Password);
+            _ = _message.Add(0, MessageReferences.MDF_M_LOGON);
+            _ = _message.AddString(Fields.MDF_F_USERNAME, Username);
+            _ = _message.AddString(Fields.MDF_F_PASSWORD, Password);
             _ = _mdf.Send(_message);
             _message.Reset();
             if (!Consume(1, 10))
@@ -178,9 +178,9 @@ namespace Millistream.Streaming.Benchmarks
             if (FunctionPointers.mdf_connect(_mdfHandle, Server) != 1)
                 throw new InvalidOperationException("Failed to connect.");
 
-            _ = FunctionPointers.mdf_message_add(_messageHandle, 0, (int)MessageReference.MDF_M_LOGON);
-            _ = FunctionPointers.mdf_message_add_string_str(_messageHandle, (int)Field.MDF_F_USERNAME, Username);
-            _ = FunctionPointers.mdf_message_add_string_str(_messageHandle, (int)Field.MDF_F_PASSWORD, Password);
+            _ = FunctionPointers.mdf_message_add(_messageHandle, 0, MessageReferences.MDF_M_LOGON);
+            _ = FunctionPointers.mdf_message_add_string_str(_messageHandle, Fields.MDF_F_USERNAME, Username);
+            _ = FunctionPointers.mdf_message_add_string_str(_messageHandle, Fields.MDF_F_PASSWORD, Password);
             _ = FunctionPointers.mdf_message_send(_mdfHandle, _messageHandle);
             FunctionPointers.mdf_message_reset(_messageHandle);
             if (!ConsumeUsingFunctionPointer(1, 10))
@@ -189,22 +189,22 @@ namespace Millistream.Streaming.Benchmarks
 
         private void Request()
         {
-            _ = _message.Add(0, (int)MessageReference.MDF_M_REQUEST);
-            _ = _message.AddList((uint)Field.MDF_F_REQUESTCLASS, StringConstants.RequestClasses.MDF_RC_BASICDATA);
-            _ = _message.AddNumeric((uint)Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE);
-            _ = _message.AddList((uint)Field.MDF_F_INSREFLIST, "772");
-            _ = _message.AddString((uint)Field.MDF_F_REQUESTID, "rid");
+            _ = _message.Add(0, MessageReferences.MDF_M_REQUEST);
+            _ = _message.AddList(Fields.MDF_F_REQUESTCLASS, RequestClasses.MDF_RC_BASICDATA);
+            _ = _message.AddNumeric(Fields.MDF_F_REQUESTTYPE, RequestTypes.MDF_RT_IMAGE);
+            _ = _message.AddList(Fields.MDF_F_INSREFLIST, "772");
+            _ = _message.AddString(Fields.MDF_F_REQUESTID, "rid");
             _ = _mdf.Send(_message);
             _message.Reset();
         }
 
         private unsafe void RequestUsingFunctionPointer()
         {
-            _ = FunctionPointers.mdf_message_add(_messageHandle, 0, (int)MessageReference.MDF_M_REQUEST);
-            _ = FunctionPointers.mdf_message_add_list_str(_messageHandle, (uint)Field.MDF_F_REQUESTCLASS, StringConstants.RequestClasses.MDF_RC_BASICDATA);
-            _ = FunctionPointers.mdf_message_add_numeric_str(_messageHandle, (uint)Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE);
-            _ = FunctionPointers.mdf_message_add_list_str(_messageHandle, (uint)Field.MDF_F_INSREFLIST, "772");
-            _ = FunctionPointers.mdf_message_add_string_str(_messageHandle, (uint)Field.MDF_F_REQUESTID, "rid");
+            _ = FunctionPointers.mdf_message_add(_messageHandle, 0, MessageReferences.MDF_M_REQUEST);
+            _ = FunctionPointers.mdf_message_add_list_str(_messageHandle, Fields.MDF_F_REQUESTCLASS, RequestClasses.MDF_RC_BASICDATA);
+            _ = FunctionPointers.mdf_message_add_numeric_str(_messageHandle, Fields.MDF_F_REQUESTTYPE, RequestTypes.MDF_RT_IMAGE);
+            _ = FunctionPointers.mdf_message_add_list_str(_messageHandle, Fields.MDF_F_INSREFLIST, "772");
+            _ = FunctionPointers.mdf_message_add_string_str(_messageHandle, Fields.MDF_F_REQUESTID, "rid");
             _ = FunctionPointers.mdf_message_send(_mdfHandle, _messageHandle);
             FunctionPointers.mdf_message_reset(_messageHandle);
         }
@@ -222,11 +222,11 @@ namespace Millistream.Streaming.Benchmarks
                 {
                     while (_mdf.GetNextMessage(out int mref, out int _, out _))
                     {
-                        if (mref == (int)MessageReference.MDF_M_LOGONGREETING)
+                        if (mref == MessageReferences.MDF_M_LOGONGREETING)
                             return true;
 
                         while (_mdf.GetNextField(out uint field, out ReadOnlySpan<byte> value))
-                            if (field == (uint)Field.MDF_F_REQUESTID && !value.IsEmpty)
+                            if (field == Fields.MDF_F_REQUESTID && !value.IsEmpty)
                                 return true;
                     }
                 }
@@ -251,7 +251,7 @@ namespace Millistream.Streaming.Benchmarks
                     ulong insref = default;
                     while (FunctionPointers.mdf_get_next_message(_mdfHandle, ref mref, ref mclass, ref insref) == 1)
                     {
-                        if (mref == (int)MessageReference.MDF_M_LOGONGREETING)
+                        if (mref == MessageReferences.MDF_M_LOGONGREETING)
                             return true;
 
                         uint tag = default;
@@ -274,7 +274,7 @@ namespace Millistream.Streaming.Benchmarks
                                 span = default;
                             }
 
-                            if (tag == (uint)Field.MDF_F_REQUESTID && !span.IsEmpty)
+                            if (tag == Fields.MDF_F_REQUESTID && !span.IsEmpty)
                                 return true;
                         }
                     }
@@ -288,7 +288,7 @@ namespace Millistream.Streaming.Benchmarks
         {
             while (handle.GetNextMessage(out int _, out _, out _))
                 while (handle.GetNextField(out uint tag, out ReadOnlySpan<byte> value))
-                    if (tag == (uint)Field.MDF_F_REQUESTID && !value.IsEmpty)
+                    if (tag == Fields.MDF_F_REQUESTID && !value.IsEmpty)
                         s_dataCallbackInvoked = true;
         }
 
@@ -319,7 +319,7 @@ namespace Millistream.Streaming.Benchmarks
                         value = default;
                     }
 
-                    if (tag == (uint)Field.MDF_F_REQUESTID && !value.IsEmpty)
+                    if (tag == Fields.MDF_F_REQUESTID && !value.IsEmpty)
                         s_dataCallbackInvoked = true;
                 }
             }

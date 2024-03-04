@@ -23,6 +23,7 @@ namespace Millistream.Streaming
         /// <param name="value">The time field value.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         /// <remarks>The corresponding native function is mdf_message_add_time.</remarks>
+        [Obsolete("This overload is deprecated and will be removed in a future version. Use the AddTime(uint tag, string value) overload instead.")]
         public bool AddTime(Field tag, string value) =>
             AddTime((uint)tag, value);
 
@@ -50,6 +51,7 @@ namespace Millistream.Streaming
         /// <param name="millisecond">The millisecond.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         /// <remarks>The corresponding native function is mdf_message_add_time2.</remarks>
+        [Obsolete("This overload is deprecated and will be removed in a future version. Use the AddTime2(uint tag, int hour, int minute, int second, int millisecond) overload instead.")]
         public bool AddTime2(Field tag, int hour, int minute, int second, int millisecond) =>
             AddTime2((uint)tag, hour, minute, second, millisecond);
 
@@ -78,6 +80,7 @@ namespace Millistream.Streaming
         /// <param name="nanosecond">The nanosecond.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         /// <remarks>The corresponding native function is mdf_message_add_time3.</remarks>
+        [Obsolete("This overload is deprecated and will be removed in a future version. Use the AddTime3(uint tag, int hour, int minute, int second, int nanosecond) overload instead.")]
         public bool AddTime3(Field tag, int hour, int minute, int second, int nanosecond) =>
             AddTime3((uint)tag, hour, minute, second, nanosecond);
 
@@ -102,6 +105,7 @@ namespace Millistream.Streaming
         /// <param name="value">The time field value as a memory span that contains a null-terminated sequence of UTF-8 encoded bytes.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         /// <remarks>The corresponding native function is mdf_message_add_time.</remarks>
+        [Obsolete("This overload is deprecated and will be removed in a future version. Use the AddTime(uint tag, ReadOnlySpan<byte> value) overload instead.")]
         public bool AddTime(Field tag, ReadOnlySpan<byte> value) =>
             AddTime((uint)tag, value);
     }

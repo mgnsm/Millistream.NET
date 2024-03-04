@@ -500,6 +500,7 @@ namespace Millistream.Streaming.UnitTests
         [TestMethod]
         public void GetNextMessageTest()
         {
+#pragma warning disable CS0618
             const MessageReference MessageReference = MessageReference.MDF_M_CI;
             const MessageClasses MessageClass = MessageClasses.MDF_MC_ESTIMATES;
             const ulong InstrumentReference = 500;
@@ -575,7 +576,7 @@ namespace Millistream.Streaming.UnitTests
             Assert.IsTrue(mdf.GetNextMessage(out messageReference, out insref));
             Assert.AreEqual(messageReference, MessageReference);
             Assert.AreEqual(insref, InstrumentReference);
-
+#pragma warning restore CS0618
             nativeImplementation.Verify(getNextMessage2Expression, Times.Exactly(2));
         }
 
@@ -595,7 +596,9 @@ namespace Millistream.Streaming.UnitTests
 
             using MarketDataFeed mdf = new(nativeImplementation);
             Assert.IsTrue(mdf.GetNextMessage(out ushort _, out _));
+#pragma warning disable CS0618
             Assert.IsTrue(mdf.GetNextMessage(out MessageReference _, out _));
+#pragma warning restore CS0618
             implemementation.Verify(expression, Times.Exactly(2)); // mdf_get_next_message should be called instead of the missing mdf_get_next_message2 function
             implemementation.Verify(x => x.mdf_get_next_message2(It.IsAny<IntPtr>(), ref It.Ref<ushort>.IsAny, ref It.Ref<ulong>.IsAny), Times.Never);
         }
@@ -607,7 +610,7 @@ namespace Millistream.Streaming.UnitTests
             IntPtr feedHandle = new(123);
             nativeImplementation.Setup(x => x.mdf_create()).Returns(feedHandle);
 
-            const Field Tag = Field.MDF_F_ADDRESS;
+            const uint Tag = Fields.MDF_F_ADDRESS;
             Expression<Func<INativeImplementation, int>> expression = x => x.mdf_get_next_field(feedHandle, ref It.Ref<uint>.IsAny, ref It.Ref<IntPtr>.IsAny);
             nativeImplementation.Setup(expression)
                 .Callback(new GetNextFieldCallback((IntPtr _, ref uint tag, ref IntPtr value) => tag = (uint)Tag))
@@ -616,9 +619,11 @@ namespace Millistream.Streaming.UnitTests
 
             using MarketDataFeed mdf = new();
             Assert.IsTrue(mdf.GetNextField(out uint tag, out ReadOnlySpan<byte> _));
-            Assert.AreEqual((uint)Tag, tag);
+            Assert.AreEqual(Tag, tag);
+#pragma warning disable CS0618
             Assert.IsTrue(mdf.GetNextField(out Field field, out ReadOnlySpan<byte> _));
-            Assert.AreEqual(Tag, field);
+#pragma warning restore CS0618
+            Assert.AreEqual(Tag, (uint)field);
             nativeImplementation.Verify(expression, Times.Exactly(2));
         }
 
@@ -723,7 +728,9 @@ namespace Millistream.Streaming.UnitTests
             NativeImplementation.Implementation = nativeImplementation.Object;
 
             using MarketDataFeed mdf = new();
+#pragma warning disable CS0618
             mdf.GetNextMessage(out MessageReference _, out MessageClasses _, out ulong _);
+#pragma warning restore CS0618
         }
 
         [TestMethod]
@@ -741,7 +748,9 @@ namespace Millistream.Streaming.UnitTests
 
             NativeImplementation.Implementation = nativeImplementation.Object;
             using MarketDataFeed mdf = new();
+#pragma warning disable CS0618
             mdf.GetNextField(out Field _, out ReadOnlySpan<byte> _);
+#pragma warning restore CS0618
         }
 
         private static void GetInt32Property(MDF_OPTION option, Func<MarketDataFeed, int> getter)
