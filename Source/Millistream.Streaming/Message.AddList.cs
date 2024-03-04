@@ -34,6 +34,7 @@ namespace Millistream.Streaming
         [Obsolete("This overload is deprecated and will be removed in a future version. Use the AddList(uint tag, string value) overload instead.")]
         public bool AddList(Field tag, string value) =>
             AddList((uint)tag, value);
+
         /// <summary>
         /// Adds a list field to the current active message. A list field is a space separated list of instrument references. The first position in the value can be:
         /// <para>'+'   (the supplied list should be added to the current value)<br/>
