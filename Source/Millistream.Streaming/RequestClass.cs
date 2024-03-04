@@ -1,8 +1,11 @@
-﻿namespace Millistream.Streaming
+﻿using System;
+
+namespace Millistream.Streaming
 {
     /// <summary>
     /// Request Classes
     /// </summary>
+    [Obsolete("This enumeration is deprecated and has been replaced by the constants in the RequestClasses class.")]
     public enum RequestClass : uint
     {
         MDF_RC_NEWSHEADLINE = 0,

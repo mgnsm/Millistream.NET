@@ -33,11 +33,13 @@ namespace Millistream.Streaming.IntegrationTests
         public void SetMessageCompressionLevelTest()
         {
             using Message message = new Message();
+#pragma warning disable CS0618
             foreach (CompressionLevel compressionLevel in Enum.GetValues(typeof(CompressionLevel)))
             {
                 message.CompressionLevel = compressionLevel;
                 Assert.AreEqual(compressionLevel, message.CompressionLevel);
             }
+#pragma warning restore CS0618
         }
 
         [TestMethod]
@@ -90,72 +92,72 @@ namespace Millistream.Streaming.IntegrationTests
             };
 
             using Message message = new Message();
-            Assert.IsTrue(message.Add(0, MessageReference.MDF_M_QUOTE));
+            Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_QUOTE));
             foreach (string value in values)
             {
-                Assert.IsTrue(message.AddNumeric(Field.MDF_F_LANGUAGE, value));
-                Assert.IsTrue(message.AddNumeric(Field.MDF_F_LANGUAGE, Encoding.UTF8.GetBytes(value + char.MinValue)));
-                Assert.IsTrue(message.AddNumeric(Field.MDF_F_LANGUAGE, Encoding.UTF8.GetBytes(value)));
+                Assert.IsTrue(message.AddNumeric(Fields.MDF_F_LANGUAGE, value));
+                Assert.IsTrue(message.AddNumeric(Fields.MDF_F_LANGUAGE, Encoding.UTF8.GetBytes(value + char.MinValue)));
+                Assert.IsTrue(message.AddNumeric(Fields.MDF_F_LANGUAGE, Encoding.UTF8.GetBytes(value)));
             }
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_LANGUAGE, default(string)));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_LANGUAGE, default(ReadOnlySpan<byte>)));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_LANGUAGE, string.Empty));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_LANGUAGE, s_empty));
+            Assert.IsTrue(message.AddNumeric(Fields.MDF_F_LANGUAGE, default(string)));
+            Assert.IsTrue(message.AddNumeric(Fields.MDF_F_LANGUAGE, default(ReadOnlySpan<byte>)));
+            Assert.IsTrue(message.AddNumeric(Fields.MDF_F_LANGUAGE, string.Empty));
+            Assert.IsTrue(message.AddNumeric(Fields.MDF_F_LANGUAGE, s_empty));
         }
 
         [TestMethod]
         public void AddInt64Test()
         {
             using Message message = new Message();
-            Assert.IsTrue(message.Add(0, MessageReference.MDF_M_QUOTE));
-            Assert.IsTrue(message.AddInt64(Field.MDF_F_QUANTITY, -12345L, 2));
-            Assert.IsTrue(message.AddInt64(Field.MDF_F_LANGUAGE, 28L, 0));
-            Assert.IsTrue(message.AddInt64(Field.MDF_F_LANGUAGE, 283L, 0));
-            Assert.IsTrue(message.AddInt64(Field.MDF_F_LANGUAGE, 0L, 0));
-            Assert.IsTrue(message.AddInt64(Field.MDF_F_LANGUAGE, 27L, 0));
-            Assert.IsTrue(message.AddInt64(Field.MDF_F_LANGUAGE, 99L, 2));
-            Assert.IsTrue(message.AddInt64(Field.MDF_F_LANGUAGE, 25599L, 2));
-            Assert.IsTrue(message.AddInt64(Field.MDF_F_LANGUAGE, 1001L, 2));
-            Assert.IsTrue(message.AddInt64(Field.MDF_F_LANGUAGE, 1030001L, 4));
-            Assert.IsTrue(message.AddInt64(Field.MDF_F_LANGUAGE, 104857L, 3));
-            Assert.IsTrue(message.AddInt64(Field.MDF_F_LANGUAGE, 1048576L, 4));
-            Assert.IsTrue(message.AddInt64(Field.MDF_F_LANGUAGE, 1L, 4));
-            Assert.IsTrue(message.AddInt64(Field.MDF_F_LANGUAGE, 1074176L, 2));
-            Assert.IsTrue(message.AddInt64(Field.MDF_F_LANGUAGE, 25601L, 2));
-            Assert.IsTrue(message.AddInt64(Field.MDF_F_LANGUAGE, 284L, 0));
-            Assert.IsTrue(message.AddInt64(Field.MDF_F_LANGUAGE, 2000L, 0));
-            Assert.IsTrue(message.AddInt64(Field.MDF_F_LANGUAGE, 20000000000000000L, 0));
-            Assert.IsTrue(message.AddInt64(Field.MDF_F_LANGUAGE, -10000001L, 7));
-            Assert.IsTrue(message.AddInt64(Field.MDF_F_LANGUAGE, 10000001L, 7));
-            Assert.IsTrue(message.AddInt64(Field.MDF_F_LANGUAGE, 1L, 15));
+            Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_QUOTE));
+            Assert.IsTrue(message.AddInt64(Fields.MDF_F_QUANTITY, -12345L, 2));
+            Assert.IsTrue(message.AddInt64(Fields.MDF_F_LANGUAGE, 28L, 0));
+            Assert.IsTrue(message.AddInt64(Fields.MDF_F_LANGUAGE, 283L, 0));
+            Assert.IsTrue(message.AddInt64(Fields.MDF_F_LANGUAGE, 0L, 0));
+            Assert.IsTrue(message.AddInt64(Fields.MDF_F_LANGUAGE, 27L, 0));
+            Assert.IsTrue(message.AddInt64(Fields.MDF_F_LANGUAGE, 99L, 2));
+            Assert.IsTrue(message.AddInt64(Fields.MDF_F_LANGUAGE, 25599L, 2));
+            Assert.IsTrue(message.AddInt64(Fields.MDF_F_LANGUAGE, 1001L, 2));
+            Assert.IsTrue(message.AddInt64(Fields.MDF_F_LANGUAGE, 1030001L, 4));
+            Assert.IsTrue(message.AddInt64(Fields.MDF_F_LANGUAGE, 104857L, 3));
+            Assert.IsTrue(message.AddInt64(Fields.MDF_F_LANGUAGE, 1048576L, 4));
+            Assert.IsTrue(message.AddInt64(Fields.MDF_F_LANGUAGE, 1L, 4));
+            Assert.IsTrue(message.AddInt64(Fields.MDF_F_LANGUAGE, 1074176L, 2));
+            Assert.IsTrue(message.AddInt64(Fields.MDF_F_LANGUAGE, 25601L, 2));
+            Assert.IsTrue(message.AddInt64(Fields.MDF_F_LANGUAGE, 284L, 0));
+            Assert.IsTrue(message.AddInt64(Fields.MDF_F_LANGUAGE, 2000L, 0));
+            Assert.IsTrue(message.AddInt64(Fields.MDF_F_LANGUAGE, 20000000000000000L, 0));
+            Assert.IsTrue(message.AddInt64(Fields.MDF_F_LANGUAGE, -10000001L, 7));
+            Assert.IsTrue(message.AddInt64(Fields.MDF_F_LANGUAGE, 10000001L, 7));
+            Assert.IsTrue(message.AddInt64(Fields.MDF_F_LANGUAGE, 1L, 15));
         }
 
         [TestMethod]
         public void AddUInt64Test()
         {
             using Message message = new Message();
-            Assert.IsTrue(message.Add(0, MessageReference.MDF_M_QUOTE));
-            Assert.IsTrue(message.AddUInt64(Field.MDF_F_QUANTITY, 12345UL, 2));
-            Assert.IsTrue(message.AddUInt64(Field.MDF_F_LANGUAGE, 28UL, 0));
-            Assert.IsTrue(message.AddUInt64(Field.MDF_F_LANGUAGE, 283UL, 0));
-            Assert.IsTrue(message.AddUInt64(Field.MDF_F_LANGUAGE, 0UL, 0));
-            Assert.IsTrue(message.AddUInt64(Field.MDF_F_LANGUAGE, 27UL, 0));
-            Assert.IsTrue(message.AddUInt64(Field.MDF_F_LANGUAGE, 99UL, 2));
-            Assert.IsTrue(message.AddUInt64(Field.MDF_F_LANGUAGE, 25599UL, 2));
-            Assert.IsTrue(message.AddUInt64(Field.MDF_F_LANGUAGE, 1001UL, 2));
-            Assert.IsTrue(message.AddUInt64(Field.MDF_F_LANGUAGE, 1030001UL, 4));
-            Assert.IsTrue(message.AddUInt64(Field.MDF_F_LANGUAGE, 104857UL, 3));
-            Assert.IsTrue(message.AddUInt64(Field.MDF_F_LANGUAGE, 1048576UL, 4));
-            Assert.IsTrue(message.AddUInt64(Field.MDF_F_LANGUAGE, 1UL, 4));
-            Assert.IsTrue(message.AddUInt64(Field.MDF_F_LANGUAGE, 1074176UL, 2));
-            Assert.IsTrue(message.AddUInt64(Field.MDF_F_LANGUAGE, 25601UL, 2));
-            Assert.IsTrue(message.AddUInt64(Field.MDF_F_LANGUAGE, 284UL, 0));
-            Assert.IsTrue(message.AddUInt64(Field.MDF_F_LANGUAGE, 2000UL, 0));
-            Assert.IsTrue(message.AddUInt64(Field.MDF_F_LANGUAGE, 20000000000000000UL, 0));
-            Assert.IsTrue(message.AddUInt64(Field.MDF_F_LANGUAGE, 18446744073709551610UL, 0));
-            Assert.IsTrue(message.AddUInt64(Field.MDF_F_LANGUAGE, 18446744073709551615UL, 15));
-            Assert.IsTrue(message.AddUInt64(Field.MDF_F_LANGUAGE, 10000001UL, 7));
-            Assert.IsTrue(message.AddUInt64(Field.MDF_F_LANGUAGE, 1UL, 15));
+            Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_QUOTE));
+            Assert.IsTrue(message.AddUInt64(Fields.MDF_F_QUANTITY, 12345UL, 2));
+            Assert.IsTrue(message.AddUInt64(Fields.MDF_F_LANGUAGE, 28UL, 0));
+            Assert.IsTrue(message.AddUInt64(Fields.MDF_F_LANGUAGE, 283UL, 0));
+            Assert.IsTrue(message.AddUInt64(Fields.MDF_F_LANGUAGE, 0UL, 0));
+            Assert.IsTrue(message.AddUInt64(Fields.MDF_F_LANGUAGE, 27UL, 0));
+            Assert.IsTrue(message.AddUInt64(Fields.MDF_F_LANGUAGE, 99UL, 2));
+            Assert.IsTrue(message.AddUInt64(Fields.MDF_F_LANGUAGE, 25599UL, 2));
+            Assert.IsTrue(message.AddUInt64(Fields.MDF_F_LANGUAGE, 1001UL, 2));
+            Assert.IsTrue(message.AddUInt64(Fields.MDF_F_LANGUAGE, 1030001UL, 4));
+            Assert.IsTrue(message.AddUInt64(Fields.MDF_F_LANGUAGE, 104857UL, 3));
+            Assert.IsTrue(message.AddUInt64(Fields.MDF_F_LANGUAGE, 1048576UL, 4));
+            Assert.IsTrue(message.AddUInt64(Fields.MDF_F_LANGUAGE, 1UL, 4));
+            Assert.IsTrue(message.AddUInt64(Fields.MDF_F_LANGUAGE, 1074176UL, 2));
+            Assert.IsTrue(message.AddUInt64(Fields.MDF_F_LANGUAGE, 25601UL, 2));
+            Assert.IsTrue(message.AddUInt64(Fields.MDF_F_LANGUAGE, 284UL, 0));
+            Assert.IsTrue(message.AddUInt64(Fields.MDF_F_LANGUAGE, 2000UL, 0));
+            Assert.IsTrue(message.AddUInt64(Fields.MDF_F_LANGUAGE, 20000000000000000UL, 0));
+            Assert.IsTrue(message.AddUInt64(Fields.MDF_F_LANGUAGE, 18446744073709551610UL, 0));
+            Assert.IsTrue(message.AddUInt64(Fields.MDF_F_LANGUAGE, 18446744073709551615UL, 15));
+            Assert.IsTrue(message.AddUInt64(Fields.MDF_F_LANGUAGE, 10000001UL, 7));
+            Assert.IsTrue(message.AddUInt64(Fields.MDF_F_LANGUAGE, 1UL, 15));
         }
 
         [TestMethod]
@@ -187,13 +189,13 @@ namespace Millistream.Streaming.IntegrationTests
             };
 
             using Message message = new Message();
-            Assert.IsTrue(message.Add(0, MessageReference.MDF_M_QUOTE));
+            Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_QUOTE));
 
             foreach (string value in validValues)
             {
-                Assert.IsTrue(message.AddDate(Field.MDF_F_DATE, value));
-                Assert.IsTrue(message.AddDate(Field.MDF_F_DATE, Encoding.UTF8.GetBytes(value + char.MinValue)));
-                Assert.IsTrue(message.AddDate(Field.MDF_F_DATE, Encoding.UTF8.GetBytes(value)));
+                Assert.IsTrue(message.AddDate(Fields.MDF_F_DATE, value));
+                Assert.IsTrue(message.AddDate(Fields.MDF_F_DATE, Encoding.UTF8.GetBytes(value + char.MinValue)));
+                Assert.IsTrue(message.AddDate(Fields.MDF_F_DATE, Encoding.UTF8.GetBytes(value)));
             }
 
             string[] invalidValues = new string[]
@@ -205,27 +207,27 @@ namespace Millistream.Streaming.IntegrationTests
 
             foreach (string invalidValue in invalidValues)
             {
-                Assert.IsFalse(message.AddDate(Field.MDF_F_DATE, invalidValue));
-                Assert.IsFalse(message.AddDate(Field.MDF_F_DATE, Encoding.UTF8.GetBytes(invalidValue + char.MinValue)));
-                Assert.IsFalse(message.AddDate(Field.MDF_F_DATE, Encoding.UTF8.GetBytes(invalidValue)));
+                Assert.IsFalse(message.AddDate(Fields.MDF_F_DATE, invalidValue));
+                Assert.IsFalse(message.AddDate(Fields.MDF_F_DATE, Encoding.UTF8.GetBytes(invalidValue + char.MinValue)));
+                Assert.IsFalse(message.AddDate(Fields.MDF_F_DATE, Encoding.UTF8.GetBytes(invalidValue)));
             }
 
-            Assert.IsTrue(message.AddDate(Field.MDF_F_DATE, default(string)));
-            Assert.IsTrue(message.AddDate(Field.MDF_F_DATE, default(ReadOnlySpan<byte>)));
-            Assert.IsFalse(message.AddDate(Field.MDF_F_DATE, string.Empty));
-            Assert.IsFalse(message.AddDate(Field.MDF_F_DATE, s_empty));
+            Assert.IsTrue(message.AddDate(Fields.MDF_F_DATE, default(string)));
+            Assert.IsTrue(message.AddDate(Fields.MDF_F_DATE, default(ReadOnlySpan<byte>)));
+            Assert.IsFalse(message.AddDate(Fields.MDF_F_DATE, string.Empty));
+            Assert.IsFalse(message.AddDate(Fields.MDF_F_DATE, s_empty));
 
-            Assert.IsTrue(message.AddDate(Field.MDF_F_DATE, 2020, 12, 30));
-            Assert.IsTrue(message.AddDate(Field.MDF_F_DATE, 2006, 9, 19));
-            Assert.IsTrue(message.AddDate(Field.MDF_F_DATE, 2008, 10, 0));
-            Assert.IsTrue(message.AddDate(Field.MDF_F_DATE, 2008, 0, 0));
-            Assert.IsTrue(message.AddDate(Field.MDF_F_DATE, 2008, 0, 1));
-            Assert.IsTrue(message.AddDate(Field.MDF_F_DATE, 2008, 0, 2 + 2));
-            Assert.IsTrue(message.AddDate(Field.MDF_F_DATE, 2008, 0, 4 + 5));
-            Assert.IsTrue(message.AddDate(Field.MDF_F_DATE, 2008, 0, 22 + 9));
-            Assert.IsTrue(message.AddDate(Field.MDF_F_DATE, 2008, 13, 53 - 22));
-            Assert.IsFalse(message.AddDate(Field.MDF_F_DATE, 2020, 13, 40));
-            Assert.IsFalse(message.AddDate(Field.MDF_F_DATE, 2020, 14, 30));
+            Assert.IsTrue(message.AddDate(Fields.MDF_F_DATE, 2020, 12, 30));
+            Assert.IsTrue(message.AddDate(Fields.MDF_F_DATE, 2006, 9, 19));
+            Assert.IsTrue(message.AddDate(Fields.MDF_F_DATE, 2008, 10, 0));
+            Assert.IsTrue(message.AddDate(Fields.MDF_F_DATE, 2008, 0, 0));
+            Assert.IsTrue(message.AddDate(Fields.MDF_F_DATE, 2008, 0, 1));
+            Assert.IsTrue(message.AddDate(Fields.MDF_F_DATE, 2008, 0, 2 + 2));
+            Assert.IsTrue(message.AddDate(Fields.MDF_F_DATE, 2008, 0, 4 + 5));
+            Assert.IsTrue(message.AddDate(Fields.MDF_F_DATE, 2008, 0, 22 + 9));
+            Assert.IsTrue(message.AddDate(Fields.MDF_F_DATE, 2008, 13, 53 - 22));
+            Assert.IsFalse(message.AddDate(Fields.MDF_F_DATE, 2020, 13, 40));
+            Assert.IsFalse(message.AddDate(Fields.MDF_F_DATE, 2020, 14, 30));
         }
 
         [TestMethod]
@@ -244,36 +246,36 @@ namespace Millistream.Streaming.IntegrationTests
             };
 
             using Message message = new Message();
-            Assert.IsTrue(message.Add(0, MessageReference.MDF_M_QUOTE));
+            Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_QUOTE));
 
             foreach (string value in values)
             {
-                Assert.IsTrue(message.AddTime(Field.MDF_F_DATE, value));
-                Assert.IsTrue(message.AddTime(Field.MDF_F_DATE, Encoding.UTF8.GetBytes(value + char.MinValue)));
-                Assert.IsTrue(message.AddTime(Field.MDF_F_DATE, Encoding.UTF8.GetBytes(value)));
+                Assert.IsTrue(message.AddTime(Fields.MDF_F_DATE, value));
+                Assert.IsTrue(message.AddTime(Fields.MDF_F_DATE, Encoding.UTF8.GetBytes(value + char.MinValue)));
+                Assert.IsTrue(message.AddTime(Fields.MDF_F_DATE, Encoding.UTF8.GetBytes(value)));
             }
-            Assert.IsFalse(message.AddTime(Field.MDF_F_DATE, "abc"));
-            Assert.IsFalse(message.AddTime(Field.MDF_F_DATE, Encoding.UTF8.GetBytes("abc")));
-            Assert.IsFalse(message.AddTime(Field.MDF_F_DATE, default(string))); 
-            Assert.IsFalse(message.AddTime(Field.MDF_F_DATE, default(ReadOnlySpan<byte>)));
-            Assert.IsFalse(message.AddTime(Field.MDF_F_DATE, string.Empty));
-            Assert.IsFalse(message.AddTime(Field.MDF_F_DATE, s_empty));
+            Assert.IsFalse(message.AddTime(Fields.MDF_F_DATE, "abc"));
+            Assert.IsFalse(message.AddTime(Fields.MDF_F_DATE, Encoding.UTF8.GetBytes("abc")));
+            Assert.IsFalse(message.AddTime(Fields.MDF_F_DATE, default(string))); 
+            Assert.IsFalse(message.AddTime(Fields.MDF_F_DATE, default(ReadOnlySpan<byte>)));
+            Assert.IsFalse(message.AddTime(Fields.MDF_F_DATE, string.Empty));
+            Assert.IsFalse(message.AddTime(Fields.MDF_F_DATE, s_empty));
 
-            Assert.IsTrue(message.AddTime2(Field.MDF_F_DATE, 17, 3, 1, 999));
-            Assert.IsTrue(message.AddTime2(Field.MDF_F_DATE, 0, 0, 0, 0));
-            Assert.IsTrue(message.AddTime2(Field.MDF_F_DATE, 23, 59, 58, 0));
-            Assert.IsTrue(message.AddTime2(Field.MDF_F_DATE, 23, 59, 59, 1));
-            Assert.IsTrue(message.AddTime2(Field.MDF_F_DATE, 23, 59, 59, 999));
-            Assert.IsFalse(message.AddTime2(Field.MDF_F_DATE, 33, 3, 1, 999));
+            Assert.IsTrue(message.AddTime2(Fields.MDF_F_DATE, 17, 3, 1, 999));
+            Assert.IsTrue(message.AddTime2(Fields.MDF_F_DATE, 0, 0, 0, 0));
+            Assert.IsTrue(message.AddTime2(Fields.MDF_F_DATE, 23, 59, 58, 0));
+            Assert.IsTrue(message.AddTime2(Fields.MDF_F_DATE, 23, 59, 59, 1));
+            Assert.IsTrue(message.AddTime2(Fields.MDF_F_DATE, 23, 59, 59, 999));
+            Assert.IsFalse(message.AddTime2(Fields.MDF_F_DATE, 33, 3, 1, 999));
 
-            Assert.IsTrue(message.AddTime3(Field.MDF_F_DATE, 17, 3, 1, 999999999));
-            Assert.IsTrue(message.AddTime3(Field.MDF_F_DATE, 17, 3, 1, 999));
-            Assert.IsTrue(message.AddTime3(Field.MDF_F_DATE, 0, 0, 0, 0));
-            Assert.IsTrue(message.AddTime3(Field.MDF_F_DATE, 23, 59, 58, 0));
-            Assert.IsTrue(message.AddTime3(Field.MDF_F_DATE, 0, 0, 0, 1));
-            Assert.IsTrue(message.AddTime3(Field.MDF_F_DATE, 23, 59, 59, 1));
-            Assert.IsTrue(message.AddTime3(Field.MDF_F_DATE, 23, 59, 59, 999999999));
-            Assert.IsFalse(message.AddTime3(Field.MDF_F_DATE, 17, 88, 1, 999));
+            Assert.IsTrue(message.AddTime3(Fields.MDF_F_DATE, 17, 3, 1, 999999999));
+            Assert.IsTrue(message.AddTime3(Fields.MDF_F_DATE, 17, 3, 1, 999));
+            Assert.IsTrue(message.AddTime3(Fields.MDF_F_DATE, 0, 0, 0, 0));
+            Assert.IsTrue(message.AddTime3(Fields.MDF_F_DATE, 23, 59, 58, 0));
+            Assert.IsTrue(message.AddTime3(Fields.MDF_F_DATE, 0, 0, 0, 1));
+            Assert.IsTrue(message.AddTime3(Fields.MDF_F_DATE, 23, 59, 59, 1));
+            Assert.IsTrue(message.AddTime3(Fields.MDF_F_DATE, 23, 59, 59, 999999999));
+            Assert.IsFalse(message.AddTime3(Fields.MDF_F_DATE, 17, 88, 1, 999));
         }
 
         [TestMethod]
@@ -296,24 +298,24 @@ namespace Millistream.Streaming.IntegrationTests
             };
 
             using Message message = new Message();
-            Assert.IsTrue(message.Add(0, MessageReference.MDF_M_BASICDATA));
+            Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_BASICDATA));
             foreach (string value in values)
             {
-                Assert.IsTrue(message.AddList(Field.MDF_F_INSREFLIST, value));
-                Assert.IsTrue(message.AddList(Field.MDF_F_INSREFLIST, Encoding.UTF8.GetBytes(value + char.MinValue)));
-                Assert.IsTrue(message.AddList(Field.MDF_F_INSREFLIST, Encoding.UTF8.GetBytes(value)));
+                Assert.IsTrue(message.AddList(Fields.MDF_F_INSREFLIST, value));
+                Assert.IsTrue(message.AddList(Fields.MDF_F_INSREFLIST, Encoding.UTF8.GetBytes(value + char.MinValue)));
+                Assert.IsTrue(message.AddList(Fields.MDF_F_INSREFLIST, Encoding.UTF8.GetBytes(value)));
             }
-            Assert.IsTrue(message.AddList(Field.MDF_F_INSREFLIST, default(string)));
-            Assert.IsTrue(message.AddList(Field.MDF_F_INSREFLIST, default(ReadOnlySpan<byte>)));
-            Assert.IsTrue(message.AddList(Field.MDF_F_INSREFLIST, string.Empty));
-            Assert.IsTrue(message.AddList(Field.MDF_F_INSREFLIST, s_empty));
+            Assert.IsTrue(message.AddList(Fields.MDF_F_INSREFLIST, default(string)));
+            Assert.IsTrue(message.AddList(Fields.MDF_F_INSREFLIST, default(ReadOnlySpan<byte>)));
+            Assert.IsTrue(message.AddList(Fields.MDF_F_INSREFLIST, string.Empty));
+            Assert.IsTrue(message.AddList(Fields.MDF_F_INSREFLIST, s_empty));
         }
 
         [TestMethod]
         public void ResetTest()
         {
             using Message message = new Message();
-            Assert.IsTrue(message.Add(0, MessageReference.MDF_M_QUOTE));
+            Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_QUOTE));
             Assert.AreEqual(1, message.ActiveCount);
             Assert.AreEqual(0, message.FieldCount);
             message.Reset();
@@ -325,11 +327,11 @@ namespace Millistream.Streaming.IntegrationTests
         public void DeleteTest()
         {
             using Message message = new Message();
-            Assert.IsTrue(message.Add(0, MessageReference.MDF_M_QUOTE));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTCLASS, StringConstants.RequestClasses.MDF_RC_BASICDATA));
+            Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_QUOTE));
+            Assert.IsTrue(message.AddNumeric(Fields.MDF_F_REQUESTCLASS, RequestClasses.MDF_RC_BASICDATA));
             Assert.AreEqual(1, message.ActiveCount);
             Assert.AreEqual(1, message.FieldCount);
-            Assert.IsTrue(message.Add(0, MessageReference.MDF_M_QUOTE));
+            Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_QUOTE));
             Assert.AreEqual(2, message.ActiveCount);
             Assert.AreEqual(0, message.FieldCount);
             message.Delete();
@@ -354,40 +356,40 @@ namespace Millistream.Streaming.IntegrationTests
             };
 
             using Message message = new Message();
-            Assert.IsTrue(message.Add(0, MessageReference.MDF_M_QUOTE));
+            Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_QUOTE));
             foreach (string @string in strings)
             {
-                Assert.IsTrue(message.AddString(Field.MDF_F_LANGUAGE, @string));
-                Assert.IsTrue(message.AddString(Field.MDF_F_LANGUAGE, @string, @string.Length));
-                Assert.IsTrue(message.AddString(Field.MDF_F_LANGUAGE, @string, @string.Length + 5));
-                Assert.IsFalse(message.AddString(Field.MDF_F_LANGUAGE, @string, -1));
+                Assert.IsTrue(message.AddString(Fields.MDF_F_LANGUAGE, @string));
+                Assert.IsTrue(message.AddString(Fields.MDF_F_LANGUAGE, @string, @string.Length));
+                Assert.IsTrue(message.AddString(Fields.MDF_F_LANGUAGE, @string, @string.Length + 5));
+                Assert.IsFalse(message.AddString(Fields.MDF_F_LANGUAGE, @string, -1));
 
                 byte[] bytes = Encoding.UTF8.GetBytes(@string + char.MinValue);
-                Assert.IsTrue(message.AddString(Field.MDF_F_LANGUAGE, bytes));
-                Assert.IsTrue(message.AddString(Field.MDF_F_LANGUAGE, bytes, @string.Length));
-                Assert.IsTrue(message.AddString(Field.MDF_F_LANGUAGE, bytes, @string.Length + 5));
-                Assert.IsFalse(message.AddString(Field.MDF_F_LANGUAGE, bytes, -1));
+                Assert.IsTrue(message.AddString(Fields.MDF_F_LANGUAGE, bytes));
+                Assert.IsTrue(message.AddString(Fields.MDF_F_LANGUAGE, bytes, @string.Length));
+                Assert.IsTrue(message.AddString(Fields.MDF_F_LANGUAGE, bytes, @string.Length + 5));
+                Assert.IsFalse(message.AddString(Fields.MDF_F_LANGUAGE, bytes, -1));
                 
                 bytes = Encoding.UTF8.GetBytes(@string);
-                Assert.IsTrue(message.AddString(Field.MDF_F_LANGUAGE, bytes));
-                Assert.IsTrue(message.AddString(Field.MDF_F_LANGUAGE, bytes, @string.Length));
-                Assert.IsTrue(message.AddString(Field.MDF_F_LANGUAGE, bytes, @string.Length + 5));
-                Assert.IsFalse(message.AddString(Field.MDF_F_LANGUAGE, bytes, -1));
+                Assert.IsTrue(message.AddString(Fields.MDF_F_LANGUAGE, bytes));
+                Assert.IsTrue(message.AddString(Fields.MDF_F_LANGUAGE, bytes, @string.Length));
+                Assert.IsTrue(message.AddString(Fields.MDF_F_LANGUAGE, bytes, @string.Length + 5));
+                Assert.IsFalse(message.AddString(Fields.MDF_F_LANGUAGE, bytes, -1));
             }
 
-            Assert.IsTrue(message.AddString(Field.MDF_F_LANGUAGE, default(string)));
-            Assert.IsTrue(message.AddString(Field.MDF_F_LANGUAGE, string.Empty));
-            Assert.IsTrue(message.AddString(Field.MDF_F_LANGUAGE, string.Empty, 0));
-            Assert.IsTrue(message.AddString(Field.MDF_F_LANGUAGE, string.Empty, 5));
-            Assert.IsTrue(message.AddString(Field.MDF_F_LANGUAGE, default(string), -1));
-            Assert.IsFalse(message.AddString(Field.MDF_F_LANGUAGE, string.Empty, -1));
+            Assert.IsTrue(message.AddString(Fields.MDF_F_LANGUAGE, default(string)));
+            Assert.IsTrue(message.AddString(Fields.MDF_F_LANGUAGE, string.Empty));
+            Assert.IsTrue(message.AddString(Fields.MDF_F_LANGUAGE, string.Empty, 0));
+            Assert.IsTrue(message.AddString(Fields.MDF_F_LANGUAGE, string.Empty, 5));
+            Assert.IsTrue(message.AddString(Fields.MDF_F_LANGUAGE, default(string), -1));
+            Assert.IsFalse(message.AddString(Fields.MDF_F_LANGUAGE, string.Empty, -1));
 
-            Assert.IsTrue(message.AddString(Field.MDF_F_LANGUAGE, default(ReadOnlySpan<byte>)));
-            Assert.IsTrue(message.AddString(Field.MDF_F_LANGUAGE, default(ReadOnlySpan<byte>), -1));
-            Assert.IsTrue(message.AddString(Field.MDF_F_LANGUAGE, s_empty));
-            Assert.IsTrue(message.AddString(Field.MDF_F_LANGUAGE, s_empty, 0));
-            Assert.IsTrue(message.AddString(Field.MDF_F_LANGUAGE, s_empty, 5));
-            Assert.IsFalse(message.AddString(Field.MDF_F_LANGUAGE, s_empty, -1));
+            Assert.IsTrue(message.AddString(Fields.MDF_F_LANGUAGE, default(ReadOnlySpan<byte>)));
+            Assert.IsTrue(message.AddString(Fields.MDF_F_LANGUAGE, default(ReadOnlySpan<byte>), -1));
+            Assert.IsTrue(message.AddString(Fields.MDF_F_LANGUAGE, s_empty));
+            Assert.IsTrue(message.AddString(Fields.MDF_F_LANGUAGE, s_empty, 0));
+            Assert.IsTrue(message.AddString(Fields.MDF_F_LANGUAGE, s_empty, 5));
+            Assert.IsFalse(message.AddString(Fields.MDF_F_LANGUAGE, s_empty, -1));
         }
 
         [TestMethod]
@@ -395,16 +397,16 @@ namespace Millistream.Streaming.IntegrationTests
         {
             using Message source = new Message();
             const ulong SourceInsRef = 1;
-            Assert.IsTrue(source.Add(SourceInsRef, MessageReference.MDF_M_REQUEST));
-            Assert.IsTrue(source.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE));
+            Assert.IsTrue(source.Add(SourceInsRef, MessageReferences.MDF_M_REQUEST));
+            Assert.IsTrue(source.AddNumeric(Fields.MDF_F_REQUESTTYPE, RequestTypes.MDF_RT_IMAGE));
             Assert.AreEqual(1, source.ActiveCount);
             Assert.AreEqual(1, source.FieldCount);
-            Assert.IsTrue(source.Add(SourceInsRef, MessageReference.MDF_M_BASICDATA));
-            Assert.IsTrue(source.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE));
+            Assert.IsTrue(source.Add(SourceInsRef, MessageReferences.MDF_M_BASICDATA));
+            Assert.IsTrue(source.AddNumeric(Fields.MDF_F_REQUESTTYPE, RequestTypes.MDF_RT_IMAGE));
             Assert.AreEqual(2, source.ActiveCount);
             Assert.AreEqual(1, source.FieldCount);
-            Assert.IsTrue(source.Add(SourceInsRef, MessageReference.MDF_M_QUOTE));
-            Assert.IsTrue(source.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE));
+            Assert.IsTrue(source.Add(SourceInsRef, MessageReferences.MDF_M_QUOTE));
+            Assert.IsTrue(source.AddNumeric(Fields.MDF_F_REQUESTTYPE, RequestTypes.MDF_RT_IMAGE));
             Assert.AreEqual(3, source.ActiveCount);
             Assert.AreEqual(1, source.FieldCount);
 
@@ -430,12 +432,12 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.IsFalse(message.Serialize(out IntPtr result));
             Assert.AreEqual(IntPtr.Zero, result);
             //serialize
-            Assert.IsTrue(message.Add(0, MessageReference.MDF_M_QUOTE));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_ASKYIELD, "123"));
+            Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_QUOTE));
+            Assert.IsTrue(message.AddNumeric(Fields.MDF_F_ASKYIELD, "123"));
             Assert.IsTrue(message.Serialize(out result));
             Assert.AreNotEqual(IntPtr.Zero, result);
-            Assert.IsTrue(message.Add(0, MessageReference.MDF_M_REQUEST));
-            Assert.IsTrue(message.AddNumeric(Field.MDF_F_REQUESTTYPE, StringConstants.RequestTypes.MDF_RT_IMAGE));
+            Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_REQUEST));
+            Assert.IsTrue(message.AddNumeric(Fields.MDF_F_REQUESTTYPE, RequestTypes.MDF_RT_IMAGE));
             Assert.IsTrue(message.Serialize(out result));
             Assert.AreNotEqual(IntPtr.Zero, result);
             //deserialize

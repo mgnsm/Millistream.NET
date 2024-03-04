@@ -7,7 +7,7 @@ namespace Millistream.Streaming
         /// <summary>
         /// Fetches the next field from the current message.
         /// </summary>
-        /// <param name="tag">The field tag. This should match a <see cref="Field"/> value.</param>
+        /// <param name="tag">The field tag. This should match a <see cref="Fields"/> value.</param>
         /// <param name="value">A memory span that contains the bytes of the UTF-8 string representation of the field value.</param>
         /// <returns><see langword="true" /> if a field was returned, or <see langword="false" /> if there are no more fields in the current message.</returns>
         /// <remarks>The corresponding native function is mdf_get_next_field.</remarks>
@@ -49,6 +49,7 @@ namespace Millistream.Streaming
         /// <returns><see langword="true" /> if a field was returned, or <see langword="false" /> if there are no more fields in the current message.</returns>
         /// <exception cref="InvalidOperationException">An unknown/undefined field tag was fetched.</exception>
         /// <remarks>The corresponding native function is mdf_get_next_field.</remarks>
+        [Obsolete("This overload is deprecated and will be removed in a future version. Use the GetNextField(out uint tag, out ReadOnlySpan<byte> value) overload instead.")]
         public bool GetNextField(out Field field, out ReadOnlySpan<byte> value)
         {
             bool ret = GetNextField(out uint tag, out value);

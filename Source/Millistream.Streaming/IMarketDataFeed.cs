@@ -139,7 +139,7 @@ namespace Millistream.Streaming
         /// <summary>
         /// Fetches a message from the current consumed data if one is present and fills the output parameters with values representing the message fetched.
         /// </summary>
-        /// <param name="mref">The fetched message reference. This should match a <see cref="MessageReference"/> value.</param>
+        /// <param name="mref">The fetched message reference. This should match a <see cref="MessageReferences"/> value.</param>
         /// <param name="mclass">The fetched message class. This should match a <see cref="MessageClasses"/> value. The message class is normally only used internally and is supplied to the client for completeness and transparency. The client should under most circumstances only use the message reference in order to determine which message it has received.</param>
         /// <param name="insref">The fetched instrument reference, which is the unique id of an instrument.</param>
         /// <returns><see langword="true" /> if a message was returned (and the <paramref name="mref"/>, <paramref name="mclass"/> and <paramref name="insref"/> fields will be filled) or <see langword="false" /> if there are no more messages in the current consumed data (or an error occured).</returns>
@@ -148,7 +148,7 @@ namespace Millistream.Streaming
         /// <summary>
         /// Fetches a message from the current consumed data if one is present and fills the output parameters with values representing the message fetched.
         /// </summary>
-        /// <param name="mref">The fetched message reference. This should match a <see cref="MessageReference"/> value.</param>
+        /// <param name="mref">The fetched message reference. This should match a <see cref="MessageReferences"/> value.</param>
         /// <param name="insref">The fetched instrument reference, which is the unique id of an instrument.</param>
         /// <returns><see langword="true" /> if a message was returned (and the <paramref name="mref"/> and <paramref name="insref"/> fields will be filled) or <see langword="false" /> if there are no more messages in the current consumed data (or an error occured).</returns>
         bool GetNextMessage(out ushort mref, out ulong insref);
@@ -160,6 +160,7 @@ namespace Millistream.Streaming
         /// <param name="messageClasses">The fetched message class(es). The message class is normally only used internally and is supplied to the client for completeness and transparency. The client should under most circumstances only use the message reference in order to determine which message it has received.</param>
         /// <param name="insref">The fetched instrument reference, which is the unique id of an instrument.</param>
         /// <returns><see langword="true" /> if a message was returned (and the <paramref name="messageReference"/>, <paramref name="messageClasses"/> and <paramref name="insref"/> fields will be filled) or <see langword="false" /> if there are no more messages in the current consumed data (or an error occured).</returns>
+        [Obsolete("This overload is deprecated and will be removed in a future version. Use the GetNextMessage(out int mref, out int mclass, out ulong insref) overload instead.")]
         bool GetNextMessage(out MessageReference messageReference, out MessageClasses messageClasses, out ulong insref);
 
         /// <summary>
@@ -168,12 +169,13 @@ namespace Millistream.Streaming
         /// <param name="messageReference">The fetched message reference.</param>
         /// <param name="insref">The fetched instrument reference, which is the unique id of an instrument.</param>
         /// <returns><see langword="true" /> if a message was returned (and the <paramref name="messageReference"/> and <paramref name="insref"/> fields will be filled) or <see langword="false" /> if there are no more messages in the current consumed data (or an error occured).</returns>
+        [Obsolete("This overload is deprecated and will be removed in a future version. Use the GetNextMessage(out ushort mref, out ulong insref) overload instead.")]
         bool GetNextMessage(out MessageReference messageReference, out ulong insref);
 
         /// <summary>
         /// Fetches the next field from the current message.
         /// </summary>
-        /// <param name="tag">The field tag. This should match a <see cref="Field"/> value.</param>
+        /// <param name="tag">The field tag. This should match a <see cref="Fields"/> value.</param>
         /// <param name="value">A memory span that contains the bytes of the UTF-8 string representation of the field value.</param>
         /// <returns><see langword="true" /> if a field was returned, or <see langword="false" /> if there are no more fields in the current message.</returns>
         bool GetNextField(out uint tag, out ReadOnlySpan<byte> value);
@@ -184,12 +186,13 @@ namespace Millistream.Streaming
         /// <param name="field">The field tag.</param>
         /// <param name="value">A memory span that contains the bytes of the UTF-8 string representation of the field value.</param>
         /// <returns><see langword="true" /> if a field was returned, or <see langword="false" /> if there are no more fields in the current message.</returns>
+        [Obsolete("This overload is deprecated and will be removed in a future version. Use the GetNextField(out uint tag, out ReadOnlySpan<byte> value) overload instead.")]
         bool GetNextField(out Field field, out ReadOnlySpan<byte> value);
 
         /// <summary>
         /// <para>Connects to the first server in servers, which can be a comma separated list of 'host:port' pairs, where 'host' can be a DNS host name or an ip address(IPv6 addressed must be enclosed in brackets). If the server does not respond in time (<see cref="ConnectionTimeout"/>), the next server in the list will be tried until the list is empty and the function finally fails.</para>
         /// <para>Upon connect, the API will verify the authenticity of the server using it's RSA key, and a secure channel will be set up between the client and the server before the function signals success.</para>
-        /// <para>If this is the first successful connect on the API handle, or the templates has been updated since the last time the API was connected, the server will send a <see cref="MessageReference.MDF_M_MESSAGESREFERENCE"/> message to the client containing the new message templates. So you could receive one message before a successful logon request.</para>
+        /// <para>If this is the first successful connect on the API handle, or the templates has been updated since the last time the API was connected, the server will send a <see cref="MessageReferences.MDF_M_MESSAGESREFERENCE"/> message to the client containing the new message templates. So you could receive one message before a successful logon request.</para>
         /// </summary>
         /// <param name="servers">A comma separated list of 'host:port' pairs, where 'host' can be a DNS host name or an ip address (IPv6 addressed must be enclosed in brackets).</param>
         /// <returns><see langword="true" /> if a connection has been set up or <see langword="false" /> if a connection attempt failed with every server on the list.</returns>

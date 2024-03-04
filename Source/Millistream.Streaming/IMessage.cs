@@ -10,6 +10,7 @@ namespace Millistream.Streaming
         /// <summary>
         /// Gets or sets the zlib compression level used for the <see cref="AddString(uint, string)"/> and <see cref="AddString(uint, string, int)"/> methods.
         /// </summary>
+        [Obsolete("The CompressionLevel enumeration is deprecated and will be removed in a future version. The type of this property will then be changed to System.Byte.")]
         CompressionLevel CompressionLevel { get; set; }
 
         /// <summary>
@@ -51,6 +52,7 @@ namespace Millistream.Streaming
         /// <param name="instrumentReference">The reference for the instrument for which the message is created for.</param>
         /// <param name="messageReference">The type of the message to create.</param>
         /// <returns><see langword="true" /> if a new message was added to the message handle (or an empty message was reused) or <see langword="false" /> if there was an error.</returns>
+        [Obsolete("This overload is deprecated and will be removed in a future version. Use the Add(ulong insref, int mref) overload instead.")]
         bool Add(ulong instrumentReference, MessageReference messageReference);
 
         /// <summary>
@@ -67,6 +69,7 @@ namespace Millistream.Streaming
         /// <param name="tag">The field tag.</param>
         /// <param name="value">The numeric value as a UTF-8 string.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false"/> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
+        [Obsolete("This overload is deprecated and will be removed in a future version. Use the AddNumeric(uint tag, string value) overload instead.")]
         bool AddNumeric(Field tag, string value);
 
         /// <summary>
@@ -85,6 +88,7 @@ namespace Millistream.Streaming
         /// <param name="value">The scaled and signed 64-bit integer.</param>
         /// <param name="decimals">The number of decimals.</param>
         /// <returns><see langword = "true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
+        [Obsolete("This overload is deprecated and will be removed in a future version. Use the AddInt64(uint tag, long value, int decimals) overload instead.")]
         bool AddInt64(Field tag, long value, int decimals);
 
         /// <summary>
@@ -103,6 +107,7 @@ namespace Millistream.Streaming
         /// <param name="value">The scaled and unsigned 64-bit integer.</param>
         /// <param name="decimals">The number of decimals.</param>
         /// <returns><see langword = "true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
+        [Obsolete("This overload is deprecated and will be removed in a future version. Use the AddUInt64(uint tag, ulong value, int decimals) overload instead.")] 
         bool AddUInt64(Field tag, ulong value, int decimals);
 
         /// <summary>
@@ -128,6 +133,7 @@ namespace Millistream.Streaming
         /// <param name="tag">The field tag.</param>
         /// <param name="value">The UTF-8 string field value.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
+        [Obsolete("This overload is deprecated and will be removed in a future version. Use the AddString(uint tag, string value) overload instead.")]
         bool AddString(Field tag, string value);
 
         /// <summary>
@@ -137,6 +143,7 @@ namespace Millistream.Streaming
         /// <param name="value">The UTF-8 string field value.</param>
         /// <param name="length">The number of characters in <paramref name="value"/> to be added to the message.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
+        [Obsolete("This overload is deprecated and will be removed in a future version. Use the AddString(uint tag, string value, int length) overload instead.")]
         bool AddString(Field tag, string value, int length);
 
         /// <summary>
@@ -153,6 +160,7 @@ namespace Millistream.Streaming
         /// <param name="tag">The field tag.</param>
         /// <param name="value">The date field value.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
+        [Obsolete("This overload is deprecated and will be removed in a future version. Use the AddDate(uint tag, string value) overload instead.")]
         bool AddDate(Field tag, string value);
 
         /// <summary>
@@ -173,6 +181,7 @@ namespace Millistream.Streaming
         /// <param name="month">The month of the date field value.</param>
         /// <param name="day">The day of the date field value.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
+        [Obsolete("This overload is deprecated and will be removed in a future version. Use the AddDate(uint tag, int year, int month, int day) overload instead.")]
         bool AddDate(Field tag, int year, int month, int day);
 
         /// <summary>
@@ -189,6 +198,7 @@ namespace Millistream.Streaming
         /// <param name="tag">The field tag.</param>
         /// <param name="value">The time.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
+        [Obsolete("This overload is deprecated and will be removed in a future version. Use the AddTime(uint tag, string value) overload instead.")]
         bool AddTime(Field tag, string value);
 
         /// <summary>
@@ -211,6 +221,7 @@ namespace Millistream.Streaming
         /// <param name="second">The second.</param>
         /// <param name="millisecond">The millisecond.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
+        [Obsolete("This overload is deprecated and will be removed in a future version. Use the AddTime2(uint tag, int hour, int minute, int second, int millisecond) overload instead.")]
         bool AddTime2(Field tag, int hour, int minute, int second, int millisecond);
 
         /// <summary>
@@ -233,6 +244,7 @@ namespace Millistream.Streaming
         /// <param name="second">The second.</param>
         /// <param name="nanosecond">The nanosecond.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
+        [Obsolete("This overload is deprecated and will be removed in a future version. Use the AddTime3(uint tag, int hour, int minute, int second, int nanosecond) overload instead.")]
         bool AddTime3(Field tag, int hour, int minute, int second, int nanosecond);
 
         /// <summary>
@@ -257,6 +269,7 @@ namespace Millistream.Streaming
         /// <param name="tag">The field tag.</param>
         /// <param name="value">The list field value.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
+        [Obsolete("This overload is deprecated and will be removed in a future version. Use the AddList(uint tag, string value) overload instead.")]
         bool AddList(Field tag, string value);
 
         /// <summary>

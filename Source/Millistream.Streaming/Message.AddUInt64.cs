@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace Millistream.Streaming
 {
@@ -24,6 +25,7 @@ namespace Millistream.Streaming
         /// <param name="decimals">The number of decimals.</param>
         /// <returns><see langword = "true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         /// <remarks>The corresponding native function is mdf_message_add_uint.</remarks>
+        [Obsolete("This overload is deprecated and will be removed in a future version. Use the AddUInt64(uint tag, ulong value, int decimals) overload instead.")]
         public bool AddUInt64(Field tag, ulong value, int decimals) =>
             AddUInt64((uint)tag, value, decimals);
     }

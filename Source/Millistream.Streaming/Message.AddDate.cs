@@ -23,6 +23,7 @@ namespace Millistream.Streaming
         /// <param name="value">The date field value.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         /// <remarks>The corresponding native function is mdf_message_add_date.</remarks>
+        [Obsolete("This overload is deprecated and will be removed in a future version. Use the AddDate(uint tag, string value) overload instead.")]
         public bool AddDate(Field tag, string value) =>
             AddDate((uint)tag, value);
 
@@ -48,6 +49,7 @@ namespace Millistream.Streaming
         /// <param name="day">The day of the date field value.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         /// <remarks>The corresponding native function is mdf_message_add_date2.</remarks>
+        [Obsolete("This overload is deprecated and will be removed in a future version. Use the AddDate(uint tag, int year, int month, int day) overload instead.")]
         public bool AddDate(Field tag, int year, int month, int day) =>
             AddDate((uint)tag, year, month, day);
 
@@ -72,6 +74,7 @@ namespace Millistream.Streaming
         /// <param name="value">The date field value as a memory span that contains a null-terminated sequence of UTF-8 encoded bytes.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         /// <remarks>The corresponding native function is mdf_message_add_date.</remarks>
+        [Obsolete("This overload is deprecated and will be removed in a future version. Use the AddDate(uint tag, ReadOnlySpan<byte> value) overload instead.")]
         public bool AddDate(Field tag, ReadOnlySpan<byte> value) =>
             AddDate((uint)tag, value);
     }

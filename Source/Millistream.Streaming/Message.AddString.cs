@@ -82,6 +82,7 @@ namespace Millistream.Streaming
         /// <param name="value">The UTF-8 string field value.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         /// <remarks>The corresponding native function is mdf_message_add_string.</remarks>
+        [Obsolete("This overload is deprecated and will be removed in a future version. Use the AddString(uint tag, string value) overload instead.")]
         public bool AddString(Field tag, string value) =>
             AddString((uint)tag, value);
 
@@ -93,6 +94,7 @@ namespace Millistream.Streaming
         /// <param name="length">The number of characters in <paramref name="value"/> to be added to the message.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         /// <remarks>The corresponding native function is mdf_message_add_string2.</remarks>
+        [Obsolete("This overload is deprecated and will be removed in a future version. Use the AddString(uint tag, string value, int length) overload instead.")]
         public bool AddString(Field tag, string value, int length) =>
             AddString((uint)tag, value, length);
 
@@ -134,6 +136,7 @@ namespace Millistream.Streaming
         /// <param name="value">The field value as a memory span that contains a null-terminated sequence of UTF-8 encoded bytes.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         /// <remarks>The corresponding native function is mdf_message_add_string.</remarks>
+        [Obsolete("This overload is deprecated and will be removed in a future version. Use the AddString(uint tag, ReadOnlySpan<byte> value) overload instead.")]
         public bool AddString(Field tag, ReadOnlySpan<byte> value) =>
             AddString((uint)tag, value);
 
@@ -145,6 +148,7 @@ namespace Millistream.Streaming
         /// <param name="length">The number of bytes in <paramref name="value"/> to be added to the message.</param>
         /// <returns><see langword="true" /> if the field was successfully added, or <see langword="false" /> if the value could not be added (because there was no more memory, the message handle does not contain any messages, or the supplied value is not of the type specified).</returns>
         /// <remarks>The corresponding native function is mdf_message_add_string2.</remarks>
+        [Obsolete("This overload is deprecated and will be removed in a future version. Use the AddString(uint tag, ReadOnlySpan<byte> value, int length) overload instead.")]
         public bool AddString(Field tag, ReadOnlySpan<byte> value, int length) =>
             AddString((uint)tag, value, length);
     }

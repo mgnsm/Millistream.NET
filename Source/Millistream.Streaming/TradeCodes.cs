@@ -6,6 +6,7 @@ namespace Millistream.Streaming
     /// Values for the <see cref="Field.MDF_F_TRADECODE"/> field
     /// </summary>
     [Flags]
+    [Obsolete("This enumeration is deprecated and will be removed in a future version.")]
     public enum TradeCodes : uint
     {
         MDF_TC_OFFHOURS = 1,

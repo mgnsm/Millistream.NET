@@ -1,13 +1,17 @@
-﻿namespace Millistream.Streaming
+﻿using System;
+
+namespace Millistream.Streaming
 {
     /// <summary>
     /// Constants defined as strings to make them easier to use in <see cref="Message.AddNumeric(uint, string)"/>.
     /// </summary>
+    [Obsolete("This type is deprecated and will be removed in a future version.")]
     public static class StringConstants
     {
         /// <summary>
         /// Request classes to be used when issuing requests to the server/system.
         /// </summary>
+        [Obsolete("This type is deprecated and has been replaced by Millistream.Streaming.RequestClasses.")]
         public static class RequestClasses
         {
             public const string All = "*";
@@ -43,6 +47,7 @@
         /// <summary>
         /// Request types defined as strings for easier use with <see cref="Message.AddNumeric(uint, string)"/>.
         /// </summary>
+        [Obsolete("This type is deprecated and has been replaced by Millistream.Streaming.RequestTypes.")]
         public static class RequestTypes
         {
             /// <summary>
@@ -64,6 +69,7 @@
         /// <summary>
         /// Corporate actions types.
         /// </summary>
+        [Obsolete("This type is deprecated and will be removed in a future version.")]
         public static class CorporateActions
         {
             public const string MDF_CA_DIVIDEND = "0";

@@ -27,8 +27,10 @@ namespace Millistream.Streaming
         #endregion
 
         #region Fields
+#pragma warning disable CS0618
         private static readonly ImmutableHashSet<int> s_messageReferences = ImmutableHashSet.Create((int[])Enum.GetValues(typeof(MessageReference)));
         private static readonly ImmutableHashSet<uint> s_fields = ImmutableHashSet.Create((uint[])Enum.GetValues(typeof(Field)));
+#pragma warning restore CS0618
         private readonly NativeImplementation _nativeImplementation;
         private readonly mdf_status_callback _nativeStatusCallback;
         private readonly mdf_data_callback _nativeDataCallback;
