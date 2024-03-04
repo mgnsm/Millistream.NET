@@ -370,8 +370,7 @@ namespace Millistream.Streaming.IntegrationTests
 
             void OnStatusChanged(HashSet<ConnectionStatus> statuses, ConnectionStatus status, ReadOnlySpan<byte> host, ReadOnlySpan<byte> ip)
             {
-                if (!statuses.Contains(status))
-                    statuses.Add(status);
+                statuses.Add(status);
 
                 if (host != default)
                     Assert.AreEqual(hostWithoutPort, Encoding.UTF8.GetString(host.ToArray()));
