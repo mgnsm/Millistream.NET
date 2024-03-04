@@ -314,13 +314,25 @@ namespace Millistream.Streaming
         public ulong MessageClass => _nativeImplementation.mdf_get_mclass != default ? _nativeImplementation.mdf_get_mclass(_feedHandle) : default;
 
         /// <summary>
+        /// Gets the number of bytes waiting to be processed in the internal read buffer after a call to <see cref="Consume(int)"/>.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_RBUF_SIZE"/> option cannot be fetched or modified.</exception>
+        public uint ReadBufferSize => (uint)GetUInt64Property(MDF_OPTION.MDF_OPT_RBUF_SIZE);
+
+        /// <summary>
         /// Gets or sets the current size of the internal read buffer.
         /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">The value is less than <see cref="ReadBufferSize"/>.</exception>
         /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_RBUF_MAXSIZE"/> option cannot be fetched or modified.</exception>
         public uint ReadBufferMaxSize
         {
             get => (uint)GetUInt64Property(MDF_OPTION.MDF_OPT_RBUF_MAXSIZE);
-            set => SetProperty(MDF_OPTION.MDF_OPT_RBUF_MAXSIZE, value);
+            set
+            {
+                if (value < ReadBufferSize)
+                    throw new ArgumentOutOfRangeException(nameof(value));
+                SetProperty(MDF_OPTION.MDF_OPT_RBUF_MAXSIZE, value);
+            }
         }
         #endregion
 

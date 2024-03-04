@@ -449,6 +449,9 @@ namespace Millistream.Streaming.UnitTests
         }
 
         [TestMethod]
+        public void GetReadBufferSizeTest() => GetUInt64Property(MDF_OPTION.MDF_OPT_RBUF_SIZE, mdf => mdf.ReadBufferSize);
+
+        [TestMethod]
         public void GetReadBufferMaxSizeTest() => GetUInt64Property(MDF_OPTION.MDF_OPT_RBUF_MAXSIZE, mdf => mdf.ReadBufferMaxSize);
 
         [TestMethod]
@@ -456,11 +459,34 @@ namespace Millistream.Streaming.UnitTests
         {
             const uint ReadBufferMaxSize = 5000;
             Mock<INativeImplementation> nativeImplementation = new();
+            nativeImplementation
+                .Setup(x => x.mdf_get_property(It.IsAny<IntPtr>(), (int)MDF_OPTION.MDF_OPT_RBUF_SIZE, ref It.Ref<ulong>.IsAny))
+                .Returns(1)
+                .Callback(new GetUInt64PropertyCallback((IntPtr handler, int option_, ref ulong value) => value = 0));
             Setup(nativeImplementation, MDF_OPTION.MDF_OPT_RBUF_MAXSIZE, ReadBufferMaxSize);
 
             using MarketDataFeed mdf = new()
             {
                 ReadBufferMaxSize = ReadBufferMaxSize
+            };
+            nativeImplementation.Verify();
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        public void ToLargeReadBufferMaxSizeTest()
+        {
+            const uint ReadBufferSize = 100;
+            Mock<INativeImplementation> nativeImplementation = new();
+            nativeImplementation
+                .Setup(x => x.mdf_get_property(It.IsAny<IntPtr>(), (int)MDF_OPTION.MDF_OPT_RBUF_SIZE, ref It.Ref<ulong>.IsAny))
+                .Returns(1)
+                .Callback(new GetUInt64PropertyCallback((IntPtr handler, int option_, ref ulong value) => value = ReadBufferSize))
+                .Verifiable();
+            NativeImplementation.Implementation = nativeImplementation.Object;
+            using MarketDataFeed mdf = new()
+            {
+                ReadBufferMaxSize = ReadBufferSize - 1
             };
             nativeImplementation.Verify();
         }
