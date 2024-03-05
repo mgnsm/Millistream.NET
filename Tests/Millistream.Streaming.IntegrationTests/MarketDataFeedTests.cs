@@ -585,7 +585,7 @@ namespace Millistream.Streaming.IntegrationTests
         }
 
         [TestMethod]
-        public void ExtractMessageTest()
+        public void ExtractAndInjectMessageTest()
         {
             using MarketDataFeed mdf = new MarketDataFeed();
             using Message message = new Message();
@@ -598,16 +598,52 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.IsTrue(message.AddNumeric(Fields.MDF_F_REQUESTCLASS, RequestClasses.MDF_RC_QUOTE));
             Assert.IsTrue(message.AddNumeric(Fields.MDF_F_REQUESTTYPE, RequestTypes.MDF_RT_IMAGE));
             const ulong InsRef = 772;
-            Assert.IsTrue(message.AddUInt64(Fields.MDF_F_INSREFLIST, InsRef, 0));
+            Assert.IsTrue(message.AddString(Fields.MDF_F_INSREFLIST, InsRef.ToString()));
             Assert.IsTrue(mdf.Send(message));
             //consume the request
             Assert.AreEqual(1, mdf.Consume(3000));
             //extract the message
-            IntPtr pointer = mdf.Extract(out ushort mref, out ulong insref, out uint len);
-            Assert.AreNotEqual(default, pointer);
+            IntPtr ptr = mdf.Extract(out ushort mref, out ulong insref, out uint len);
+            Assert.AreNotEqual(default, ptr);
             Assert.AreEqual(MessageReferences.MDF_M_QUOTE, mref);
             Assert.AreEqual(InsRef, insref);
             Assert.IsTrue(len > 0);
+            //inject the message into the another handle using the pointer
+            using MarketDataFeed targetMdf = new MarketDataFeed();
+            Assert.AreEqual(1, targetMdf.Inject(ptr, len));
+            Assert.IsTrue(targetMdf.GetNextMessage(out ushort injectedMref, out ulong injectedInsRef));
+            Assert.AreEqual(MessageReferences.MDF_M_QUOTE, injectedMref);
+            Assert.AreEqual(InsRef, injectedInsRef);
+            //copy the data
+            byte[] data = new byte[len];
+            Marshal.Copy(ptr, data, 0, (int)len);
+            //inject the message using the copied data
+            using MarketDataFeed targetMdf2 = new MarketDataFeed();
+            Assert.AreEqual(1, targetMdf2.Inject(data));
+            Assert.IsTrue(targetMdf2.GetNextMessage(out injectedMref, out injectedInsRef));
+            Assert.AreEqual(MessageReferences.MDF_M_QUOTE, injectedMref);
+            Assert.AreEqual(InsRef, injectedInsRef);
+            //inject the message into a handle that has a callback
+            using MarketDataFeed targetMdf3 = new MarketDataFeed();
+            targetMdf3.DataCallback = (data, handle) =>
+            {
+                while (handle.GetNextMessage(out injectedMref, out injectedInsRef))
+                {
+                    CallbackUserData callbackUserData = data as CallbackUserData;
+                    Assert.IsNotNull(callbackUserData);
+                    callbackUserData.Count++;
+                    Assert.AreEqual(MessageReferences.MDF_M_QUOTE, injectedMref);
+                    Assert.AreEqual(InsRef, injectedInsRef);
+                }
+            };
+            CallbackUserData callbackUserData = new CallbackUserData();
+            targetMdf3.CallbackUserData = callbackUserData;
+            Assert.AreEqual(0, targetMdf3.Inject(ptr, len));
+            Assert.AreEqual(1, callbackUserData.Count);
+
+            while (mdf.GetNextField(out uint _, out _)) ;
+            Assert.IsFalse(mdf.GetNextMessage(out ushort _, out _));
+            mdf.Disconnect();
         }
 
         private string GetTestRunParameter(string parameterName)
@@ -695,5 +731,9 @@ namespace Millistream.Streaming.IntegrationTests
 #endif
         }
 
+        private class CallbackUserData
+        {
+            public int Count { get; set; }
+        }
     }
 }
