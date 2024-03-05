@@ -21,6 +21,7 @@ namespace Millistream.Streaming.Interop
         int mdf_connect(IntPtr handle, string server);
         void mdf_disconnect(IntPtr handle);
         IntPtr mdf_extract(IntPtr handle, ref ushort mref, ref ulong insref, ref uint len);
+        int mdf_inject(IntPtr handle, IntPtr ptr, uint len);
         IntPtr mdf_message_create();
         void mdf_message_destroy(IntPtr message);
         void mdf_message_reset(IntPtr message);

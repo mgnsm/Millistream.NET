@@ -842,6 +842,39 @@ namespace Millistream.Streaming.UnitTests
             nativeImplementation.Verify();
         }
 
+        [TestMethod]
+        public void InjectReturnsMinusOneWhenNativeFunctionIsMissingTest()
+        {
+            NativeImplementation nativeImplementation = new(default)
+            {
+                mdf_inject = default
+            };
+            using MarketDataFeed mdf = new(nativeImplementation);
+            Assert.AreEqual(-1, mdf.Inject(new IntPtr(456), 3));
+            Assert.AreEqual(-1, mdf.Inject(new byte[] { 4, 5, 6 }));
+        }
+
+        [TestMethod]
+        public void InjectTest()
+        {
+            IntPtr feedHandle = new(123);
+            IntPtr ptr = new(456);
+            const uint Len = 3;
+
+            Mock<INativeImplementation> nativeImplementation = new();
+            nativeImplementation.Setup(x => x.mdf_create()).Returns(feedHandle);
+            NativeImplementation.Implementation = nativeImplementation.Object;
+
+            using MarketDataFeed mdf = new();
+            nativeImplementation.Setup(x => x.mdf_inject(feedHandle, ptr, Len)).Returns(1).Verifiable();
+            Assert.AreEqual(1, mdf.Inject(ptr, Len));
+            nativeImplementation.Verify();
+
+            nativeImplementation.Setup(x => x.mdf_inject(feedHandle, It.IsAny<IntPtr>(), It.IsAny<uint>())).Returns(2).Verifiable();
+            Assert.AreEqual(2, mdf.Inject(new byte[] { 4, 5, 6 }));
+            nativeImplementation.Verify();
+        }
+
         private static void GetInt32Property(MDF_OPTION option, Func<MarketDataFeed, int> getter)
         {
             const int Value = 5;
