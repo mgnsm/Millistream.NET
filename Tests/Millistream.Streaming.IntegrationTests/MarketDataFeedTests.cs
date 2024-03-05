@@ -23,15 +23,15 @@ namespace Millistream.Streaming.IntegrationTests
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                using MarketDataFeed mdf = new MarketDataFeed("libmdf.so.0");
+                using MarketDataFeed mdf = new("libmdf.so.0");
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                using MarketDataFeed mdf = new MarketDataFeed("libmdf-0.dll");
+                using MarketDataFeed mdf = new("libmdf-0.dll");
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                using MarketDataFeed mdf = new MarketDataFeed("libmdf.0.dylib");
+                using MarketDataFeed mdf = new("libmdf.0.dylib");
             }
             else
                 throw new PlatformNotSupportedException();
@@ -40,7 +40,7 @@ namespace Millistream.Streaming.IntegrationTests
         [TestMethod]
         public void GetAndSetPropertiesTest()
         {
-            using MarketDataFeed mdf = new MarketDataFeed();
+            using MarketDataFeed mdf = new();
 
             Assert.AreEqual(0UL, mdf.ReceivedBytes);
             Assert.AreEqual(0UL, mdf.SentBytes);
@@ -59,7 +59,7 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.IsTrue(mdf.Connect(GetTestRunParameter("host")));
             Assert.AreNotEqual(-1, mdf.FileDescriptor);
 
-            using Message message = new Message();
+            using Message message = new();
             LogOn(mdf, message);
             Assert.IsTrue(mdf.HandleDelay);
             mdf.Disconnect();
@@ -177,7 +177,7 @@ namespace Millistream.Streaming.IntegrationTests
         [TestMethod]
         public void GetAndSetMessageDigestsAndCiphersTest()
         {
-            using MarketDataFeed mdf = new MarketDataFeed();
+            using MarketDataFeed mdf = new();
             Assert.IsFalse(string.IsNullOrEmpty(mdf.MessageDigests));
             Assert.IsFalse(string.IsNullOrEmpty(mdf.Ciphers));
 
@@ -212,7 +212,7 @@ namespace Millistream.Streaming.IntegrationTests
         [ExpectedException(typeof(InvalidOperationException))]
         public void CannotGetDigestBeforeConnectTest()
         {
-            using MarketDataFeed mdf = new MarketDataFeed();
+            using MarketDataFeed mdf = new();
             _ = mdf.MessageDigest;
         }
 
@@ -220,15 +220,15 @@ namespace Millistream.Streaming.IntegrationTests
         [ExpectedException(typeof(InvalidOperationException))]
         public void CannotGetCipherBeforeConnectTest()
         {
-            using MarketDataFeed mdf = new MarketDataFeed();
+            using MarketDataFeed mdf = new();
             _ = mdf.Cipher;
         }
 
         [TestMethod]
         public void ConnectAndLogOnTest()
         {
-            using MarketDataFeed mdf = new MarketDataFeed();
-            using Message message = new Message();
+            using MarketDataFeed mdf = new();
+            using Message message = new();
             Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_REQUEST));
             Assert.IsTrue(message.AddNumeric(Fields.MDF_F_REQUESTCLASS, RequestClasses.MDF_RC_BASICDATA));
             Assert.IsTrue(message.AddNumeric(Fields.MDF_F_REQUESTTYPE, RequestTypes.MDF_RT_IMAGE));
@@ -250,15 +250,15 @@ namespace Millistream.Streaming.IntegrationTests
         [TestMethod]
         public void SendMultipleMessagesTest()
         {
-            using MarketDataFeed mdf = new MarketDataFeed();
+            using MarketDataFeed mdf = new();
             //connect
             Assert.IsTrue(mdf.Connect(GetTestRunParameter("host")));
 
-            using Message message = new Message();
+            using Message message = new();
             //log on
             Assert.IsTrue(LogOn(mdf, message));
 
-            List<string> requestIds = new List<string>(3)
+            List<string> requestIds = new(3)
             {
                 Guid.NewGuid().ToString(),
                 Guid.NewGuid().ToString(),
@@ -319,11 +319,11 @@ namespace Millistream.Streaming.IntegrationTests
             const string UserData = "sample data...";
             const string RequestId = "rid";
 
-            using MarketDataFeed mdf = new MarketDataFeed();
+            using MarketDataFeed mdf = new();
             //connect
             Assert.IsTrue(mdf.Connect(GetTestRunParameter("host")));
             //log on
-            using Message message = new Message();
+            using Message message = new();
             Assert.IsTrue(LogOn(mdf, message));
             //set some custom user callback data
             mdf.CallbackUserData = UserData;
@@ -368,8 +368,8 @@ namespace Millistream.Streaming.IntegrationTests
             int index = host.LastIndexOf(':');
             string hostWithoutPort = index > -1 ? host.Substring(0, index) : host;
 
-            HashSet<ConnectionStatus> receivedStatuses = new HashSet<ConnectionStatus>();
-            using MarketDataFeed<object, HashSet<ConnectionStatus>> mdf = new MarketDataFeed<object, HashSet<ConnectionStatus>>()
+            HashSet<ConnectionStatus> receivedStatuses = new();
+            using MarketDataFeed<object, HashSet<ConnectionStatus>> mdf = new()
             {
                 StatusCallbackUserData = receivedStatuses
             };
@@ -403,8 +403,8 @@ namespace Millistream.Streaming.IntegrationTests
         [TestMethod]
         public void SubscribeAndUnsubscribeTest()
         {
-            using MarketDataFeed mdf = new MarketDataFeed();
-            using Message message = new Message();
+            using MarketDataFeed mdf = new();
+            using Message message = new();
             //connect
             Assert.IsTrue(mdf.Connect(GetTestRunParameter("host")));
             //log on
@@ -437,8 +437,8 @@ namespace Millistream.Streaming.IntegrationTests
         [TestMethod]
         public void WildcardSubscriptionsTest()
         {
-            using MarketDataFeed mdf = new MarketDataFeed();
-            using Message message = new Message();
+            using MarketDataFeed mdf = new();
+            using Message message = new();
             //connect
             Assert.IsTrue(mdf.Connect(GetTestRunParameter("host")));
             //log on
@@ -456,8 +456,8 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.IsTrue(mdf.Send(message));
             message.Reset();
             //consume
-            Dictionary<int, int> receivedMessageTypes = new Dictionary<int, int>();
-            Dictionary<ulong, int> receivedInstrumentReferences = new Dictionary<ulong, int>();
+            Dictionary<int, int> receivedMessageTypes = new();
+            Dictionary<ulong, int> receivedInstrumentReferences = new();
 
             bool ConsumeAndCount(string requestId)
             {
@@ -539,8 +539,8 @@ namespace Millistream.Streaming.IntegrationTests
         [TestMethod]
         public void CreateInstrumentsTest()
         {
-            using MarketDataFeed mdf = new MarketDataFeed();
-            using Message message = new Message();
+            using MarketDataFeed mdf = new();
+            using Message message = new();
             //connect
             Assert.IsTrue(mdf.Connect(GetTestRunParameter("host")));
             //log on
@@ -587,8 +587,8 @@ namespace Millistream.Streaming.IntegrationTests
         [TestMethod]
         public void ExtractAndInjectMessageTest()
         {
-            using MarketDataFeed mdf = new MarketDataFeed();
-            using Message message = new Message();
+            using MarketDataFeed mdf = new();
+            using Message message = new();
             //connect
             Assert.IsTrue(mdf.Connect(GetTestRunParameter("host")));
             //log on
@@ -609,7 +609,7 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.AreEqual(InsRef, insref);
             Assert.IsTrue(len > 0);
             //inject the message into the another handle using the pointer
-            using MarketDataFeed targetMdf = new MarketDataFeed();
+            using MarketDataFeed targetMdf = new();
             Assert.AreEqual(1, targetMdf.Inject(ptr, len));
             Assert.IsTrue(targetMdf.GetNextMessage(out ushort injectedMref, out ulong injectedInsRef));
             Assert.AreEqual(MessageReferences.MDF_M_QUOTE, injectedMref);
@@ -618,13 +618,13 @@ namespace Millistream.Streaming.IntegrationTests
             byte[] data = new byte[len];
             Marshal.Copy(ptr, data, 0, (int)len);
             //inject the message using the copied data
-            using MarketDataFeed targetMdf2 = new MarketDataFeed();
+            using MarketDataFeed targetMdf2 = new();
             Assert.AreEqual(1, targetMdf2.Inject(data));
             Assert.IsTrue(targetMdf2.GetNextMessage(out injectedMref, out injectedInsRef));
             Assert.AreEqual(MessageReferences.MDF_M_QUOTE, injectedMref);
             Assert.AreEqual(InsRef, injectedInsRef);
             //inject the message into a handle that has a callback
-            using MarketDataFeed targetMdf3 = new MarketDataFeed();
+            using MarketDataFeed targetMdf3 = new();
             targetMdf3.DataCallback = (data, handle) =>
             {
                 while (handle.GetNextMessage(out injectedMref, out injectedInsRef))
@@ -636,7 +636,7 @@ namespace Millistream.Streaming.IntegrationTests
                     Assert.AreEqual(InsRef, injectedInsRef);
                 }
             };
-            CallbackUserData callbackUserData = new CallbackUserData();
+            CallbackUserData callbackUserData = new();
             targetMdf3.CallbackUserData = callbackUserData;
             Assert.AreEqual(0, targetMdf3.Inject(ptr, len));
             Assert.AreEqual(1, callbackUserData.Count);
