@@ -584,6 +584,32 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.IsTrue(succeeded);
         }
 
+        [TestMethod]
+        public void ExtractMessageTest()
+        {
+            using MarketDataFeed mdf = new MarketDataFeed();
+            using Message message = new Message();
+            //connect
+            Assert.IsTrue(mdf.Connect(GetTestRunParameter("host")));
+            //log on
+            Assert.IsTrue(LogOn(mdf, message));
+            //subscribe to quotes for instrument 772
+            Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_REQUEST));
+            Assert.IsTrue(message.AddNumeric(Fields.MDF_F_REQUESTCLASS, RequestClasses.MDF_RC_QUOTE));
+            Assert.IsTrue(message.AddNumeric(Fields.MDF_F_REQUESTTYPE, RequestTypes.MDF_RT_IMAGE));
+            const ulong InsRef = 772;
+            Assert.IsTrue(message.AddUInt64(Fields.MDF_F_INSREFLIST, InsRef, 0));
+            Assert.IsTrue(mdf.Send(message));
+            //consume the request
+            Assert.AreEqual(1, mdf.Consume(3000));
+            //extract the message
+            IntPtr pointer = mdf.Extract(out ushort mref, out ulong insref, out uint len);
+            Assert.AreNotEqual(default, pointer);
+            Assert.AreEqual(MessageReferences.MDF_M_QUOTE, mref);
+            Assert.AreEqual(InsRef, insref);
+            Assert.IsTrue(len > 0);
+        }
+
         private string GetTestRunParameter(string parameterName)
         {
             if (string.IsNullOrEmpty(parameterName))

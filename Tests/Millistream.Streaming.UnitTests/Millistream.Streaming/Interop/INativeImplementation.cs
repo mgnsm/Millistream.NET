@@ -20,6 +20,7 @@ namespace Millistream.Streaming.Interop
         ulong mdf_get_mclass(IntPtr handle);
         int mdf_connect(IntPtr handle, string server);
         void mdf_disconnect(IntPtr handle);
+        IntPtr mdf_extract(IntPtr handle, ref ushort mref, ref ulong insref, ref uint len);
         IntPtr mdf_message_create();
         void mdf_message_destroy(IntPtr message);
         void mdf_message_reset(IntPtr message);

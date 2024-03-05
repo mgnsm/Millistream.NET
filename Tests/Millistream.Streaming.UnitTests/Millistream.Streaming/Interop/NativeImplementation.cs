@@ -21,6 +21,7 @@ namespace Millistream.Streaming.Interop
         internal delegate*<IntPtr, ulong> mdf_get_mclass;
         internal delegate*<IntPtr, string, int> mdf_connect;
         internal delegate*<IntPtr, void> mdf_disconnect;
+        internal delegate*<IntPtr, ref ushort, ref ulong, ref uint, IntPtr> mdf_extract;
         internal delegate*<IntPtr> mdf_message_create;
         internal delegate*<IntPtr, void> mdf_message_destroy;
         internal delegate*<IntPtr, void> mdf_message_reset;
@@ -76,6 +77,7 @@ namespace Millistream.Streaming.Interop
             mdf_get_mclass = &MdfGetMClass;
             mdf_connect = &MdfConnect;
             mdf_disconnect = &MdfDisconnect;
+            mdf_extract = &MdfExtract;
             mdf_message_create = &MdfMessageCreate;
             mdf_message_destroy = &MdfMessageDestroy;
             mdf_message_reset = &MdfMessageReset;
@@ -124,6 +126,7 @@ namespace Millistream.Streaming.Interop
         private static ulong MdfGetMClass(IntPtr handle) => Implementation.mdf_get_mclass(handle);
         private static int MdfConnect(IntPtr handle, string server) => Implementation.mdf_connect(handle, server);
         private static void MdfDisconnect(IntPtr handle) => Implementation.mdf_disconnect(handle);
+        private static IntPtr MdfExtract(IntPtr handle, ref ushort mref, ref ulong insref, ref uint len) => Implementation.mdf_extract(handle, ref mref, ref insref, ref len);
         private static IntPtr MdfMessageCreate() => Implementation.mdf_message_create();
         private static void MdfMessageDestroy(IntPtr message) => Implementation.mdf_message_destroy(message);
         private static void MdfMessageReset(IntPtr message) => Implementation.mdf_message_reset(message);
