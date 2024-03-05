@@ -19,6 +19,7 @@ namespace Millistream.Streaming.UnitTests
         private delegate void GetUInt64PropertyCallback(IntPtr handle, int option, ref ulong value);
         private delegate void GetInt64PropertyCallback(IntPtr handle, int option, ref long value);
         private delegate void GetIntPtrPropertyCallback(IntPtr handle, int option, ref IntPtr value);
+        private delegate void ExtractCallback(IntPtr handle, ref ushort mref, ref ulong insref, ref uint len);
 
         [AssemblyInitialize]
         public static void DoNotInitializeDefaultMarketDataFeedByDefaultTest(TestContext _1)
@@ -794,6 +795,51 @@ namespace Millistream.Streaming.UnitTests
 #pragma warning disable CS0618
             mdf.GetNextField(out Field _, out ReadOnlySpan<byte> _);
 #pragma warning restore CS0618
+        }
+
+        [TestMethod]
+        public void ExtractReturnsTheDefaultValueWhenNativeFunctionIsMissingTest()
+        {
+            NativeImplementation nativeImplementation = new(default)
+            {
+                mdf_extract = default
+            };
+            using MarketDataFeed mdf = new(nativeImplementation);
+            Assert.AreEqual(default, mdf.Extract(out ushort mref, out ulong insref, out uint len));
+            Assert.AreEqual(default, mref);
+            Assert.AreEqual(default, insref);
+            Assert.AreEqual(default, len);
+        }
+
+
+        [TestMethod]
+        public void ExtractTest()
+        {
+            IntPtr feedHandle = new(123);
+            IntPtr ptr = new(456);
+            const ushort MessageReference = MessageReferences.MDF_M_QUOTE;
+            const ulong InstrumentReference = 1000;
+            const uint Length = 500;
+
+            Mock<INativeImplementation> nativeImplementation = new();
+            nativeImplementation.Setup(x => x.mdf_create()).Returns(feedHandle);
+            NativeImplementation.Implementation = nativeImplementation.Object;
+
+            using MarketDataFeed mdf = new();
+            nativeImplementation.Setup(x => x.mdf_extract(feedHandle, ref It.Ref<ushort>.IsAny, ref It.Ref<ulong>.IsAny, ref It.Ref<uint>.IsAny))
+                .Callback(new ExtractCallback((IntPtr _, ref ushort mref, ref ulong insref, ref uint len) =>
+                {
+                    mref = MessageReference;
+                    insref = InstrumentReference;
+                    len = Length;
+                }))
+                .Returns(ptr)
+                .Verifiable();
+            Assert.AreEqual(ptr, mdf.Extract(out ushort mref, out ulong insref, out uint len));
+            Assert.AreEqual(MessageReference, mref);
+            Assert.AreEqual(InstrumentReference, insref);
+            Assert.AreEqual(Length, len);
+            nativeImplementation.Verify();
         }
 
         private static void GetInt32Property(MDF_OPTION option, Func<MarketDataFeed, int> getter)
