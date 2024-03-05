@@ -15,15 +15,15 @@ namespace Millistream.Streaming.IntegrationTests
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                using Message message = new Message("libmdf.so.0");
+                using Message message = new("libmdf.so.0");
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                using Message message = new Message("libmdf-0.dll");
+                using Message message = new("libmdf-0.dll");
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                using Message message = new Message("libmdf.0.dylib");
+                using Message message = new("libmdf.0.dylib");
             }
             else
                 throw new PlatformNotSupportedException();
@@ -32,7 +32,7 @@ namespace Millistream.Streaming.IntegrationTests
         [TestMethod]
         public void SetMessageCompressionLevelTest()
         {
-            using Message message = new Message();
+            using Message message = new();
 #pragma warning disable CS0618
             foreach (CompressionLevel compressionLevel in Enum.GetValues(typeof(CompressionLevel)))
             {
@@ -45,7 +45,7 @@ namespace Millistream.Streaming.IntegrationTests
         [TestMethod]
         public void SetUtf8ValidationTest()
         {
-            using Message message = new Message();
+            using Message message = new();
             Assert.IsTrue(message.Utf8Validation);
             message.Utf8Validation = false;
             Assert.IsFalse(message.Utf8Validation);
@@ -54,7 +54,7 @@ namespace Millistream.Streaming.IntegrationTests
         [TestMethod]
         public void SetDelayTest()
         {
-            using Message message = new Message();
+            using Message message = new();
             Assert.AreEqual(default, message.Delay);
             const byte Delay = byte.MaxValue;
             message.Delay = Delay;
@@ -91,7 +91,7 @@ namespace Millistream.Streaming.IntegrationTests
                 "-18446.744073709551615"
             };
 
-            using Message message = new Message();
+            using Message message = new();
             Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_QUOTE));
             foreach (string value in values)
             {
@@ -108,7 +108,7 @@ namespace Millistream.Streaming.IntegrationTests
         [TestMethod]
         public void AddInt64Test()
         {
-            using Message message = new Message();
+            using Message message = new();
             Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_QUOTE));
             Assert.IsTrue(message.AddInt64(Fields.MDF_F_QUANTITY, -12345L, 2));
             Assert.IsTrue(message.AddInt64(Fields.MDF_F_LANGUAGE, 28L, 0));
@@ -135,7 +135,7 @@ namespace Millistream.Streaming.IntegrationTests
         [TestMethod]
         public void AddUInt64Test()
         {
-            using Message message = new Message();
+            using Message message = new();
             Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_QUOTE));
             Assert.IsTrue(message.AddUInt64(Fields.MDF_F_QUANTITY, 12345UL, 2));
             Assert.IsTrue(message.AddUInt64(Fields.MDF_F_LANGUAGE, 28UL, 0));
@@ -188,7 +188,7 @@ namespace Millistream.Streaming.IntegrationTests
                 "2008-W53"
             };
 
-            using Message message = new Message();
+            using Message message = new();
             Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_QUOTE));
 
             foreach (string value in validValues)
@@ -245,7 +245,7 @@ namespace Millistream.Streaming.IntegrationTests
                 "23:59:59.999999999"
             };
 
-            using Message message = new Message();
+            using Message message = new();
             Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_QUOTE));
 
             foreach (string value in values)
@@ -297,7 +297,7 @@ namespace Millistream.Streaming.IntegrationTests
                 "-28 28 343"
             };
 
-            using Message message = new Message();
+            using Message message = new();
             Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_BASICDATA));
             foreach (string value in values)
             {
@@ -314,7 +314,7 @@ namespace Millistream.Streaming.IntegrationTests
         [TestMethod]
         public void ResetTest()
         {
-            using Message message = new Message();
+            using Message message = new();
             Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_QUOTE));
             Assert.AreEqual(1, message.ActiveCount);
             Assert.AreEqual(0, message.FieldCount);
@@ -326,7 +326,7 @@ namespace Millistream.Streaming.IntegrationTests
         [TestMethod]
         public void DeleteTest()
         {
-            using Message message = new Message();
+            using Message message = new();
             Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_QUOTE));
             Assert.IsTrue(message.AddNumeric(Fields.MDF_F_REQUESTCLASS, RequestClasses.MDF_RC_BASICDATA));
             Assert.AreEqual(1, message.ActiveCount);
@@ -355,7 +355,7 @@ namespace Millistream.Streaming.IntegrationTests
                 "46--X-B--P-3--"
             };
 
-            using Message message = new Message();
+            using Message message = new();
             Assert.IsTrue(message.Add(0, MessageReferences.MDF_M_QUOTE));
             foreach (string @string in strings)
             {
@@ -395,7 +395,7 @@ namespace Millistream.Streaming.IntegrationTests
         [TestMethod]
         public void MoveTest()
         {
-            using Message source = new Message();
+            using Message source = new();
             const ulong SourceInsRef = 1;
             Assert.IsTrue(source.Add(SourceInsRef, MessageReferences.MDF_M_REQUEST));
             Assert.IsTrue(source.AddNumeric(Fields.MDF_F_REQUESTTYPE, RequestTypes.MDF_RT_IMAGE));
@@ -410,7 +410,7 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.AreEqual(3, source.ActiveCount);
             Assert.AreEqual(1, source.FieldCount);
 
-            using Message destination = new Message();
+            using Message destination = new();
             Assert.AreEqual(0, destination.ActiveCount);
             Assert.AreEqual(0, destination.FieldCount);
 
@@ -428,7 +428,7 @@ namespace Millistream.Streaming.IntegrationTests
         [TestMethod]
         public void SerializeAndDeserializeTest()
         {
-            using Message message = new Message();
+            using Message message = new();
             Assert.IsFalse(message.Serialize(out IntPtr result));
             Assert.AreEqual(IntPtr.Zero, result);
             //serialize
@@ -442,7 +442,7 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.AreNotEqual(IntPtr.Zero, result);
             //deserialize
             string s = Marshal.PtrToStringAnsi(result);
-            using Message message2 = new Message();
+            using Message message2 = new();
             Assert.IsTrue(message2.Deserialize(s));
             Assert.AreEqual(2, message2.ActiveCount);
             Assert.AreEqual(1, message2.FieldCount);
