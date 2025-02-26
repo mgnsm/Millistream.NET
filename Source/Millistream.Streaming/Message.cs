@@ -10,12 +10,13 @@ namespace Millistream.Streaming
     /// <remarks>Handles are not thread-safe. If multiple threads will share access to a single handle, the accesses has to be serialized using a mutex or other forms of locking mechanisms. The API as such is thread-safe so multiple threads can have local handles without the need for locks.</remarks>
     public sealed unsafe partial class Message : IMessage, IDisposable
     {
+        private const byte MDF_DLY_BEST = 15;
         private readonly NativeImplementation _nativeImplementation;
 #pragma warning disable CS0618
         private CompressionLevel _compressionLevel = CompressionLevel.Z_BEST_SPEED;
 #pragma warning restore CS0618
         private bool _utf8Validation = true;
-        private byte _delay;
+        private byte _delay = MDF_DLY_BEST;
         private IntPtr _handle;
 
         /// <summary>
@@ -117,7 +118,7 @@ namespace Millistream.Streaming
         }
 
         /// <summary>
-        /// Gets or sets the intended delay of the message. The default value is 0.
+        /// Gets or sets the intended delay of the message.
         /// </summary>
         /// <remarks>The corresponding native function for setting the value is mdf_message_set_property with an option of <see cref="MDF_MSG_OPTION.MDF_MSG_OPT_DELAY"/>.</remarks>
         public byte Delay
