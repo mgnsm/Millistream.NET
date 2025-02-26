@@ -11,6 +11,7 @@ namespace Millistream.Streaming.UnitTests
     [TestClass]
     public sealed class MessageTests
     {
+        private const byte MDF_DLY_BEST = 15;
         private readonly Mock<INativeImplementation> _nativeImplementation = new();
         private delegate void mdf_message_serialize_callback(IntPtr messageHandle, ref IntPtr result);
 
@@ -134,10 +135,10 @@ namespace Millistream.Streaming.UnitTests
             _nativeImplementation.Setup(x => x.mdf_message_set_property(It.IsAny<IntPtr>(), (int)MDF_MSG_OPTION.MDF_MSG_OPT_DELAY, It.IsAny<int>())).Returns(1)
                 .Verifiable();
             using Message message = new();
-            Assert.AreEqual(default, message.Delay);
-            const byte Delay = byte.MaxValue - 10;
-            message.Delay = Delay;
-            Assert.AreEqual(Delay, message.Delay);
+            Assert.AreEqual(MDF_DLY_BEST, message.Delay);
+            const byte MDF_DLY_T1 = 4;
+            message.Delay = MDF_DLY_T1;
+            Assert.AreEqual(MDF_DLY_T1, message.Delay);
             _nativeImplementation.Verify();
         }
 
@@ -589,7 +590,7 @@ namespace Millistream.Streaming.UnitTests
             {
                 Delay = 1
             };
-            Assert.AreEqual(default, message.Delay);
+            Assert.AreEqual(MDF_DLY_BEST, message.Delay);
             Assert.AreEqual(default, message.FieldCount);
 
             //The mdf_message_set_compression_level and mdf_message_set_utf8_validation in libmdf-1.0.25 should be used
