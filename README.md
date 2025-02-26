@@ -10,15 +10,15 @@ An unofficial .NET wrapper for Millistream's low-latency, high-throughput and hi
 ## Installation
 Millistream.NET is distributed via [NuGet](https://www.nuget.org/packages/Millistream.Streaming). The native and wrapped API can be downloaded from [Millistream's official website](https://packages.millistream.com/). Binaries are available for Linux, macOS and Windows. They come in both 32- and 64-bit versions and should work on both little- and big-endian systems. Please refer to [the official documentation](https://packages.millistream.com/documents/MDF%20C%20API.pdf) for more information about the wrapped API itself. The NuGet package does not include any native assemblies. You will have to download and install these separately.
 ### Native Dependency
-On **Windows** you download and run an [.exe](https://packages.millistream.com/Windows/libmdf-1.0.28.exe) that will install the native `libmdf` core library along pre-built binaries of [zlib](http://zlib.net) and [OpenSSL](http://openssl.org/) (`libmdf` links against these). You can do this silently from a command prompt using Powershell:
+On **Windows** you download and run an [.exe](https://packages.millistream.com/Windows/libmdf-1.0.29.exe) that will install the native `libmdf` core library along pre-built binaries of [zlib](http://zlib.net) and [OpenSSL](http://openssl.org/) (`libmdf` links against these). You can do this silently from a command prompt using Powershell:
 
-    powershell (new-object System.Net.WebClient).DownloadFile('https://packages.millistream.com/Windows/libmdf-1.0.28.exe', 'libmdf-1.0.28.exe')
-    .\libmdf-1.0.28.exe /S
+    powershell (new-object System.Net.WebClient).DownloadFile('https://packages.millistream.com/Windows/libmdf-1.0.29.exe', 'libmdf-1.0.29.exe')
+    .\libmdf-1.0.29.exe /S
 
 On **macOS** you download and install a `.pkg` file, for example in a Bash shell:
 
-    curl -O https://packages.millistream.com/macOS/libmdf-1.0.26.pkg 
-    sudo installer -pkg libmdf-1.0.26.pkg -target /
+    curl -O https://packages.millistream.com/macOS/libmdf-1.0.29.pkg 
+    sudo installer -pkg libmdf-1.0.29.pkg -target /
 
 On **Linux**, the native API and the dependent libraries are available through your distribution repository. Below is an example of how to install everything needed using the `apt-get` command-line tool on Ubuntu:
 
@@ -78,10 +78,10 @@ mdf.DataCallback = (data, handle) =>
 
         while (handle.GetNextField(out uint tag, out ReadOnlySpan<byte> value))
         {
-#if NETCOREAPP
-            Console.WriteLine($"Field: {tag}, Value: {Encoding.UTF8.GetString(value)}");
-#else
+#if NETFRAMEWORK
             Console.WriteLine($"Field: {tag}, Value: {Encoding.UTF8.GetString(value.ToArray())}");
+#else
+            Console.WriteLine($"Field: {tag}, Value: {Encoding.UTF8.GetString(value)}");
 #endif
         }
     }

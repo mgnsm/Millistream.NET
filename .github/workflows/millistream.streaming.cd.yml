@@ -64,9 +64,9 @@ jobs:
     - name: Download and Install libmdf on macOS
       if: ${{ matrix.os == 'macOS-latest' }}
       run: |
-        wget https://packages.millistream.com/source/libmdf-1.0.28.tar.gz
-        tar -zxf libmdf-1.0.28.tar.gz
-        cd libmdf-1.0.28
+        wget https://packages.millistream.com/source/libmdf-1.0.29.tar.gz
+        tar -zxf libmdf-1.0.29.tar.gz
+        cd libmdf-1.0.29
         ./configure --prefix=/usr/local
         make
         make install
@@ -74,9 +74,9 @@ jobs:
     - name: Download and Install libmdf on Linux
       if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
-        wget https://packages.millistream.com/source/libmdf-1.0.28.tar.gz
-        tar -zxf libmdf-1.0.28.tar.gz
-        cd libmdf-1.0.28
+        wget https://packages.millistream.com/source/libmdf-1.0.29.tar.gz
+        tar -zxf libmdf-1.0.29.tar.gz
+        cd libmdf-1.0.29
         ./configure --prefix=/usr
         make
         sudo make install
@@ -85,8 +85,8 @@ jobs:
       if: ${{ matrix.os == 'windows-latest' }}
       shell: pwsh
       run: |
-        (new-object System.Net.WebClient).DownloadFile('https://packages.millistream.com/Windows/libmdf-1.0.28.exe','libmdf-1.0.28.exe')
-        .\libmdf-1.0.28.exe /S
+        (new-object System.Net.WebClient).DownloadFile('https://packages.millistream.com/Windows/libmdf-1.0.29.exe','libmdf-1.0.29.exe')
+        .\libmdf-1.0.29.exe /S
         # Wait for the DLL to appear in C:\Windows\System32
         while (-not (Test-Path -Path "C:\Windows\System32\libmdf-0.dll")) {
           Write-Host "libmdf not found. Waiting..."

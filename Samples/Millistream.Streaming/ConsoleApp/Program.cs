@@ -40,10 +40,10 @@ mdf.DataCallback = (data, handle) =>
 
         while (handle.GetNextField(out uint tag, out ReadOnlySpan<byte> value))
         {
-#if NETCOREAPP
-            Console.WriteLine($"Field: {tag}, Value: {Encoding.UTF8.GetString(value)}");
-#else
+#if NETFRAMEWORK
             Console.WriteLine($"Field: {tag}, Value: {Encoding.UTF8.GetString(value.ToArray())}");
+#else
+            Console.WriteLine($"Field: {tag}, Value: {Encoding.UTF8.GetString(value)}");
 #endif
         }
     }
