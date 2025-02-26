@@ -334,6 +334,18 @@ namespace Millistream.Streaming
                 SetProperty(MDF_OPTION.MDF_OPT_RBUF_MAXSIZE, value);
             }
         }
+
+        /// <summary>
+        /// Gets the hostname of the currently connected server.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_CONNECTED_HOST"/> option cannot be fetched.</exception>
+        public string ConnectedHost => GetStringProperty(MDF_OPTION.MDF_OPT_CONNECTED_HOST);
+
+        /// <summary>
+        /// Gets the IP address of the currently connected server.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_CONNECTED_IP"/> option cannot be fetched.</exception>
+        public string ConnectedIPAddress => GetStringProperty(MDF_OPTION.MDF_OPT_CONNECTED_IP);
         #endregion
 
         #region Methods

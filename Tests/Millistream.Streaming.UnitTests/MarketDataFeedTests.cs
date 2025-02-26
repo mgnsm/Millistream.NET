@@ -493,6 +493,14 @@ namespace Millistream.Streaming.UnitTests
         }
 
         [TestMethod]
+        public void GetConnectedHostTest() => 
+            GetStringProperty(MDF_OPTION.MDF_OPT_CONNECTED_HOST, mdf => mdf.ConnectedHost);
+
+        [TestMethod]
+        public void GetConnectedIPAddressTest() =>
+            GetStringProperty(MDF_OPTION.MDF_OPT_CONNECTED_IP, mdf => mdf.ConnectedIPAddress);
+
+        [TestMethod]
         public void GetAndSetDataCallbackTest()
         {
             Mock<INativeImplementation> nativeImplementation = new();

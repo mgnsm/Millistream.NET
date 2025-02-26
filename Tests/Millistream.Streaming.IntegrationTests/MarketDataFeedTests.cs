@@ -56,7 +56,8 @@ namespace Millistream.Streaming.IntegrationTests
 
             //FileDescriptor
             Assert.AreEqual(-1, mdf.FileDescriptor);
-            Assert.IsTrue(mdf.Connect(GetTestRunParameter("host")));
+            string host = GetTestRunParameter("host");
+            Assert.IsTrue(mdf.Connect(host));
             Assert.AreNotEqual(-1, mdf.FileDescriptor);
 
             using Message message = new();
@@ -172,6 +173,9 @@ namespace Millistream.Streaming.IntegrationTests
             _ = mdf.MessageClass;
 
             Assert.AreEqual(allocatedBytes, GetTotalAllocatedBytes());
+
+            Assert.IsTrue(host.AsSpan().Slice(0, host.LastIndexOf(':')).SequenceEqual(mdf.ConnectedHost.AsSpan()));
+            Assert.IsNotNull(mdf.ConnectedIPAddress);
         }
 
         [TestMethod]
@@ -722,7 +726,7 @@ namespace Millistream.Streaming.IntegrationTests
 
         private static long GetTotalAllocatedBytes()
         {
-#if NET462
+#if NETFRAMEWORK
             //GC statistics are guaranteed to be accurate only after a full, blocking collection.
             GC.Collect();
             return AppDomain.CurrentDomain.MonitoringTotalAllocatedMemorySize;
