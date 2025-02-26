@@ -462,5 +462,13 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.AreEqual(2, message2.ActiveCount);
             Assert.AreEqual(1, message2.FieldCount);
         }
+
+        [TestMethod]
+        public void AddMessageWithDelayTest()
+        {
+            const byte MDF_DLY_ANY = 14;
+            using Message message = new();
+            Assert.IsTrue(message.Add(default, default, MDF_DLY_ANY));
+        }
     }
 }
