@@ -146,8 +146,10 @@ namespace Millistream.Streaming.UnitTests
         public void AddTest()
         {
             _nativeImplementation.Setup(x => x.mdf_message_add(It.IsAny<IntPtr>(), It.IsAny<ulong>(), It.IsAny<int>())).Returns(1);
+            _nativeImplementation.Setup(x => x.mdf_message_add2(It.IsAny<IntPtr>(), It.IsAny<ulong>(), It.IsAny<ushort>(), It.IsAny<byte>())).Returns(1);
 
             const ulong instrumentReference = 10;
+            const byte Delay = 1;
 #pragma warning disable CS0618
             MessageReference messageReference = MessageReference.MDF_M_REQUEST;
             using Message message = new();
@@ -155,6 +157,8 @@ namespace Millistream.Streaming.UnitTests
 #pragma warning restore CS0618
             Assert.IsTrue(message.Add(instrumentReference, (int)messageReference));
             _nativeImplementation.Verify(x => x.mdf_message_add(It.IsAny<IntPtr>(), instrumentReference, (int)messageReference), Times.Exactly(2));
+            Assert.IsTrue(message.Add(instrumentReference, (ushort)messageReference, Delay));
+            _nativeImplementation.Verify(x => x.mdf_message_add2(It.IsAny<IntPtr>(), instrumentReference, (ushort)messageReference, Delay), Times.Once);
         }
 
         [TestMethod]

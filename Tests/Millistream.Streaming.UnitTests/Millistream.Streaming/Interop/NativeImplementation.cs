@@ -28,6 +28,7 @@ namespace Millistream.Streaming.Interop
         internal delegate*<IntPtr, void> mdf_message_reset;
         internal delegate*<IntPtr, int> mdf_message_del;
         internal delegate*<IntPtr, ulong, int, int> mdf_message_add;
+        internal delegate*<IntPtr, ulong, ushort, byte, int> mdf_message_add2;
         internal delegate*<IntPtr, uint, IntPtr, int> mdf_message_add_numeric;
         internal delegate*<IntPtr, uint, string, int> mdf_message_add_numeric_str;
         internal delegate*<IntPtr, uint, long, int, int> mdf_message_add_int;
@@ -85,6 +86,7 @@ namespace Millistream.Streaming.Interop
             mdf_message_reset = &MdfMessageReset;
             mdf_message_del = &MdfMessageDel;
             mdf_message_add = &MdfMessageAdd;
+            mdf_message_add2 = &MdfMessageAdd2;
             mdf_message_add_numeric = &MdfMessageAddNumeric;
             mdf_message_add_numeric_str = &MdfMessageAddNumericString;
             mdf_message_add_int = &MdfMessageAddInt32;
@@ -135,6 +137,7 @@ namespace Millistream.Streaming.Interop
         private static void MdfMessageReset(IntPtr message) => Implementation.mdf_message_reset(message);
         private static int MdfMessageDel(IntPtr message) => Implementation.mdf_message_del(message);
         private static int MdfMessageAdd(IntPtr message, ulong insref, int mref) => Implementation.mdf_message_add(message, insref, mref);
+        private static int MdfMessageAdd2(IntPtr message, ulong insref, ushort mref, byte delay) => Implementation.mdf_message_add2(message, insref, mref, delay);
         private static int MdfMessageAddNumeric(IntPtr message, uint tag, IntPtr value) => Implementation.mdf_message_add_numeric(message, tag, value);
         private static int MdfMessageAddNumericString(IntPtr message, uint tag, string value) => Implementation.mdf_message_add_numeric_str(message, tag, value);
         private static int MdfMessageAddInt32(IntPtr message, uint tag, long value, int decimals) => Implementation.mdf_message_add_int(message, tag, value, decimals);

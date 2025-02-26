@@ -31,6 +31,7 @@ namespace Millistream.Streaming.Interop
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, void> mdf_message_reset;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, int> mdf_message_del;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, ulong, int, int> mdf_message_add;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, ulong, int, ushort, byte> mdf_message_add2;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, uint, IntPtr, int> mdf_message_add_numeric;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, uint, string, int> mdf_message_add_numeric_str;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, uint, long, int, int> mdf_message_add_int;
@@ -158,6 +159,8 @@ namespace Millistream.Streaming.Interop
                 mdf_message_set_compression_level = (delegate* unmanaged[Cdecl]<IntPtr, int, int>)address;
             if (nativeLibrary.TryGetExport(lib, nameof(mdf_message_set_utf8_validation), out address))
                 mdf_message_set_utf8_validation = (delegate* unmanaged[Cdecl]<IntPtr, int, int>)address;
+            if (nativeLibrary.TryGetExport(lib, nameof(mdf_message_add2), out address))
+                mdf_message_add2 = (delegate* unmanaged[Cdecl]<IntPtr, ulong, int, ushort, byte>)address;
         }
 
         internal static NativeImplementation Default => s_defaultImplementation ??= new(null);
