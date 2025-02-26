@@ -46,6 +46,11 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.AreEqual(0UL, mdf.SentBytes);
             Assert.AreEqual(0U, mdf.ReadBufferSize);
             Assert.AreEqual(2048U, mdf.ReadBufferMaxSize);
+            Assert.AreEqual(default, mdf.BindAddress);
+            Assert.AreEqual(default, mdf.Cipher);
+            Assert.AreEqual(default, mdf.ConnectedHost);
+            Assert.AreEqual(default, mdf.ConnectedIPAddress);
+            Assert.AreEqual(default, mdf.MessageDigest);
 
             //HandleDelay
             Assert.IsFalse(mdf.HandleDelay);
@@ -210,22 +215,6 @@ namespace Millistream.Streaming.IntegrationTests
             Assert.IsTrue(mdf.Connect(GetTestRunParameter("host")));
             Assert.IsFalse(string.IsNullOrEmpty(mdf.MessageDigest));
             Assert.IsFalse(string.IsNullOrEmpty(mdf.Cipher));
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void CannotGetDigestBeforeConnectTest()
-        {
-            using MarketDataFeed mdf = new();
-            _ = mdf.MessageDigest;
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void CannotGetCipherBeforeConnectTest()
-        {
-            using MarketDataFeed mdf = new();
-            _ = mdf.Cipher;
         }
 
         [TestMethod]
