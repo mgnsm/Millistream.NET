@@ -230,7 +230,7 @@ namespace Millistream.Streaming
         /// <summary>
         /// Gets or sets a numerical address to which the API will bind before attempting to connect to a server in <see cref="Connect"/>. If the bind fails then <see cref="Connect"/> also fails. The string is copied by the API and a <see langword="NULL" /> value can be used in order to "unset" the bind address.
         /// </summary>
-        /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_BIND_ADDRESS"/> option cannot be fetched or modified.</exception>
+        /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_BIND_ADDRESS"/> option cannot be modified.</exception>
         public string BindAddress
         {
             get => GetStringProperty(MDF_OPTION.MDF_OPT_BIND_ADDRESS);
@@ -255,7 +255,7 @@ namespace Millistream.Streaming
         /// <summary>
         /// Gets or sets a comma separated list of the message digests that the client will offer to the server upon connect.
         /// </summary>
-        /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_CRYPT_DIGESTS"/> option cannot be fetched or modified.</exception>
+        /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_CRYPT_DIGESTS"/> option cannot be modified.</exception>
         public string MessageDigests
         {
             get => GetStringProperty(MDF_OPTION.MDF_OPT_CRYPT_DIGESTS);
@@ -265,7 +265,7 @@ namespace Millistream.Streaming
         /// <summary>
         /// Gets or sets a comma separated list of the encryption ciphers that the client will offer to the server upon connect.
         /// </summary>
-        /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_CRYPT_CIPHERS"/> option cannot be fetched or modified.</exception>
+        /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_CRYPT_CIPHERS"/> option cannot be modified.</exception>
         public string Ciphers
         {
             get => GetStringProperty(MDF_OPTION.MDF_OPT_CRYPT_CIPHERS);
@@ -275,13 +275,11 @@ namespace Millistream.Streaming
         /// <summary>
         /// Gets the digest chosen by the server. Only available after <see cref="Connect"/> returns.
         /// </summary>
-        /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_CRYPT_DIGEST"/> option cannot be fetched.</exception>
         public string MessageDigest => GetStringProperty(MDF_OPTION.MDF_OPT_CRYPT_DIGEST);
 
         /// <summary>
         /// Gets the cipher chosen by the server. Only available after <see cref="Connect"/> returns.
         /// </summary>
-        /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_CRYPT_CIPHER"/> option cannot be fetched.</exception>
         public string Cipher => GetStringProperty(MDF_OPTION.MDF_OPT_CRYPT_CIPHER);
 
         /// <summary>
@@ -338,13 +336,11 @@ namespace Millistream.Streaming
         /// <summary>
         /// Gets the hostname of the currently connected server.
         /// </summary>
-        /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_CONNECTED_HOST"/> option cannot be fetched.</exception>
         public string ConnectedHost => GetStringProperty(MDF_OPTION.MDF_OPT_CONNECTED_HOST);
 
         /// <summary>
         /// Gets the IP address of the currently connected server.
         /// </summary>
-        /// <exception cref="InvalidOperationException">The native value of the <see cref="MDF_OPTION.MDF_OPT_CONNECTED_IP"/> option cannot be fetched.</exception>
         public string ConnectedIPAddress => GetStringProperty(MDF_OPTION.MDF_OPT_CONNECTED_IP);
         #endregion
 
@@ -398,10 +394,7 @@ namespace Millistream.Streaming
         private string GetStringProperty(MDF_OPTION option)
         {
             IntPtr value = default;
-            if (_nativeImplementation.mdf_get_property(_feedHandle, option, ref value) != 1)
-                throw new InvalidOperationException(UnknownOptionMessage);
-
-            if (value == IntPtr.Zero)
+            if (_nativeImplementation.mdf_get_property(_feedHandle, option, ref value) != 1 || value == IntPtr.Zero)
                 return null;
 
             unsafe
