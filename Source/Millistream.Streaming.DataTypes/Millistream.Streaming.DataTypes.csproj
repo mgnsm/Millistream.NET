@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <Authors>mgnsm</Authors>
-    <Description>Managed C# implementations of the data types used in Millistream's low-latency, high-throughput and high-availability C/C++ streaming API that can be used to subscribe to streaming real-time or delayed financial data.</Description>
+    <Description>Managed C# implementations of the data types used in Millistream's low-latency, high-throughput and high-availability streaming API that can be used to subscribe to streaming real-time or delayed financial data.</Description>
     <PackageProjectUrl>http://github.com/mgnsm/Millistream.NET</PackageProjectUrl>
     <RepositoryUrl>http://github.com/mgnsm/Millistream.NET</RepositoryUrl>
     <Product>Millistream Market Data Feed (MDF)</Product>

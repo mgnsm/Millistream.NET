@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>net45;netcoreapp3.0;netstandard1.4</TargetFrameworks>
     <Authors>Magnus Montin</Authors>
-    <Description>An unofficial .NET wrapper for Millistream's low-latency, high-throughput and high-availability C/C++ streaming API that can be used to subscribe to streaming real-time or delayed financial data.</Description>
+    <Description>An unofficial C#/.NET wrapper for Millistream's low-latency, high-throughput and high-availability streaming API that can be used to subscribe to streaming real-time or delayed financial data.</Description>
     <PackageProjectUrl>https://github.com/mgnsm/Millistream.NET</PackageProjectUrl>
     <RepositoryUrl>https://github.com/mgnsm/Millistream.NET</RepositoryUrl>
     <Product>Millistream Market Data Feed (MDF)</Product>
