@@ -1,6 +1,6 @@
 # Millistream.NET
 
-An unofficial .NET wrapper for Millistream's low-latency, high-throughput and high-availability C/C++ streaming API that can be used to subscribe to streaming real-time or delayed financial data.
+An unofficial C#/.NET wrapper for Millistream's low-latency, high-throughput and high-availability streaming API that can be used to subscribe to streaming real-time or delayed financial data.
 
 | Package | Build Status | NuGet  |
 | :------------ |-------------| -------------|
