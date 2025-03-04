@@ -54,12 +54,10 @@ namespace Millistream.Streaming.IntegrationTests
         [TestMethod]
         public void SetDelayTest()
         {
-            const byte MDF_DLY_BEST = 15;
             using Message message = new();
-            Assert.AreEqual(MDF_DLY_BEST, message.Delay);
-            const byte MDF_DLY_T1 = 4;
-            message.Delay = MDF_DLY_T1;
-            Assert.AreEqual(MDF_DLY_T1, message.Delay);
+            Assert.AreEqual(DelayValues.MDF_DLY_BEST, message.Delay);
+            message.Delay = DelayValues.MDF_DLY_T1;
+            Assert.AreEqual(DelayValues.MDF_DLY_T1, message.Delay);
         }
 
         [TestMethod]
