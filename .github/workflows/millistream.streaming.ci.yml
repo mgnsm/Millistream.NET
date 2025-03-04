@@ -25,7 +25,7 @@ jobs:
   Build:
     strategy:
       matrix:
-        os: [macOS-latest, ubuntu-latest, windows-latest]
+        os: [macos-13, ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
     - name: Checkout
@@ -62,7 +62,7 @@ jobs:
         dotnet test Tests/Millistream.Streaming.UnitTests/Millistream.Streaming.UnitTests.csproj -c Release --no-build --no-restore
 
     - name: Download and Install libmdf on macOS
-      if: ${{ matrix.os == 'macOS-latest' }}
+      if: ${{ matrix.os == 'macos-13' }}
       run: |
         wget https://packages.millistream.com/source/libmdf-1.0.29.tar.gz
         tar -zxf libmdf-1.0.29.tar.gz
@@ -107,7 +107,7 @@ jobs:
         $doc.Save("UpdatedTestSettings.runsettings")
 
     - name: Run Integration Tests on macOS
-      if: ${{ matrix.os == 'macOS-latest' }}
+      if: ${{ matrix.os == 'macos-13' }}
       run: |
         export DYLD_LIBRARY_PATH=/usr/local/lib:$DYLD_LIBRARY_PATH
         dotnet test Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release -f net8.0 --no-build --no-restore -s UpdatedTestSettings.runsettings
