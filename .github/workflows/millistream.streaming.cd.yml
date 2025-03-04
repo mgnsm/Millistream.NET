@@ -106,8 +106,14 @@ jobs:
         $doc.RunSettings.TestRunParameters.ChildNodes.Item(2).value = "$env:PASSWORD"
         $doc.Save("UpdatedTestSettings.runsettings")
 
-    - name: Run Integration Tests on macOS/Linux
-      if: ${{ matrix.os != 'windows-latest' }}
+    - name: Run Integration Tests on macOS
+      if: ${{ matrix.os == 'macOS-latest' }}
+      run: |
+        export DYLD_LIBRARY_PATH=/usr/local/lib:$DYLD_LIBRARY_PATH
+        dotnet test Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release -f net8.0 --no-build --no-restore -s UpdatedTestSettings.runsettings
+
+    - name: Run Integration Tests on Linux
+      if: ${{ matrix.os == 'ubuntu-latest' }}
       run: |
         dotnet test Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release -f net8.0 --no-build --no-restore -s UpdatedTestSettings.runsettings
 
