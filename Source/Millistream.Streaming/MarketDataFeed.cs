@@ -246,7 +246,11 @@ namespace Millistream.Streaming
             get
             {
                 long value = default;
+#if ARM64
+                if (_nativeImplementation.mdf_get_long_property(_feedHandle, MDF_OPTION.MDF_OPT_TIME_DIFFERENCE_NS, 0, 0, 0, 0, 0, 0, ref value) != 1)
+#else
                 if (_nativeImplementation.mdf_get_long_property(_feedHandle, MDF_OPTION.MDF_OPT_TIME_DIFFERENCE_NS, ref value) != 1)
+#endif
                     throw new InvalidOperationException();
                 return value;
             }
@@ -378,7 +382,11 @@ namespace Millistream.Streaming
         private int GetInt32Property(MDF_OPTION option)
         {
             int value = default;
+#if ARM64
+            if (_nativeImplementation.mdf_get_int_property(_feedHandle, option, 0, 0, 0, 0, 0, 0, ref value) != 1)
+#else
             if (_nativeImplementation.mdf_get_int_property(_feedHandle, option, ref value) != 1)
+#endif
                 throw new InvalidOperationException(UnknownOptionMessage);
             return value;
         }
@@ -386,15 +394,23 @@ namespace Millistream.Streaming
         private ulong GetUInt64Property(MDF_OPTION option)
         {
             ulong value = default;
-            if (_nativeImplementation.mdf_get_ulong_property(_feedHandle, option, ref value) != 1)
-                throw new InvalidOperationException(UnknownOptionMessage);
+
+#if ARM64
+            _nativeImplementation.mdf_get_ulong_property(_feedHandle, option, 0, 0, 0, 0, 0, 0, ref value);
+#else
+            _nativeImplementation.mdf_get_ulong_property(_feedHandle, option, ref value);
+#endif
             return value;
         }
 
         private string GetStringProperty(MDF_OPTION option)
         {
             IntPtr value = default;
+#if ARM64
+            if (_nativeImplementation.mdf_get_property(_feedHandle, option, 0, 0, 0, 0, 0, 0, ref value) != 1 || value == IntPtr.Zero)
+#else
             if (_nativeImplementation.mdf_get_property(_feedHandle, option, ref value) != 1 || value == IntPtr.Zero)
+#endif
                 return null;
 
             unsafe

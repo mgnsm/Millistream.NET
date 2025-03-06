@@ -15,10 +15,18 @@ namespace Millistream.Streaming.Interop
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, ref int, ref int, ref ulong, int> mdf_get_next_message;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, ref ushort, ref ulong, int> mdf_get_next_message2;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, ref uint, ref IntPtr, int> mdf_get_next_field;
+#if ARM64
+        // pass variadic arguments as the 9th+ arguments on ARM64
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, MDF_OPTION, int, int, int, int, int, int, ref IntPtr, int> mdf_get_property;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, MDF_OPTION, int, int, int, int, int, int, ref int, int> mdf_get_int_property;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, MDF_OPTION, int, int, int, int, int, int, ref ulong, int> mdf_get_ulong_property;
+        internal readonly delegate* unmanaged[Cdecl]<IntPtr, MDF_OPTION, int, int, int, int, int, int, ref long, int> mdf_get_long_property;
+#else
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, MDF_OPTION, ref IntPtr, int> mdf_get_property;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, MDF_OPTION, ref int, int> mdf_get_int_property;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, MDF_OPTION, ref ulong, int> mdf_get_ulong_property;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, MDF_OPTION, ref long, int> mdf_get_long_property;
+#endif
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, MDF_OPTION, IntPtr, int> mdf_set_property;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, byte> mdf_get_delay;
         internal readonly delegate* unmanaged[Cdecl]<IntPtr, ulong> mdf_get_mclass;
@@ -95,10 +103,17 @@ namespace Millistream.Streaming.Interop
             mdf_consume = (delegate* unmanaged[Cdecl]<IntPtr, int, int>)nativeLibrary.GetExport(lib, nameof(mdf_consume));
             mdf_get_next_message = (delegate* unmanaged[Cdecl]<IntPtr, ref int, ref int, ref ulong, int>)nativeLibrary.GetExport(lib, nameof(mdf_get_next_message));
             mdf_get_next_field = (delegate* unmanaged[Cdecl]<IntPtr, ref uint, ref IntPtr, int>)nativeLibrary.GetExport(lib, nameof(mdf_get_next_field));
+#if ARM64
+            mdf_get_property = (delegate* unmanaged[Cdecl]<IntPtr, MDF_OPTION, int, int, int, int, int, int, ref IntPtr, int>)nativeLibrary.GetExport(lib, nameof(mdf_get_property));
+            mdf_get_int_property = (delegate* unmanaged[Cdecl]<IntPtr, MDF_OPTION, int, int, int, int, int, int, ref int, int>)nativeLibrary.GetExport(lib, nameof(mdf_get_property));
+            mdf_get_ulong_property = (delegate* unmanaged[Cdecl]<IntPtr, MDF_OPTION, int, int, int, int, int, int, ref ulong, int>)nativeLibrary.GetExport(lib, nameof(mdf_get_property));
+            mdf_get_long_property = (delegate* unmanaged[Cdecl]<IntPtr, MDF_OPTION, int, int, int, int, int, int, ref long, int>)nativeLibrary.GetExport(lib, nameof(mdf_get_property));
+#else
             mdf_get_property = (delegate* unmanaged[Cdecl]<IntPtr, MDF_OPTION, ref IntPtr, int>)nativeLibrary.GetExport(lib, nameof(mdf_get_property));
             mdf_get_int_property = (delegate* unmanaged[Cdecl]<IntPtr, MDF_OPTION, ref int, int>)nativeLibrary.GetExport(lib, nameof(mdf_get_property));
             mdf_get_ulong_property = (delegate* unmanaged[Cdecl]<IntPtr, MDF_OPTION, ref ulong, int>)nativeLibrary.GetExport(lib, nameof(mdf_get_property));
             mdf_get_long_property = (delegate* unmanaged[Cdecl]<IntPtr, MDF_OPTION, ref long, int>)nativeLibrary.GetExport(lib, nameof(mdf_get_property));
+#endif
             mdf_set_property = (delegate* unmanaged[Cdecl]<IntPtr, MDF_OPTION, IntPtr, int>)nativeLibrary.GetExport(lib, nameof(mdf_set_property));
             mdf_connect = (delegate* unmanaged[Cdecl]<IntPtr, string, int>)nativeLibrary.GetExport(lib, nameof(mdf_connect));
             mdf_disconnect = (delegate* unmanaged[Cdecl]<IntPtr, void>)nativeLibrary.GetExport(lib, nameof(mdf_disconnect));

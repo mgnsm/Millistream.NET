@@ -1,55 +1,65 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>net45;netcoreapp3.0;netstandard1.4</TargetFrameworks>
-    <Authors>Magnus Montin</Authors>
-    <Description>An unofficial C#/.NET wrapper for Millistream's low-latency, high-throughput and high-availability streaming API that can be used to subscribe to streaming real-time or delayed financial data.</Description>
-    <PackageProjectUrl>https://github.com/mgnsm/Millistream.NET</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/mgnsm/Millistream.NET</RepositoryUrl>
-    <Product>Millistream Market Data Feed (MDF)</Product>
-    <Title>Millistream Streaming API</Title>
-	<PackageTags>financial;streaming;stocks;real-time;trading;prices</PackageTags>
-    <Copyright>© Magnus Montin. All rights reserved.</Copyright>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <NoWarn>$(NoWarn);1591</NoWarn>
-    <PackageReleaseNotes>https://github.com/mgnsm/Millistream.NET/releases</PackageReleaseNotes>
-	<LangVersion>9.0</LangVersion>
-	<PublishRepositoryUrl>true</PublishRepositoryUrl>
-	<EmbedUntrackedSources>true</EmbedUntrackedSources>
-	<IncludeSymbols>true</IncludeSymbols>
-	<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-	<PackageLicenseExpression>MIT</PackageLicenseExpression>
-  </PropertyGroup>
-	
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
-    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
-    <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
-  </ItemGroup>
-	
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.4' ">
-    <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
-  </ItemGroup>
-	
-   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.0' ">
-     <Compile Remove="Interop/NativeLibrary.cs" />
-     <Compile Remove="Interop/NativeUnixLibrary.cs" />
-     <Compile Remove="Interop/NativeWindowsLibrary.cs" />
-   </ItemGroup>
-	
-  <ItemGroup>
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net45" Version="1.0.3">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="System.Buffers" Version="4.5.1" />
-    <PackageReference Include="System.Memory" Version="4.5.5" />
-	<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
-  </ItemGroup>
+	<PropertyGroup>
+		<TargetFrameworks>net45;netcoreapp3.0;netstandard1.4</TargetFrameworks>
+		<RuntimeIdentifiers>osx-arm64</RuntimeIdentifiers>
+		<Authors>Magnus Montin</Authors>
+		<Description>An unofficial C#/.NET wrapper for Millistream's low-latency, high-throughput and high-availability streaming API that can be used to subscribe to streaming real-time or delayed financial data.</Description>
+		<PackageProjectUrl>https://github.com/mgnsm/Millistream.NET</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/mgnsm/Millistream.NET</RepositoryUrl>
+		<Product>Millistream Market Data Feed (MDF)</Product>
+		<Title>Millistream Streaming API</Title>
+		<PackageTags>financial;streaming;stocks;real-time;trading;prices</PackageTags>
+		<Copyright>© Magnus Montin. All rights reserved.</Copyright>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<NoWarn>$(NoWarn);1591</NoWarn>
+		<PackageReleaseNotes>https://github.com/mgnsm/Millistream.NET/releases</PackageReleaseNotes>
+		<LangVersion>9.0</LangVersion>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	</PropertyGroup>
 
-  <PropertyGroup>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <WarningsAsErrors />
-  </PropertyGroup>
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+		<PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
+		<PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
+	</ItemGroup>
+
+	<ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.4' ">
+		<PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
+	</ItemGroup>
+
+	<ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.0' ">
+		<Compile Remove="Interop/NativeLibrary.cs" />
+		<Compile Remove="Interop/NativeUnixLibrary.cs" />
+		<Compile Remove="Interop/NativeWindowsLibrary.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net45" Version="1.0.3">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="System.Buffers" Version="4.5.1" />
+		<PackageReference Include="System.Memory" Version="4.5.5" />
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+	</ItemGroup>
+
+	<PropertyGroup>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<WarningsAsErrors />
+	</PropertyGroup>
+
+	<PropertyGroup Condition=" '$(RuntimeIdentifier)' == 'osx-arm64' ">
+		<DefineConstants>$(DefineConstants);ARM64</DefineConstants>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="bin\Release\netcoreapp3.0\osx-arm64\$(AssemblyName).dll" Pack="true" PackagePath="runtimes/osx-arm64/lib/netcoreapp3.0/" />
+		<None Include="bin\Release\netcoreapp3.0\osx-arm64\$(AssemblyName).xml" Pack="true" PackagePath="runtimes/osx-arm64/lib/netcoreapp3.0/" />
+		<None Include="bin\Release\netcoreapp3.0\osx-arm64\$(AssemblyName).pdb" Pack="true" PackagePath="runtimes/osx-arm64/lib/netcoreapp3.0/" Condition="'$(IncludeSymbols)' == 'true'" />
+	</ItemGroup>
 
 </Project>

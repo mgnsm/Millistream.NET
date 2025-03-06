@@ -25,73 +25,16 @@ jobs:
   Build:
     strategy:
       matrix:
-        os: [macos-13, ubuntu-latest, windows-latest]
+        os: [macos-13, macos-latest, ubuntu-latest, ubuntu-24.04-arm, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-
+      
     - name: Setup the .NET 8 SDK
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
-
-    - name: Build on macOS/Linux
-      if: ${{ matrix.os != 'windows-latest' }}
-      run: |
-        dotnet build Source/Millistream.Streaming/Millistream.Streaming.csproj -c Release -f netstandard1.4
-        dotnet build Tests/Millistream.Streaming.UnitTests/Millistream.Streaming.UnitTests.csproj -c Release -f net8.0
-        dotnet build Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release -f net8.0
-
-    - name: Build on Windows
-      if: ${{ matrix.os == 'windows-latest' }}
-      shell: bash
-      run: |
-        dotnet build Source/Millistream.Streaming/Millistream.Streaming.csproj -c Release
-        dotnet build Tests/Millistream.Streaming.UnitTests/Millistream.Streaming.UnitTests.csproj -c Release
-        dotnet build Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release
-
-    - name: Run Unit Tests on macOS/Linux
-      if: ${{ matrix.os != 'windows-latest' }}
-      run: |
-        dotnet test Tests/Millistream.Streaming.UnitTests/Millistream.Streaming.UnitTests.csproj -c Release -f net8.0 --no-build --no-restore
-
-    - name: Run Unit Tests on Windows
-      if: ${{ matrix.os == 'windows-latest' }}
-      run: |
-        dotnet test Tests/Millistream.Streaming.UnitTests/Millistream.Streaming.UnitTests.csproj -c Release --no-build --no-restore
-
-    - name: Download and Install libmdf on macOS
-      if: ${{ matrix.os == 'macos-13' }}
-      run: |
-        wget https://packages.millistream.com/source/libmdf-1.0.29.tar.gz
-        tar -zxf libmdf-1.0.29.tar.gz
-        cd libmdf-1.0.29
-        ./configure --prefix=/usr/local
-        make
-        sudo make install
-
-    - name: Download and Install libmdf on Linux
-      if: ${{ matrix.os == 'ubuntu-latest' }}
-      run: |
-        wget https://packages.millistream.com/source/libmdf-1.0.29.tar.gz
-        tar -zxf libmdf-1.0.29.tar.gz
-        cd libmdf-1.0.29
-        ./configure --prefix=/usr
-        make
-        sudo make install
-
-    - name: Download and Install libmdf on Windows
-      if: ${{ matrix.os == 'windows-latest' }}
-      shell: pwsh
-      run: |
-        (new-object System.Net.WebClient).DownloadFile('https://packages.millistream.com/Windows/libmdf-1.0.29.exe','libmdf-1.0.29.exe')
-        .\libmdf-1.0.29.exe /S
-        # Wait for the DLL to appear in C:\Windows\System32
-        while (-not (Test-Path -Path "C:\Windows\System32\libmdf-0.dll")) {
-          Write-Host "libmdf not found. Waiting..."
-          Start-Sleep -Seconds 1
-        }
 
     - name: Set Credentials
       shell: pwsh
@@ -106,21 +49,72 @@ jobs:
         $doc.RunSettings.TestRunParameters.ChildNodes.Item(2).value = "$env:PASSWORD"
         $doc.Save("UpdatedTestSettings.runsettings")
 
-    - name: Run Integration Tests on macOS
+    - name: Install libmdf, Build and Test on macOS 13 (Intel)
       if: ${{ matrix.os == 'macos-13' }}
       run: |
+        wget https://packages.millistream.com/source/libmdf-1.0.29.tar.gz
+        tar -zxf libmdf-1.0.29.tar.gz
+        cd libmdf-1.0.29
+        ./configure --prefix=/usr/local
+        make
+        sudo make install
+        cd ..
         export DYLD_LIBRARY_PATH=/usr/local/lib:$DYLD_LIBRARY_PATH
+        dotnet build Source/Millistream.Streaming/Millistream.Streaming.csproj -c Release -f netstandard1.4
+        dotnet build Source/Millistream.Streaming/Millistream.Streaming.csproj -c Release -f netcoreapp3.0
+        dotnet build Tests/Millistream.Streaming.UnitTests/Millistream.Streaming.UnitTests.csproj -c Release -f net8.0
+        dotnet build Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release -f net8.0
+        dotnet test Tests/Millistream.Streaming.UnitTests/Millistream.Streaming.UnitTests.csproj -c Release -f net8.0 --no-build --no-restore
         dotnet test Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release -f net8.0 --no-build --no-restore -s UpdatedTestSettings.runsettings
-
-    - name: Run Integration Tests on Linux
-      if: ${{ matrix.os == 'ubuntu-latest' }}
+        
+    - name: Install libmdf, Build and Test on the latest macOS (arm64)
+      if: ${{ matrix.os == 'macos-latest' }}
       run: |
+        curl -O https://packages.millistream.com/macOS/libmdf-1.0.29.pkg 
+        sudo installer -pkg libmdf-1.0.29.pkg -target /
+        export DYLD_LIBRARY_PATH=/usr/local/lib:$DYLD_LIBRARY_PATH
+        dotnet build Source/Millistream.Streaming/Millistream.Streaming.csproj -c Release -f netstandard1.4 -r osx-arm64
+        dotnet build Source/Millistream.Streaming/Millistream.Streaming.csproj -c Release -f netcoreapp3.0 -r osx-arm64
+        dotnet build Tests/Millistream.Streaming.UnitTests/Millistream.Streaming.UnitTests.csproj -c Release -f net8.0 -r osx-arm64
+        dotnet build Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release -f net8.0 -r osx-arm64
+        dotnet test Tests/Millistream.Streaming.UnitTests/Millistream.Streaming.UnitTests.csproj -c Release -f net8.0 --no-build --no-restore -r osx-arm64
+        dotnet test Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release -f net8.0 --no-build --no-restore -s UpdatedTestSettings.runsettings -r osx-arm64
+
+    - name: Install libmdf, Build and Test on Ubuntu (x64 and arm64)
+      if: ${{ matrix.os == 'ubuntu-latest' || matrix.os == 'ubuntu-24.04-arm' }}
+      run: |
+        sudo wget "https://packages.millistream.com/apt/sources.list.d/`lsb_release -cs`.list" -O /etc/apt/sources.list.d/millistream.list 
+        wget -O- "https://packages.millistream.com/D2FCCE35.gpg" | gpg --dearmor | sudo tee /usr/share/keyrings/millistream-archive-keyring.gpg > /dev/null 
+        sudo apt update
+        sudo apt-get install libmdf
+        dotnet build Source/Millistream.Streaming/Millistream.Streaming.csproj -c Release -f netstandard1.4
+        dotnet build Source/Millistream.Streaming/Millistream.Streaming.csproj -c Release -f netcoreapp3.0
+        dotnet build Tests/Millistream.Streaming.UnitTests/Millistream.Streaming.UnitTests.csproj -c Release -f net8.0
+        dotnet build Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release -f net8.0
+        dotnet test Tests/Millistream.Streaming.UnitTests/Millistream.Streaming.UnitTests.csproj -c Release -f net8.0 --no-build --no-restore
         dotnet test Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release -f net8.0 --no-build --no-restore -s UpdatedTestSettings.runsettings
 
-    - name: Run Integration Tests on Windows
+    - name: Download and Install libmdf on the latest Windows (x64)
       if: ${{ matrix.os == 'windows-latest' }}
+      shell: pwsh
       run: |
-        dotnet test Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release --no-build --no-restore -s UpdatedTestSettings.runsettings
+        (new-object System.Net.WebClient).DownloadFile('https://packages.millistream.com/Windows/libmdf-1.0.29.exe','libmdf-1.0.29.exe')
+        .\libmdf-1.0.29.exe /S
+        # Wait for the DLL to appear in C:\Windows\System32
+        while (-not (Test-Path -Path "C:\Windows\System32\libmdf-0.dll")) {
+          Write-Host "libmdf not found. Waiting..."
+          Start-Sleep -Seconds 1
+        }
+        
+    - name: Build and Test on the latest Windows (x64)
+      if: ${{ matrix.os == 'windows-latest' }}
+      shell: bash
+      run: |
+        dotnet build Source/Millistream.Streaming/Millistream.Streaming.csproj -c Release
+        dotnet build Tests/Millistream.Streaming.UnitTests/Millistream.Streaming.UnitTests.csproj -c Release
+        dotnet build Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release
+        dotnet test Tests/Millistream.Streaming.UnitTests/Millistream.Streaming.UnitTests.csproj -c Release --no-build --no-restore
+        dotnet test Tests/Millistream.Streaming.IntegrationTests/Millistream.Streaming.IntegrationTests.csproj -c Release --no-build --no-restore -s UpdatedTestSettings.runsettings 
 
     - name: Remove the .runsettings file
       shell: pwsh
